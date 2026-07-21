@@ -1587,6 +1587,51 @@ let state = {
 };
 let firstWeightRecorded = false;
 
+// ===== SUPABASE =====
+const SB_URL='https://xqvhcncxnwhokhfpyyjl.supabase.co';
+const SB_KEY='sb_publishable_k4sbBFCmfn-Zk2zvucVgNA_Trm0EADc';
+function deviceId(){
+  let d=localStorage.getItem('inflife_dev');
+  if(!d){ d=crypto.randomUUID?.()||'d'+Date.now(); localStorage.setItem('inflife_dev',d); }
+  return d;
+}
+async function sbLoad(){
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/user_data?id=eq.'+encodeURIComponent(deviceId()),{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    if(!r.ok)return;
+    const a=await r.json();
+    if(a[0]?.state){
+      const p=a[0].state;
+      state.habits=p.habits||[];
+      state.records=p.records||{};
+      state.coffeeLogs=p.coffeeLogs||{};
+      state.weightLogs=p.weightLogs||{};
+      state.waterLogs=p.waterLogs||{};
+      state.exerciseLogs=p.exerciseLogs||{};
+      state.exp=p.exp||0;
+      state.level=p.level||1;
+      state.coins=p.coins||0;
+      state.creatureLevels=p.creatureLevels||{};
+      state.inventory=p.inventory||{};
+      state.collectedCreatures=p.collectedCreatures||[];
+      state.settings=p.settings||{darkMode:false,reminder:true};
+      localStorage.setItem('inflife_state',JSON.stringify(a[0].state));
+      // re-render after Supabase data syncs in
+      initApp();
+    }
+  }catch(e){console.warn('sbLoad',e)}
+}
+let _sbTimer;
+function sbSave(){
+  clearTimeout(_sbTimer);
+  _sbTimer=setTimeout(async()=>{
+    try{
+      const s={habits:state.habits,records:state.records,coffeeLogs:state.coffeeLogs,weightLogs:state.weightLogs,waterLogs:state.waterLogs,exerciseLogs:state.exerciseLogs,exp:state.exp,level:state.level,coins:state.coins,creatureLevels:state.creatureLevels,inventory:state.inventory,collectedCreatures:state.collectedCreatures,settings:state.settings};
+      await fetch(SB_URL+'/rest/v1/user_data',{method:'POST',headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:deviceId(),state:s,updated_at:new Date().toISOString()})});
+    }catch(e){console.warn('sbSave',e)}
+  },500);
+}
+
 // ===== INIT =====
 function init(){
   // Cache buster - redirect if no v param
@@ -1597,6 +1642,11 @@ function init(){
     return;
   }
   loadState();
+  initApp();
+  sbLoad();
+}
+
+function initApp(){
   if(state.habits.length === 0){
     state.habits = DEFAULT_HABITS.map(h => ({...h}));
   }
@@ -1625,7 +1675,6 @@ function init(){
       const n=parseInt(urlParams.get('n'))||1;
       logWater(n);
     }
-    // Clean params from URL
     const u=new URL(window.location);
     u.searchParams.delete('wt');
     u.searchParams.delete('n');
@@ -1641,7 +1690,6 @@ function init(){
       const prev = state.exerciseLogs[key] || 0;
       if(mins > prev){
         state.exerciseLogs[key] = mins;
-        // Award coins: 30min = 10 coins, proportional
         const newCoins = Math.floor(mins / 30) * 10;
         const prevCoins = Math.floor(prev / 30) * 10;
         const earn = newCoins - prevCoins;
@@ -1653,7 +1701,6 @@ function init(){
         renderToday();
       }
     }
-    // Clean param
     const u=new URL(window.location);
     u.searchParams.delete('sync_exercise');
     window.history.replaceState({},'',u);
@@ -1685,7 +1732,7 @@ function loadState(){
       state.newUnlocks = [];
       state.settings = parsed.settings || { darkMode: false, reminder: true };
     }
-  }catch(e){console.warn('load failed',e)}
+  }catch(e){console.warn('loadState',e)}
 }
 
 function saveState(){
@@ -1705,7 +1752,8 @@ function saveState(){
       collectedCreatures: state.collectedCreatures,
       settings: state.settings,
     }));
-  }catch(e){console.warn('save failed',e)}
+    sbSave();
+  }catch(e){console.warn('saveState',e)}
 }
 
 // ===== DATE HELPERS =====
