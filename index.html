@@ -764,11 +764,17 @@ body.dark .unlock-modal-content{background:#322a26;border-color:#c4aa8a}
   60%{transform:scale(1.08)}
   100%{transform:scale(1);opacity:1}
 }
-.unlock-emoji{
-  font-size:72px;display:block;margin-bottom:8px;
-  animation:unlockBounce .6s ease infinite alternate;
+.unlock-emoji{display:none}
+.unlock-svg-wrap{
+  width:140px;height:140px;margin:0 auto 12px;
+  animation:unlockJump .6s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes unlockBounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.unlock-svg-wrap img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15))}
+@keyframes unlockJump{
+  0%{transform:scale(0) rotate(-10deg);opacity:0}
+  50%{transform:scale(1.2) rotate(5deg)}
+  100%{transform:scale(1) rotate(0deg);opacity:1}
+}
 .unlock-title{font-size:20px;font-weight:600;color:#3a322f;margin-bottom:4px}
 body.dark .unlock-title{color:#d9bb98}
 .unlock-subtitle{font-size:13px;color:#8a7a6a;margin-bottom:4px}
@@ -1885,13 +1891,27 @@ function checkMilestones(){
 // ===== UNLOCK MODAL =====
 function showUnlockModal(creature){
   const modal=document.getElementById('unlockModal');
-  document.getElementById('unlockEmoji').textContent=creature.emoji;
+  document.getElementById('unlockEmoji').textContent='';
   document.getElementById('unlockTitle').textContent='✨ 获得新精灵！';
   document.getElementById('unlockSubtitle').textContent=creature.name;
   document.getElementById('unlockRarity').textContent='🧚 '+creature.rarity+'精灵';
   document.getElementById('unlockRarity').style.color=getRarityColor(creature.rarity);
   document.getElementById('unlockDesc').textContent=creature.desc;
-  document.getElementById('unlockSvgWrap').innerHTML=renderCreatureSVG(creature,80);
+  document.getElementById('unlockSvgWrap').innerHTML=renderCreatureSVG(creature,120);
+  // Sparkle burst
+  const emojis=['✨','⭐','🌟','💫'];
+  const existing=modal.querySelectorAll('.unlock-sparkle');
+  existing.forEach(e=>e.remove());
+  for(let i=0;i<12;i++){
+    const s=document.createElement('span');
+    s.className='unlock-sparkle';
+    s.textContent=emojis[i%emojis.length];
+    s.style.left=(10+Math.random()*80)+'%';
+    s.style.top=(10+Math.random()*80)+'%';
+    s.style.animationDelay=(Math.random()*.3)+'s';
+    s.style.fontSize=(12+Math.random()*14)+'px';
+    document.querySelector('.unlock-modal-content').appendChild(s);
+  }
   modal.classList.add('show');
 }
 
