@@ -1105,6 +1105,21 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
 .raise-btns{display:flex;gap:10px;justify-content:center;padding:10px 0 8px}
 .raise-dot{width:8px;height:8px;border-radius:50%;background:#d4c5b2;cursor:pointer;transition:.2s;display:inline-block}
 .raise-dot.active{background:#d63384;width:20px;border-radius:4px}
+.album-entry{display:flex;gap:12px;padding:14px;margin-bottom:10px;background:#f5ede4;border-radius:12px;align-items:flex-start;transition:.2s}
+.album-entry.locked{opacity:.75;background:#ede5d8}
+.album-entry.collected{background:linear-gradient(135deg,#f5ede4,#f0e6d8)}
+.album-sprite{flex-shrink:0;width:80px;height:80px;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden}
+.album-sprite.gray{opacity:.4;filter:grayscale(1)}
+.album-info{flex:1;min-width:0}
+.album-name{font-size:15px;font-weight:700;color:#493e38;margin-bottom:1px}
+.album-sub{font-size:10px;color:#8a7a6a;margin-bottom:4px}
+.album-badge{font-size:9px;color:#5c9e5c;font-weight:600;margin-bottom:4px}
+.album-hint{font-size:11px;color:#b9a58a;font-weight:500;margin-bottom:4px}
+.album-bio{font-size:11px;color:#6a5a4a;line-height:1.6;letter-spacing:.3px}
+body.dark .album-entry{background:#2a2520}
+body.dark .album-entry.locked{background:#221e1a}
+body.dark .album-name{color:#d9bb98}
+body.dark .album-bio{color:#b9a58a}
 body.dark .gallery-card{background:#2a2520}
 body.dark .gallery-name{color:#d9bb98}
 body.dark .raise-name{color:#d9bb98}
@@ -1425,108 +1440,126 @@ const CREATURES = [
     desc:'记录体重，健康生活的第一步！',
     check:s=>Object.keys(s.weightLogs||{}).length>=1,
     personality:{mbti:'INFJ',trait:'温暖守护者',greeting:'喜欢安静地陪伴你'},
+    bio:'她是第一缕晨光凝结成的蛋，在你最冷的清晨，轻轻靠在你掌心。不说话，却让你知道——今天也会暖。',
   },
   {
     id:'sprout', name:'豆豆芽', emoji:'🌱', rarity:'普通',
     desc:'单日运动达到 15 分钟，小嫩芽破土而出！',
     check:s=>getTodayExercise(s)>=15,
     personality:{mbti:'ENFP',trait:'活力萌芽',greeting:'每天都充满期待'},
+    bio:'她是泥土里第一个醒来的梦。你以为只是偶然，她却等了你整个冬天。小小的、绿色的、倔强的。',
   },
   {
     id:'clover3', name:'三叶', emoji:'🍀', rarity:'稀有',
     desc:'连续 3 天运动 15 分钟以上，开始长叶子了。',
     check:s=>getExerciseStreak(s,15)>=3,
     personality:{mbti:'ISFJ',trait:'幸运守护',greeting:'默默守护你的好运'},
+    bio:'三片叶子，一片给过去，一片给现在，一片给未来。她不承诺幸运，她只是让幸运悄悄落在你肩上。',
   },
   {
     id:'sevastar', name:'小七星', emoji:'💜', rarity:'史诗',
     desc:'累计运动 5 小时，星光汇聚而成的守护者。',
     check:s=>getTotalExercise(s)>=300,
     personality:{mbti:'INTJ',trait:'星辰策划者',greeting:'用星光绘制你的蓝图'},
+    bio:'七颗星连成她的名字。每当你在夜里抬头，最亮的那一颗就是她在说：我在这里。',
   },
   {
     id:'lightfloat', name:'轻飘飘', emoji:'🍃', rarity:'稀有',
     desc:'减掉 1kg，身体变轻了！',
     check:s=>{const w=getWeightProgress(s); return w.lost>=1},
     personality:{mbti:'INFP',trait:'轻盈梦想家',greeting:'随风飘荡，自由自在'},
+    bio:'她是一片被风吹走的羽毛，落在哪里，哪里就成了诗。别想抓住她——她属于自由。',
   },
   {
     id:'cloudpuff', name:'云朵朵', emoji:'☁️', rarity:'史诗',
     desc:'减掉 3kg，轻得像一朵云。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=3},
     personality:{mbti:'ENFJ',trait:'温柔云朵',greeting:'轻轻包裹你的不安'},
+    bio:'她是一朵不想下雨的云，软软的、蓬蓬的，只想把自己揉进你的怀抱里。',
   },
   {
     id:'littlehorn', name:'小独角', emoji:'🦄', rarity:'传说',
     desc:'单日运动 60 分钟，传说中的独角现身！',
     check:s=>{const k=todayKey(); return (s.exerciseLogs?.[k]||0)>=60},
     personality:{mbti:'ENTJ',trait:'传说领袖',greeting:'天生就是主角'},
+    bio:'传说里才有她的身影。她踏着月光而来，角上挂着未实现的愿望——你不信，她就消失了。',
   },
   {
     id:'mushroom', name:'小蘑菇', emoji:'🍄', rarity:'普通',
     desc:'减掉 0.5kg，森林里冒出来的小蘑菇。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=0.5},
     personality:{mbti:'ISFP',trait:'森林隐士',greeting:'安静地生长在角落'},
+    bio:'她躲在树根下，撑着一把小小的伞。雨水顺着伞沿滴落，她听见了你走近的脚步声。',
   },
   {
     id:'flamephoenix', name:'小火凤', emoji:'🔥', rarity:'传说',
     desc:'累计运动 50 小时，浴火重生！',
     check:s=>getTotalExercise(s)>=3000,
     personality:{mbti:'ENTP',trait:'涅槃革新者',greeting:'在灰烬中重新定义自己'},
+    bio:'她在燃烧中醒来。不是毁灭，是每一次灰烬里都藏着比上一次更亮的光。',
   },
   {
     id:'fourleaf', name:'四叶草', emoji:'🍀', rarity:'稀有',
     desc:'单日运动 30 分钟，幸运使者降临。',
     check:s=>{const k=todayKey(); return (s.exerciseLogs?.[k]||0)>=30},
     personality:{mbti:'ESFJ',trait:'幸运使者',greeting:'把幸运分给每一个人'},
+    bio:'四片叶子是奇迹的概率——但她愿意为你，把不可能变成刚好遇见。',
   },
   {
     id:'moonpie', name:'眠眠', emoji:'🌙', rarity:'稀有',
     desc:'连续 7 天运动 15 分钟以上，月亮守护你。',
     check:s=>getExerciseStreak(s,15)>=7,
     personality:{mbti:'INTP',trait:'月光思考者',greeting:'在深夜思考宇宙'},
+    bio:'她只在月亮圆的时候睁开眼睛。不说话，不吵闹，只是安静地陪你失眠。',
   },
   {
     id:'coffeebean', name:'咖咖', emoji:'☕', rarity:'普通',
     desc:'累计运动 10 小时，咖啡因小精灵！',
     check:s=>getTotalExercise(s)>=600,
     personality:{mbti:'ESTJ',trait:'高效执行者',greeting:'没有咖啡解决不了的事'},
+    bio:'没有她叫不醒的早晨。她浑身冒着热气，说话带着焦糖味——她说，困了就再撑一会儿。',
   },
   {
     id:'snowball', name:'雪团团', emoji:'❄️', rarity:'普通',
     desc:'累计运动 3 小时，冰冰凉凉的小雪球。',
     check:s=>getTotalExercise(s)>=180,
     personality:{mbti:'ISTJ',trait:'沉稳雪人',greeting:'冷静可靠，从不慌张'},
+    bio:'她是初雪那天滚出来的第一颗雪球，冰冰的、圆圆的，在你手心慢慢融化成一滴舍不得的水。',
   },
   {
     id:'candy', name:'糖糖', emoji:'🍬', rarity:'稀有',
     desc:'累计运动 20 小时，甜甜的糖果精灵。',
     check:s=>getTotalExercise(s)>=1200,
     personality:{mbti:'ESFP',trait:'甜蜜表演者',greeting:'快乐是会传染的'},
+    bio:'她是一颗会在你嘴里跳来跳去的糖果。甜得让你眯起眼睛——她说，快乐不需要理由。',
   },
   {
     id:'bell', name:'小铃铛', emoji:'🔔', rarity:'稀有',
     desc:'减掉 8kg，叮叮当当的小铃铛。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=8},
     personality:{mbti:'ISTP',trait:'叮当冒险家',greeting:'跟着铃声去探索'},
+    bio:'她的声音很轻很轻，但你总能听见。在你想放弃的时候，叮——她说，再走一步。',
   },
   {
     id:'shell', name:'小贝壳', emoji:'🐚', rarity:'史诗',
     desc:'累计运动 30 小时，来自海洋的小贝壳。',
     check:s=>getTotalExercise(s)>=1800,
     personality:{mbti:'ESTP',trait:'海洋探索者',greeting:'每一片海都有故事'},
+    bio:'她把海浪的声音藏在身体里。你贴着耳朵听，听见的不是海，是远方在叫你。',
   },
   {
     id:'rainbow', name:'小彩虹', emoji:'🌈', rarity:'传说',
     desc:'累计运动 80 小时，七彩小彩虹！',
     check:s=>getTotalExercise(s)>=4800,
     personality:{mbti:'ENFJ',trait:'七彩希望',greeting:'雨后的光最温暖'},
+    bio:'她不常出现。但每次来，都带着七种颜色和一句：雨停了。该往前走了。',
   },
   {
     id:'butterfly', name:'小蝶蝶', emoji:'🦋', rarity:'传说',
     desc:'收集所有 17 只精灵后出现的神秘精灵！',
     check:s=>(s.collectedCreatures||[]).length>=17,
     personality:{mbti:'INFJ',trait:'神秘蜕变',greeting:'破茧之后才是真正的自己'},
+    bio:'没有人见过她变成蝴蝶之前的样子。她不说，你也不要问。有些美丽，不需要来历。',
   },
 ];
 
@@ -2701,53 +2734,68 @@ function renderGallery(){
   const grid=document.getElementById('creatureGrid');
   const total=CREATURES.length;
 
-  document.getElementById('galleryCollected').textContent=collected.length;
-  document.getElementById('galleryTotal').textContent=total;
+  if(document.getElementById('galleryCollected')){
+    document.getElementById('galleryCollected').textContent=collected.length;
+  }
+  if(document.getElementById('galleryTotal')){
+    document.getElementById('galleryTotal').textContent=total;
+  }
 
   const filtered=CREATURES.filter(function(c){return galleryFilter==='all'||c.rarity===galleryFilter;});
 
   grid.innerHTML=filtered.map(function(c){
     const isCollected=collected.includes(c.id);
-    const isNew=state.newUnlocks?.includes(c.id);
+    const lvl=state.creatureLevels[c.id]||1;
     const mbtiTag=c.personality?c.personality.mbti:'';
+    const traitTag=c.personality?c.personality.trait:'';
+    const bio=c.bio||'';
+    var hint='';
+    if(c.id==='warmegg') hint='📝 记录一次体重';
+    else if(c.id==='sprout') hint='🏃 单日运动15分钟';
+    else if(c.id==='clover3') hint='🏃 连续3天运动15分钟+';
+    else if(c.id==='sevastar') hint='🏃 累计运动5小时';
+    else if(c.id==='lightfloat') hint='⚖️ 减重1kg';
+    else if(c.id==='cloudpuff') hint='⚖️ 减重3kg';
+    else if(c.id==='littlehorn') hint='🏃 单日运动60分钟';
+    else if(c.id==='mushroom') hint='⚖️ 减重0.5kg';
+    else if(c.id==='flamephoenix') hint='🏃 累计50小时';
+    else if(c.id==='fourleaf') hint='🏃 单日运动30分钟';
+    else if(c.id==='moonpie') hint='🏃 连续7天运动15分钟+';
+    else if(c.id==='coffeebean') hint='🏃 累计10小时';
+    else if(c.id==='snowball') hint='🏃 累计3小时';
+    else if(c.id==='candy') hint='🏃 累计20小时';
+    else if(c.id==='bell') hint='⚖️ 减重8kg';
+    else if(c.id==='shell') hint='🏃 累计30小时';
+    else if(c.id==='rainbow') hint='🏃 累计80小时';
+    else if(c.id==='butterfly') hint='🧚 收集全部17只';
+
     if(isCollected){
-      const lvl=state.creatureLevels[c.id]||1;
-      return '<div class="gallery-card'+(isNew?' newly-unlocked':'')+'">'+
-        '<div style="margin:-4px -2px 2px;text-align:center">'+renderPetFace(c.id,64)+'</div>'+
-        '<div class="gallery-name">'+c.emoji+' '+c.name+'</div>'+
-        '<div style="font-size:8px;color:#8a7a6a;margin:1px 0">'+mbtiTag+'</div>'+
-        '<div class="gallery-lvl">Lv.'+lvl+' ✅</div>'+
+      return '<div class="album-entry collected">'+
+        '<div class="album-sprite">'+
+          renderPetFace(c.id,80)+
+        '</div>'+
+        '<div class="album-info">'+
+          '<div class="album-name">'+c.emoji+' '+c.name+'</div>'+
+          '<div class="album-sub">'+mbtiTag+' · '+traitTag+' · Lv.'+lvl+'</div>'+
+          '<div class="album-badge">✅ 已收集</div>'+
+          '<div class="album-bio">'+bio+'</div>'+
+        '</div>'+
       '</div>';
     } else {
-      var hint='';
-      if(c.id==='warmegg') hint='📝 记录一次体重';
-      else if(c.id==='sprout') hint='🏃 单日运动15分钟';
-      else if(c.id==='clover3') hint='🏃 连续3天运动15分钟+';
-      else if(c.id==='sevastar') hint='🏃 累计运动5小时';
-      else if(c.id==='lightfloat') hint='⚖️ 减重1kg';
-      else if(c.id==='cloudpuff') hint='⚖️ 减重3kg';
-      else if(c.id==='littlehorn') hint='🏃 单日运动60分钟';
-      else if(c.id==='mushroom') hint='⚖️ 减重0.5kg';
-      else if(c.id==='flamephoenix') hint='🏃 累计50小时';
-      else if(c.id==='fourleaf') hint='🏃 单日运动30分钟';
-      else if(c.id==='moonpie') hint='🏃 连续7天运动15分钟+';
-      else if(c.id==='coffeebean') hint='🏃 累计10小时';
-      else if(c.id==='snowball') hint='🏃 累计3小时';
-      else if(c.id==='candy') hint='🏃 累计20小时';
-      else if(c.id==='bell') hint='⚖️ 减重8kg';
-      else if(c.id==='shell') hint='🏃 累计30小时';
-      else if(c.id==='rainbow') hint='🏃 累计80小时';
-      else if(c.id==='butterfly') hint='🧚 收集全部17只';
-      return '<div class="gallery-card locked">'+
-        '<div style="margin:-4px -2px 2px;text-align:center;opacity:.4">'+renderPetFace(c.id,64)+'</div>'+
-        '<div class="gallery-name" style="opacity:.4">'+c.emoji+' '+c.name+'</div>'+
-        '<div style="font-size:8px;color:#b9a58a;margin:1px 0">'+c.rarity+'</div>'+
-        '<div class="gallery-hint">'+hint+'</div>'+
+      return '<div class="album-entry locked">'+
+        '<div class="album-sprite gray">'+
+          renderPetFace(c.id,80)+
+        '</div>'+
+        '<div class="album-info">'+
+          '<div class="album-name" style="color:#8a7a6a">'+c.emoji+' '+c.name+'</div>'+
+          '<div class="album-sub" style="color:#b9a58a">'+c.rarity+' · '+mbtiTag+'</div>'+
+          '<div class="album-hint">🔒 '+hint+'</div>'+
+          '<div class="album-bio" style="color:#b9a58a">'+bio+'</div>'+
+        '</div>'+
       '</div>';
     }
   }).join('');
 }
-
 function renderRaise(){
   const collected=state.collectedCreatures||[];
   const track=document.getElementById('raiseTrack');
