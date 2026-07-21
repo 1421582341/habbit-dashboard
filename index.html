@@ -1087,6 +1087,10 @@ body.dark .level-up-title{color:#d9bb98}
   background:#493e38;color:#e8ddcf;font-family:inherit;font-size:14px;
   font-weight:500;cursor:pointer;transition:.2s}
 body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
+.pet-bar-bg{flex:1;height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden}
+.pet-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.pet-bar-hunger{background:linear-gradient(90deg,#f9a825,#ff8f00)}
+.pet-bar-happy{background:linear-gradient(90deg,#ef5350,#e91e63)}
 .level-up-btn:active{transform:scale(.95)}
 </style>
 </head>
@@ -1387,91 +1391,109 @@ const CREATURES = [
     id:'warmegg', name:'小暖暖', emoji:'🥚', rarity:'普通',
     desc:'记录体重，健康生活的第一步！',
     check:s=>Object.keys(s.weightLogs||{}).length>=1,
+    personality:{mbti:'INFJ',trait:'温暖守护者',greeting:'喜欢安静地陪伴你'},
   },
   {
     id:'sprout', name:'豆豆芽', emoji:'🌱', rarity:'普通',
     desc:'单日运动达到 15 分钟，小嫩芽破土而出！',
     check:s=>getTodayExercise(s)>=15,
+    personality:{mbti:'ENFP',trait:'活力萌芽',greeting:'每天都充满期待'},
   },
   {
     id:'clover3', name:'三叶', emoji:'🍀', rarity:'稀有',
     desc:'连续 3 天运动 15 分钟以上，开始长叶子了。',
     check:s=>getExerciseStreak(s,15)>=3,
+    personality:{mbti:'ISFJ',trait:'幸运守护',greeting:'默默守护你的好运'},
   },
   {
     id:'sevastar', name:'小七星', emoji:'💜', rarity:'史诗',
     desc:'累计运动 5 小时，星光汇聚而成的守护者。',
     check:s=>getTotalExercise(s)>=300,
+    personality:{mbti:'INTJ',trait:'星辰策划者',greeting:'用星光绘制你的蓝图'},
   },
   {
     id:'lightfloat', name:'轻飘飘', emoji:'🍃', rarity:'稀有',
     desc:'减掉 1kg，身体变轻了！',
     check:s=>{const w=getWeightProgress(s); return w.lost>=1},
+    personality:{mbti:'INFP',trait:'轻盈梦想家',greeting:'随风飘荡，自由自在'},
   },
   {
     id:'cloudpuff', name:'云朵朵', emoji:'☁️', rarity:'史诗',
     desc:'减掉 3kg，轻得像一朵云。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=3},
+    personality:{mbti:'ENFJ',trait:'温柔云朵',greeting:'轻轻包裹你的不安'},
   },
   {
     id:'littlehorn', name:'小独角', emoji:'🦄', rarity:'传说',
     desc:'单日运动 60 分钟，传说中的独角现身！',
     check:s=>{const k=todayKey(); return (s.exerciseLogs?.[k]||0)>=60},
+    personality:{mbti:'ENTJ',trait:'传说领袖',greeting:'天生就是主角'},
   },
   {
     id:'mushroom', name:'小蘑菇', emoji:'🍄', rarity:'普通',
     desc:'减掉 0.5kg，森林里冒出来的小蘑菇。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=0.5},
+    personality:{mbti:'ISFP',trait:'森林隐士',greeting:'安静地生长在角落'},
   },
   {
     id:'flamephoenix', name:'小火凤', emoji:'🔥', rarity:'传说',
     desc:'累计运动 50 小时，浴火重生！',
     check:s=>getTotalExercise(s)>=3000,
+    personality:{mbti:'ENTP',trait:'涅槃革新者',greeting:'在灰烬中重新定义自己'},
   },
   {
     id:'fourleaf', name:'四叶草', emoji:'🍀', rarity:'稀有',
     desc:'单日运动 30 分钟，幸运使者降临。',
     check:s=>{const k=todayKey(); return (s.exerciseLogs?.[k]||0)>=30},
+    personality:{mbti:'ESFJ',trait:'幸运使者',greeting:'把幸运分给每一个人'},
   },
   {
     id:'moonpie', name:'眠眠', emoji:'🌙', rarity:'稀有',
     desc:'连续 7 天运动 15 分钟以上，月亮守护你。',
     check:s=>getExerciseStreak(s,15)>=7,
+    personality:{mbti:'INTP',trait:'月光思考者',greeting:'在深夜思考宇宙'},
   },
   {
     id:'coffeebean', name:'咖咖', emoji:'☕', rarity:'普通',
     desc:'累计运动 10 小时，咖啡因小精灵！',
     check:s=>getTotalExercise(s)>=600,
+    personality:{mbti:'ESTJ',trait:'高效执行者',greeting:'没有咖啡解决不了的事'},
   },
   {
     id:'snowball', name:'雪团团', emoji:'❄️', rarity:'普通',
     desc:'累计运动 3 小时，冰冰凉凉的小雪球。',
     check:s=>getTotalExercise(s)>=180,
+    personality:{mbti:'ISTJ',trait:'沉稳雪人',greeting:'冷静可靠，从不慌张'},
   },
   {
     id:'candy', name:'糖糖', emoji:'🍬', rarity:'稀有',
     desc:'累计运动 20 小时，甜甜的糖果精灵。',
     check:s=>getTotalExercise(s)>=1200,
+    personality:{mbti:'ESFP',trait:'甜蜜表演者',greeting:'快乐是会传染的'},
   },
   {
     id:'bell', name:'小铃铛', emoji:'🔔', rarity:'稀有',
     desc:'减掉 8kg，叮叮当当的小铃铛。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=8},
+    personality:{mbti:'ISTP',trait:'叮当冒险家',greeting:'跟着铃声去探索'},
   },
   {
     id:'shell', name:'小贝壳', emoji:'🐚', rarity:'史诗',
     desc:'累计运动 30 小时，来自海洋的小贝壳。',
     check:s=>getTotalExercise(s)>=1800,
+    personality:{mbti:'ESTP',trait:'海洋探索者',greeting:'每一片海都有故事'},
   },
   {
     id:'rainbow', name:'小彩虹', emoji:'🌈', rarity:'传说',
     desc:'累计运动 80 小时，七彩小彩虹！',
     check:s=>getTotalExercise(s)>=4800,
+    personality:{mbti:'ENFJ',trait:'七彩希望',greeting:'雨后的光最温暖'},
   },
   {
     id:'butterfly', name:'小蝶蝶', emoji:'🦋', rarity:'传说',
     desc:'收集所有 17 只精灵后出现的神秘精灵！',
     check:s=>(s.collectedCreatures||[]).length>=17,
+    personality:{mbti:'INFJ',trait:'神秘蜕变',greeting:'破茧之后才是真正的自己'},
   },
 ];
 
@@ -1490,6 +1512,7 @@ let state = {
   inventory: {},     // food item → count
   collectedCreatures: [], // creature IDs
   newUnlocks: [],         // creature IDs unlocked this session (for animation)
+  petState: {},           // creatureId -> { hunger, happiness, lastFeed, lastPlay }
   settings: { darkMode: false, reminder: true }
 };
 let firstWeightRecorded = false;
@@ -1503,6 +1526,7 @@ function init(){
   if(!state.weightLogs) state.weightLogs = {};
   if(!state.collectedCreatures) state.collectedCreatures = [];
   if(!state.newUnlocks) state.newUnlocks = [];
+  calcPetDecay(state);
   renderToday();
   renderWeeklyView();
   renderGallery();
@@ -2089,6 +2113,79 @@ function playWithCreature(creatureId){
   alert(`🎾 ${c.name} ${moods[Math.floor(Math.random()*moods.length)]} 获得 ${coinBonus}🪙`);
 }
 
+
+// ===== PET RAISING SYSTEM =====
+const PET_DECAY_RATE = 3;
+
+function initPetState(creatureId){
+  if(!state.petState) state.petState = {};
+  if(!state.petState[creatureId]){
+    state.petState[creatureId] = {
+      hunger: 100,
+      happiness: 100,
+      lastFeed: Date.now(),
+      lastPlay: Date.now()
+    };
+  }
+}
+
+function calcPetDecay(st){
+  const now = Date.now();
+  for(const id of (st.collectedCreatures||[])){
+    if(!st.petState) st.petState = {};
+    if(!st.petState[id]) initPetState(id);
+    const p = st.petState[id];
+    const hoursSinceFeed = (now - (p.lastFeed||now)) / 3600000;
+    const hoursSincePlay = (now - (p.lastPlay||now)) / 3600000;
+    p.hunger = Math.max(0, Math.min(100, (p.hunger||100) - hoursSinceFeed * PET_DECAY_RATE));
+    p.happiness = Math.max(0, Math.min(100, (p.happiness||100) - hoursSincePlay * PET_DECAY_RATE));
+  }
+}
+
+function getMoodEmoji(happiness){
+  if(happiness >= 80) return '\ud83d\ude06';
+  if(happiness >= 60) return '\ud83d\ude42';
+  if(happiness >= 40) return '\ud83d\ude10';
+  if(happiness >= 20) return '\ud83d\ude22';
+  return '\ud83d\ude2d';
+}
+
+function feedPet(creatureId){
+  const items=Object.keys(state.inventory).filter(k=>state.inventory[k]>0);
+  if(items.length===0){ alert('没有食物了，去商店买点吧！'); return; }
+  const c = CREATURES.find(function(cr){return cr.id===creatureId;});
+  if(!c) return;
+  initPetState(creatureId);
+  const p = state.petState[creatureId];
+  const foodId=items[0];
+  state.inventory[foodId]--;
+  p.lastFeed = Date.now();
+  p.hunger = Math.min(100, (p.hunger||0) + 35);
+  if(!state.creatureLevels[creatureId]) state.creatureLevels[creatureId]=1;
+  state.creatureLevels[creatureId] += 1;
+  saveState();
+  renderGallery();
+  renderCoins();
+  var msg = (c.personality && c.personality.greeting) || '好吃！';
+  alert(c.name+' 吃了！ '+msg);
+}
+
+function playPet(creatureId){
+  const c = CREATURES.find(function(cr){return cr.id===creatureId;});
+  if(!c) return;
+  initPetState(creatureId);
+  const p = state.petState[creatureId];
+  p.lastPlay = Date.now();
+  p.happiness = Math.min(100, (p.happiness||0) + 25);
+  const coinBonus = Math.floor(Math.random() * 3) + 2;
+  state.coins += coinBonus;
+  saveState();
+  renderGallery();
+  renderCoins();
+  const plays = ['开心地跳了起来！','围着你转圈～','蹭了蹭你的手','高兴地打了个滚'];
+  alert(c.name+' '+plays[Math.floor(Math.random()*plays.length)]+' 获得 '+coinBonus+'\ud83e\udd51');
+}
+
 // ===== PIXEL PET RENDERER =====
 // 16×16 pixel sprites with cute faces and expressions
 const PX = {}; // palette shorthand
@@ -2438,19 +2535,35 @@ function renderGallery(){
     const isNew=state.newUnlocks?.includes(c.id);
 
     if(isCollected){
+      if(!state.petState) state.petState = {};
+      if(!state.petState[c.id]) initPetState(c.id);
+      const p = state.petState[c.id] || {hunger:100, happiness:100};
       const lvl=state.creatureLevels[c.id]||1;
-      const hunger=Math.min(5, Math.floor(lvl/3)+1);
-      const mood=lvl>=10?'😆':lvl>=5?'😊':lvl>=2?'🙂':'👶';
+      const hungerPct = Math.round(p.hunger||0);
+      const happyPct = Math.round(p.happiness||0);
+      const moodEmoji = getMoodEmoji(p.happiness||100);
+      const mbtiTag = c.personality ? c.personality.mbti : '';
+      const traitTag = c.personality ? c.personality.trait : '';
       return `<div class="tama-card${isNew?' newly-unlocked':''}">
         <div style="margin:-4px -2px 2px;text-align:center">${renderPetFace(c.id,72)}</div>
         <div class="tama-name">${c.emoji} ${c.name}</div>
-        <div class="tama-level">Lv.${lvl} ${mood}</div>
-        <div class="tama-stats">
-          <span class="tama-stat">🍽️ ${'●'.repeat(hunger)}${'○'.repeat(5-hunger)}</span>
+        <div style="font-size:9px;color:#8a7a6a;margin:-2px 0 2px">${mbtiTag} · ${traitTag}</div>
+        <div class="tama-level">Lv.${lvl} ${moodEmoji}</div>
+        <div style="margin:4px 0">
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;margin-bottom:2px">
+            <span>🍽️</span>
+            <div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-hunger" style="width:${hungerPct}%"></div></div>
+            <span style="color:#8a7a6a;font-size:9px;width:36px;text-align:right">${hungerPct}%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px">
+            <span>❤️</span>
+            <div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-happy" style="width:${happyPct}%"></div></div>
+            <span style="color:#8a7a6a;font-size:9px;width:36px;text-align:right">${happyPct}%</span>
+          </div>
         </div>
         <div class="tama-btns">
-          <button class="tama-btn tama-btn-feed" onclick="feedCreature('${c.id}')">🍽️喂食</button>
-          <button class="tama-btn tama-btn-play" onclick="playWithCreature('${c.id}')">🎾玩耍</button>
+          <button class="tama-btn tama-btn-feed" onclick="feedPet('${c.id}')">🍽️喂食</button>
+          <button class="tama-btn tama-btn-play" onclick="playPet('${c.id}')">🎾玩耍</button>
         </div>
       </div>`;
     } else {
