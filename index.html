@@ -1264,11 +1264,27 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
     </div>
 
     <!-- Creature Grid -->
-    <div class="creature-grid" id="creatureGrid">
+    <div class="creature-grid gallery-grid" id="creatureGrid">
       <!-- rendered by JS -->
     </div>
   </div>
 
+    <!-- VIEW: RAISE (card-swipe pet care) -->
+  <div class="view" id="viewRaise">
+    <div class="card" style="padding-top:0">
+      <div id="raiseContainer" style="overflow:hidden;position:relative">
+        <div id="raiseTrack" style="display:flex;transition:transform .35s cubic-bezier(.25,.46,.45,.94);touch-action:pan-y">
+        </div>
+      </div>
+      <div id="raiseDots" style="display:flex;justify-content:center;gap:6px;padding:8px 0 4px"></div>
+      <div style="display:flex;justify-content:center;gap:20px;margin-top:2px">
+        <button onclick="slideRaise(-1)" style="background:none;border:none;font-size:18px;color:#8a7a6a;padding:4px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent">‹</button>
+        <span id="raiseCounter" style="font-size:12px;color:#8a7a6a;padding:4px 0">0 / 0</span>
+        <button onclick="slideRaise(1)" style="background:none;border:none;font-size:18px;color:#8a7a6a;padding:4px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent">›</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- VIEW: SETTINGS -->
   <div class="view" id="viewSettings">
     <div class="card">
@@ -1321,7 +1337,8 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
 <div class="nav-bar" id="navBar">
   <div class="nav-slider" id="navSlider" style="left:0"></div>
   <button class="nav-btn active" data-view="viewToday">🌱<span>今日</span></button>
-  <button class="nav-btn" data-view="viewCreatures">🧚<span>精灵</span></button>
+  <button class="nav-btn" data-view="viewCreatures">🧚<span>图鉴</span></button>
+  <button class="nav-btn" data-view="viewRaise">💕<span>养成</span></button>
   <button class="nav-btn" data-view="viewWeekly">📊<span>周报</span></button>
   <button class="nav-btn" data-view="viewSettings">⚙️<span>设置</span></button>
 </div>
@@ -1531,6 +1548,8 @@ function init(){
   renderToday();
   renderWeeklyView();
   renderGallery();
+  renderRaise();
+  updateRaiseSlide();
   setupTheme();
   bindUI();
   saveState();
@@ -2669,6 +2688,218 @@ function renderGallery(){
 
   document.getElementById('galleryCollected').textContent=collected.length;
   document.getElementById('galleryTotal').textContent=total;
+
+  const filtered=CREATURES.filter(function(c){return galleryFilter==='all'||c.rarity===galleryFilter;});
+
+  grid.innerHTML=filtered.map(function(c){
+    const isCollected=collected.includes(c.id);
+    const isNew=state.newUnlocks?.includes(c.id);
+    const mbtiTag=c.personality?c.personality.mbti:'';
+    if(isCollected){
+      const lvl=state.creatureLevels[c.id]||1;
+      return '<div class="gallery-card'+(isNew?' newly-unlocked':'')+'">'+
+        '<div style="margin:-4px -2px 2px;text-align:center">'+renderPetFace(c.id,64)+'</div>'+
+        '<div class="gallery-name">'+c.emoji+' '+c.name+'</div>'+
+        '<div style="font-size:8px;color:#8a7a6a;margin:1px 0">'+mbtiTag+'</div>'+
+        '<div class="gallery-lvl">Lv.'+lvl+' ✅</div>'+
+      '</div>';
+    } else {
+      var hint='';
+      if(c.id==='warmegg') hint='📝 记录一次体重';
+      else if(c.id==='sprout') hint='🏃 单日运动15分钟';
+      else if(c.id==='clover3') hint='🏃 连续3天运动15分钟+';
+      else if(c.id==='sevastar') hint='🏃 累计运动5小时';
+      else if(c.id==='lightfloat') hint='⚖️ 减重1kg';
+      else if(c.id==='cloudpuff') hint='⚖️ 减重3kg';
+      else if(c.id==='littlehorn') hint='🏃 单日运动60分钟';
+      else if(c.id==='mushroom') hint='⚖️ 减重0.5kg';
+      else if(c.id==='flamephoenix') hint='🏃 累计50小时';
+      else if(c.id==='fourleaf') hint='🏃 单日运动30分钟';
+      else if(c.id==='moonpie') hint='🏃 连续7天运动15分钟+';
+      else if(c.id==='coffeebean') hint='🏃 累计10小时';
+      else if(c.id==='snowball') hint='🏃 累计3小时';
+      else if(c.id==='candy') hint='🏃 累计20小时';
+      else if(c.id==='bell') hint='⚖️ 减重8kg';
+      else if(c.id==='shell') hint='🏃 累计30小时';
+      else if(c.id==='rainbow') hint='🏃 累计80小时';
+      else if(c.id==='butterfly') hint='🧚 收集全部17只';
+      return '<div class="gallery-card locked">'+
+        '<div style="margin:-4px -2px 2px;text-align:center;opacity:.4">'+renderPetFace(c.id,64)+'</div>'+
+        '<div class="gallery-name" style="opacity:.4">'+c.emoji+' '+c.name+'</div>'+
+        '<div style="font-size:8px;color:#b9a58a;margin:1px 0">'+c.rarity+'</div>'+
+        '<div class="gallery-hint">'+hint+'</div>'+
+      '</div>';
+    }
+  }).join('');
+}
+
+function renderRaise(){
+  const collected=state.collectedCreatures||[];
+  const track=document.getElementById('raiseTrack');
+  const dots=document.getElementById('raiseDots');
+  const counter=document.getElementById('raiseCounter');
+  if(!track) return;
+
+  if(collected.length===0){
+    track.innerHTML='<div style="min-width:100%;padding:40px 0;text-align:center;color:#8a7a6a;font-size:14px">🧚 还没有解锁任何精灵<br><span style="font-size:12px">去图鉴页完成解锁条件吧！</span></div>';
+    dots.innerHTML='';
+    if(counter) counter.textContent='0 / 0';
+    return;
+  }
+
+  track.innerHTML=collected.map(function(id){
+    const c=CREATURES.find(function(cr){return cr.id===id;});
+    if(!c) return '';
+    if(!state.petState) state.petState={};
+    if(!state.petState[id]) initPetState(id);
+    const p=state.petState[id]||{hunger:100,happiness:100,intimacy:0};
+    const lvl=state.creatureLevels[id]||1;
+    const hungerPct=Math.round(p.hunger||0);
+    const happyPct=Math.round(p.happiness||0);
+    const intimacyPct=Math.round(p.intimacy||0);
+    const moodEmoji=getMoodEmoji(p.happiness||100);
+    const intimacyLabel=getIntimacyLabel(p.intimacy||0);
+    const mbtiTag=c.personality?c.personality.mbti:'';
+    const traitTag=c.personality?c.personality.trait:'';
+
+    return '<div class="raise-card">'+
+      '<div class="raise-header">'+
+        '<div class="raise-name">'+c.emoji+' '+c.name+'</div>'+
+        '<div style="font-size:10px;color:#8a7a6a;margin-top:2px">'+mbtiTag+' · '+traitTag+'</div>'+
+      '</div>'+
+      '<div style="text-align:center;padding:8px 0;min-height:100px">'+renderPetFace(c.id,100)+'</div>'+
+      '<div style="text-align:center;font-size:14px;font-weight:500;color:#8a7a6a;margin-bottom:8px">Lv.'+lvl+' '+moodEmoji+'</div>'+
+      '<div style="max-width:220px;margin:0 auto">'+
+        '<div class="raise-stat-row"><span style="font-size:11px;width:28px">🍽️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-hunger" style="width:'+hungerPct+'%"></div></div><span style="font-size:10px;color:#8a7a6a;width:28px;text-align:right">'+hungerPct+'%</span></div>'+
+        '<div class="raise-stat-row"><span style="font-size:11px;width:28px">❤️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-happy" style="width:'+happyPct+'%"></div></div><span style="font-size:10px;color:#8a7a6a;width:28px;text-align:right">'+happyPct+'%</span></div>'+
+        '<div class="raise-stat-row"><span style="font-size:11px;width:28px">💕</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-intimacy" style="width:'+intimacyPct+'%"></div></div><span style="font-size:10px;color:#d63384;width:28px;text-align:right">'+intimacyLabel+'</span></div>'+
+      '</div>'+
+      '<div class="raise-btns">'+
+        '<button class="tama-btn tama-btn-feed" onclick="feedPet(this.dataset.cid)">🍽️ 喂食</button>'+
+        '<button class="tama-btn tama-btn-play" onclick="playPet(this.dataset.cid)">🎾 玩耍</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  dots.innerHTML=collected.map(function(_,i){
+    return '<span class="raise-dot'+(i===0?' active':'')+'" onclick="slideRaiseTo('+i+')"></span>';
+  }).join('');
+
+  if(counter) counter.textContent='1 / '+collected.length;
+}
+
+var raiseSlideIdx=0;
+function slideRaise(dir){
+  const collected=state.collectedCreatures||[];
+  if(collected.length===0) return;
+  raiseSlideIdx=Math.max(0,Math.min(collected.length-1,raiseSlideIdx+dir));
+  updateRaiseSlide();
+}
+function slideRaiseTo(idx){
+  raiseSlideIdx=idx;
+  updateRaiseSlide();
+}
+function updateRaiseSlide(){
+  const track=document.getElementById('raiseTrack');
+  const dots=document.getElementById('raiseDots');
+  const counter=document.getElementById('raiseCounter');
+  const collected=state.collectedCreatures||[];
+  if(!track) return;
+  track.style.transform='translateX(-'+(raiseSlideIdx*100)+'%)';
+  if(dots){
+    dots.querySelectorAll('.raise-dot').forEach(function(d,i){
+      d.classList.toggle('active',i===raiseSlideIdx);
+    });
+  }
+  if(counter) counter.textContent=(raiseSlideIdx+1)+' / '+collected.length;
+}
+function renderWeeklyView(){
+  const container=document.getElementById('weeklyReport');
+  const now=new Date();
+  const weekStart=new Date(now);
+  weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+
+  // Calculate weekly stats
+  let totalExercise=0, totalWater=0, totalWeightDays=0, taskDone=0, collectedThisWeek=0;
+  const allCollected=state.collectedCreatures||[];
+  const weekDates=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(weekStart);
+    d.setDate(d.getDate()+i);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    weekDates.push(key);
+    totalExercise+=state.exerciseLogs?.[key]||0;
+    totalWater+=state.waterLogs?.[key]||0;
+    if(state.weightLogs?.[key]) totalWeightDays++;
+  }
+
+  const firstWeight=Object.values(state.weightLogs||{})[0]?.weight;
+  const lastWeight=Object.values(state.weightLogs||{}).pop()?.weight;
+  const weightChange=firstWeight&&lastWeight?lastWeight-firstWeight:null;
+
+  const weekStartStr=weekDates[0];
+  const weekEndStr=weekDates[6];
+  collectedThisWeek=allCollected.filter(cid=>{
+    // Estimate: check if creature was unlocked recently (simplified)
+    return allCollected.indexOf(cid)>=(allCollected.length-3);
+  }).length;
+
+  // Calculate task completion for this week
+  let totalTasks=0, doneTasks=0;
+  for(const d of weekDates){
+    const t=JSON.parse(localStorage.getItem('inflife_tasks_'+d)||'[]');
+    if(t.length>0) totalTasks++;
+    doneTasks+=t.length;
+  }
+
+  const html=`
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:13px;color:#8a7a6a;margin-top:2px">${weekStartStr} ~ ${weekEndStr}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#5c9e5c">${totalExercise}</div>
+        <div class="streak-label">🏃 运动分钟</div>
+      </div>
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#4fc3f7">${totalWater}</div>
+        <div class="streak-label">💧 喝水杯数</div>
+      </div>
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#d4a017">${doneTasks}</div>
+        <div class="streak-label">☑️ 任务完成</div>
+      </div>
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#ab47bc">${allCollected.length}</div>
+        <div class="streak-label">🧚 精灵收集</div>
+      </div>
+    </div>
+    ${weightChange!==null?`
+      <div style="text-align:center;padding:10px;background:rgba(92,158,92,.08);border-radius:8px;margin-bottom:12px">
+        <span style="font-size:13px;color:#8a7a6a">⚖️ 体重变化 </span>
+        <span style="font-size:16px;font-weight:700;color:${weightChange<=0?'#5c9e5c':'#e57373'}">
+          ${weightChange<=0?''+Math.abs(weightChange).toFixed(1)+'kg ✓':'+'+weightChange.toFixed(1)+'kg'}
+        </span>
+      </div>
+    `:''}
+    <div style="font-size:11px;color:#8a7a6a;text-align:center;padding:6px 0">
+      ${totalWeightDays>=7?'📝 坚持每天记录体重！':totalWeightDays>0?'📝 本周记录体重 '+totalWeightDays+' 天':''}
+    </div>
+  `;
+
+  container.innerHTML=html;
+}
+
+// ===== RENDER: GALLERY =====
+galleryFilter='all';
+
+function renderGallery(){
+  const collected=state.collectedCreatures||[];
+  const grid=document.getElementById('creatureGrid');
+  const total=CREATURES.length;
+
+  document.getElementById('galleryCollected').textContent=collected.length;
+  document.getElementById('galleryTotal').textContent=total;
   document.getElementById('galleryProgress').textContent=total>0?Math.round(collected.length/total*100)+'%':'0%';
 
   renderExercise();
@@ -2909,6 +3140,7 @@ function switchView(viewId){
   slider.style.left=`${idx*25}%`;
   if(viewId==='viewWeekly') renderWeeklyView();
   if(viewId==='viewCreatures') renderGallery();
+  if(viewId==='viewRaise'){raiseSlideIdx=0;renderRaise();updateRaiseSlide();}
 }
 
 // ===== BIND UI =====
