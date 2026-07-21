@@ -19,7 +19,7 @@ additional_redirect_urls = ["http://127.0.0.1:8080", "http://localhost:8080"]
 enable_signup = false
 
 [auth.email]
-enable_signup = false
+enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 secure_password_change = false
