@@ -476,8 +476,9 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
   height:2px;
   border-radius:1px;
   background:#493e38;
-  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  transition:left .35s cubic-bezier(.34,1.56,.64,1);
   width:25%;
+  left:0;
 }
 
 /* ===== VIEWS ===== */
@@ -2451,7 +2452,7 @@ function switchView(viewId){
   });
   const idx=views.indexOf(viewId);
   const slider=document.getElementById('navSlider');
-  slider.style.transform=`translateX(${idx*25}%)`;
+  slider.style.left=`${idx*25}%`;
   if(viewId==='viewWeekly') renderWeeklyView();
   if(viewId==='viewCreatures') renderGallery();
 }
