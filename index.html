@@ -1515,6 +1515,17 @@ function init(){
   saveState();
   checkMilestones();
 
+  // Remote water add via URL param
+  const urlParams=new URLSearchParams(window.location.search);
+  if(urlParams.get('addwater')){
+    const n=parseInt(urlParams.get('addwater'))||1;
+    logWater(n);
+    // Clean param from URL without reload
+    const u=new URL(window.location);
+    u.searchParams.delete('addwater');
+    window.history.replaceState({},'',u);
+  }
+
   if(state.settings.reminder && 'Notification' in window && Notification.permission === 'default'){
     Notification.requestPermission();
   }
