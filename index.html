@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#b2946e">
+<title>INFPLife · 精灵看板</title>
+
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans CJK SC','Helvetica Neue',sans-serif;
+  background:#d8c9b6;
+  color:#3a322f;
+  min-height:100dvh;
+  padding:0 0 100px 0;
+  overflow-x:hidden;
+  transition:background .4s,color .4s;
+}
+
+/* ===== DARK MODE ===== */
+body.dark{
+  background:#1a1512;
+  color:#d9bb98;
+}
+body.dark .card{
+  background:#322a26;
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
+  border:1px solid #493e38;
+}
+body.dark .card-header{color:#c4aa8a;letter-spacing:1.5px}
+body.dark .stat-value{color:#d3b694}
+body.dark .stat-label{color:#8a7a6a}
+body.dark .habit-item{background:#3a322f;border-color:#493e38}
+body.dark .habit-item:active{background:#493e38}
+body.dark .check-circle{border-color:#6a5a4a;background:transparent}
+body.dark .check-circle.checked{border-color:#c4aa8a;background:#c4aa8a;box-shadow:0 2px 6px rgba(196,170,138,.2)}
+body.dark .habit-text{color:#d9bb98}
+body.dark .habit-text.done{color:#6a5a4a;text-decoration-color:#493e38}
+body.dark .progress-bar{background:#493e38}
+body.dark .progress-fill{background:linear-gradient(90deg,#c4aa8a,#b2946e)}
+body.dark .week-day{color:#8a7a6a}
+body.dark .week-day .week-dot{background:#493e38}
+body.dark .week-day .week-dot.done{background:#c4aa8a}
+body.dark .week-day .week-dot.partial{background:linear-gradient(135deg,#c4aa8a 50%,#493e38 50%)}
+body.dark .week-day .week-dot.done{background:#c4aa8a}
+body.dark .week-day .week-dot.partial{background:linear-gradient(135deg,#c4aa8a 50%,#493e38 50%)}
+body.dark .streak-number{color:#d3b694}
+body.dark h2{color:#c4aa8a}
+body.dark .theme-toggle{color:#8a7a6a;border-color:#493e38}
+body.dark .theme-toggle:hover{color:#d9bb98;border-color:#8a7a6a}
+body.dark .quote{color:#8a7a6a;border-left-color:#493e38}
+body.dark .empty-state{color:#6a5a4a}
+body.dark .settings-panel{background:#322a26}
+body.dark .nav-bar{background:rgba(50,42,38,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid #493e38}
+body.dark .nav-btn{color:#8a7a6a}
+body.dark .nav-btn.active{color:#c4aa8a}
+body.dark .nav-slider{background:#c4aa8a}
+body.dark .add-habit-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+body.dark .add-habit-input::placeholder{color:#6a5a4a}
+body.dark .add-btn{background:#c4aa8a;color:#1a1512}
+body.dark .btn-cancel{background:#493e38;color:#8a7a6a}
+body.dark .btn-danger{background:#493e38;color:#d9bb98}
+body.dark .modal-overlay{background:rgba(26,21,18,.7)}
+body.dark .modal-content{background:#322a26;border:1px solid #493e38}
+body.dark .modal-title{color:#d9bb98}
+body.dark .note-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+body.dark .note-input::placeholder{color:#6a5a4a}
+body.dark .save-btn{background:#c4aa8a;color:#1a1512}
+body.dark .habit-delete{color:#6a5a4a}
+body.dark .habit-delete:hover{color:#d9bb98}
+body.dark .section-title{color:#c4aa8a}
+body.dark .streak-box{background:#3a322f}
+body.dark .weekly-badge{background:#493e38;color:#8a7a6a}
+body.dark .weekly-badge.done{background:#493e38;color:#c4aa8a}
+body.dark .setting-row{border-color:#493e38}
+body.dark .toggle{background:#493e38}
+body.dark .toggle.on{background:#c4aa8a}
+body.dark .serif{font-style:italic;letter-spacing:.5px}
+body.dark .creature-card{background:#3a322f;border-color:#493e38}
+body.dark .creature-name{color:#c4aa8a}
+body.dark .creature-rarity{color:#8a7a6a}
+body.dark .creature-desc{color:#8a7a6a}
+body.dark .creature-locked{background:rgba(50,42,38,.4);border-color:#3a322f}
+body.dark .creature-locked .creature-svg-wrap{opacity:.25;filter:grayscale(1)}
+body.dark .creature-locked .creature-name{color:#6a5a4a}
+body.dark .unlock-modal-content{background:#322a26;border:2px solid #c4aa8a}
+body.dark .unlock-title{color:#d9bb98}
+body.dark .unlock-subtitle{color:#8a7a6a}
+body.dark .unlock-btn{background:#c4aa8a;color:#1a1512}
+body.dark .weight-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+body.dark .weight-input::placeholder{color:#6a5a4a}
+body.dark .weight-change-positive{color:#8fc75a}
+body.dark .weight-change-negative{color:#e57373}
+body.dark .stat-highlight{color:#d3b694}
+body.dark .progress-badge-empty{background:#3a322f;color:#6a5a4a}
+body.dark .creature-progress-text{color:#8a7a6a}
+body.dark .filter-btn{color:#8a7a6a;border-color:#493e38}
+body.dark .filter-btn.active{background:#c4aa8a;color:#1a1512;border-color:#c4aa8a}
+body.dark .gallery-stats{background:#3a322f;border-color:#493e38}
+body.dark .gallery-stat-value{color:#d3b694}
+body.dark .unlock-emoji-bg{background:#2a2520}
+/* ===== CONTAINER ===== */
+.container{max-width:480px;margin:0 auto;padding:20px 16px}
+
+/* ===== DECORATIVE ===== */
+.serif{font-style:italic;letter-spacing:.5px}
+
+/* ===== HEADER ===== */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:28px 0 8px;
+  position:relative;
+}
+.header::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#c4aa8a 20%,#c4aa8a 80%,transparent);
+  opacity:.3;
+}
+.header-left h1{
+  font-size:20px;
+  font-weight:500;
+  letter-spacing:1px;
+  color:#493e38;
+}
+body.dark .header-left h1{color:#c4aa8a}
+.header-left .date-display{
+  font-size:12px;
+  color:#8a7a6a;
+  margin-top:3px;
+  font-weight:400;
+  letter-spacing:.5px;
+}
+.theme-toggle{
+  width:38px;height:38px;
+  border-radius:50%;
+  border:1.5px solid #b9a58a;
+  background:transparent;
+  font-size:16px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.3s;
+  opacity:.6;
+}
+.theme-toggle:hover{opacity:1;border-color:#8a7a6a}
+
+/* ===== GREETING + QUOTE ===== */
+.greeting{
+  font-size:14px;
+  font-weight:400;
+  margin:4px 0 16px;
+  color:#8a7a6a;
+  line-height:1.6;
+}
+.quote{
+  font-size:13px;
+  font-style:italic;
+  color:#8a7a6a;
+  padding:14px 18px;
+  border-left:2px solid #c4aa8a;
+  margin:0 0 20px;
+  line-height:1.7;
+  border-radius:0 8px 8px 0;
+  background:rgba(196,170,138,.08);
+}
+
+/* ===== CARDS ===== */
+.card{
+  background:#e8ddcf;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:14px;
+  box-shadow:none;
+  transition:.3s;
+  border:1px solid #d5c5b0;
+}
+.card-header{
+  font-size:11px;
+  font-weight:600;
+  color:#8a7a6a;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  margin-bottom:16px;
+}
+
+/* ===== STATS ROW ===== */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:18px;
+}
+.stat-item{text-align:center}
+.stat-value{
+  font-size:28px;
+  font-weight:400;
+  color:#493e38;
+  line-height:1.2;
+  letter-spacing:-.5px;
+}
+.stat-label{
+  font-size:10px;
+  color:#8a7a6a;
+  margin-top:4px;
+  font-weight:500;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+
+/* ===== HABIT LIST ===== */
+.habit-list{display:flex;flex-direction:column;gap:8px}
+.habit-item{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:13px 14px;
+  background:#d8c9b6;
+  border:1px solid transparent;
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .25s;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  position:relative;
+}
+.habit-item:active{
+  background:#cebda8;
+  transform:scale(.98);
+}
+.habit-item.editing{
+  border-color:#c4aa8a;
+}
+.check-circle{
+  width:26px;height:26px;
+  border-radius:50%;
+  border:2.5px solid #b9a58a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  background:transparent;
+}
+.check-circle.checked{
+  border-color:#493e38;
+  background:#493e38;
+  transform:scale(1.08);
+  box-shadow:0 2px 6px rgba(73,62,56,.2);
+}
+.check-circle svg{
+  width:14px;height:14px;
+  opacity:0;
+  transform:scale(0);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.check-circle.checked svg{
+  opacity:1;
+  transform:scale(1);
+}
+.habit-text{
+  flex:1;
+  font-size:14px;
+  font-weight:500;
+  transition:.3s;
+  color:#3a322f;
+}
+.habit-text.done{
+  color:#8a7a6a;
+  text-decoration:line-through;
+  text-decoration-color:#b9a58a;
+  text-decoration-thickness:1px;
+}
+.habit-time{
+  font-size:11px;
+  color:#8a7a6a;
+  margin-top:2px;
+}
+.habit-delete{
+  width:28px;height:28px;
+  border:none;background:transparent;
+  color:#b9a58a;
+  font-size:14px;
+  cursor:pointer;
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;
+  opacity:0;
+}
+.habit-item:hover .habit-delete{opacity:1}
+.habit-item.editing .habit-delete{opacity:1}
+
+/* ===== PROGRESS ===== */
+.progress-section{margin-top:16px}
+.progress-label{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:#8a7a6a;margin-bottom:6px;
+  letter-spacing:.3px;
+}
+.progress-bar{
+  height:4px;border-radius:2px;
+  background:#cebda8;overflow:hidden;
+}
+.progress-fill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,#c4aa8a,#b2946e);
+  transition:width .6s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ===== WEEK ROW ===== */
+.week-section{margin-top:20px}
+.week-section .section-title{
+  font-size:11px;
+  font-weight:600;
+  color:#8a7a6a;
+  margin-bottom:14px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.week-row{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.week-day{
+  flex:1;
+  text-align:center;
+  font-size:10px;
+  color:#8a7a6a;
+  font-weight:500;
+}
+.week-day .week-label{margin-bottom:6px;letter-spacing:.5px;font-size:9px}
+.week-day .week-ring-wrap{
+  position:relative;
+  width:100%;
+  padding-bottom:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.week-day .week-ring-wrap svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  transform:rotate(-90deg);
+}
+.week-ring-bg{fill:none;stroke:#cebda8;stroke-width:8}
+body.dark .week-ring-bg{stroke:#493e38}
+.week-ring-fill{fill:none;stroke:#493e38;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.34,1.56,.64,1)}
+body.dark .week-ring-fill{stroke:#c4aa8a}
+.week-ring-fill.done{stroke:#7dae44}
+body.dark .week-ring-fill.done{stroke:#8fc75a}
+.week-day .week-score{
+  font-size:9px;
+  margin-top:4px;
+  color:#8a7a6a;
+  letter-spacing:.3px;
+}
+.week-day.today .week-label{font-weight:700;color:#493e38}
+body.dark .week-day.today .week-label{color:#c4aa8a}
+
+/* ===== STREAK ===== */
+.streak-section{
+  display:flex;
+  gap:12px;
+  margin-bottom:16px;
+}
+.streak-box{
+  flex:1;
+  background:#d8c9b6;
+  border-radius:10px;
+  padding:14px;
+  text-align:center;
+}
+.streak-number{
+  font-size:22px;
+  font-weight:400;
+  color:#493e38;
+  line-height:1.2;
+}
+.streak-label{
+  font-size:10px;
+  color:#8a7a6a;
+  margin-top:3px;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+
+/* ===== ADD HABIT ===== */
+.add-habit-bar{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+.add-habit-input{
+  flex:1;
+  padding:11px 14px;
+  border:1.5px solid #cebda8;
+  border-radius:8px;
+  font-size:13px;
+  font-family:inherit;
+  background:#d8c9b6;
+  outline:none;
+  transition:.3s;
+  color:#3a322f;
+}
+.add-habit-input:focus{border-color:#b9a58a}
+.add-habit-input::placeholder{color:#b9a58a;font-style:italic}
+.add-btn{
+  width:42px;height:42px;
+  border:none;border-radius:8px;
+  background:#493e38;
+  color:#d8c9b6;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  transition:.2s;
+  font-weight:300;
+}
+.add-btn:active{transform:scale(.94)}
+
+/* ===== NAV BAR ===== */
+.nav-bar{
+  position:fixed;
+  bottom:0;
+  left:0;right:0;
+  display:flex;
+  background:rgba(216,201,182,.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-top:1px solid #cebda8;
+  z-index:100;
+  padding:6px 0 env(safe-area-inset-bottom,8px);
+}
+.nav-btn{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  padding:6px 0;
+  border:none;
+  background:transparent;
+  font-size:10px;
+  color:#8a7a6a;
+  cursor:pointer;
+  transition:.2s;
+  font-family:inherit;
+  font-weight:500;
+  -webkit-tap-highlight-color:transparent;
+  letter-spacing:.3px;
+}
+.nav-btn .nav-icon{font-size:20px;line-height:1}
+.nav-btn.active{color:#493e38}
+.nav-slider{
+  position:absolute;
+  bottom:auto;
+  top:0;
+  height:2px;
+  border-radius:1px;
+  background:#493e38;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  width:25%;
+}
+
+/* ===== VIEWS ===== */
+.view{display:none}
+.view.active{display:block;animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== WEEKLY VIEW ===== */
+.weekly-card{margin-bottom:14px}
+.weekly-date{font-size:11px;color:#8a7a6a;margin-bottom:6px;letter-spacing:.3px}
+.weekly-items{display:flex;flex-wrap:wrap;gap:4px}
+.weekly-badge{
+  padding:3px 10px;
+  border-radius:4px;
+  font-size:11px;
+  background:#d8c9b6;
+  color:#8a7a6a;
+}
+.weekly-badge.done{background:#493e38;color:#d8c9b6}
+
+/* ===== SETTINGS ===== */
+.settings-section{margin-bottom:20px}
+.settings-section .section-title{
+  font-size:11px;
+  font-weight:600;
+  color:#8a7a6a;
+  margin-bottom:12px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.setting-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;border-bottom:1px solid #cebda8;
+}
+.setting-label{font-size:13px;font-weight:500}
+
+/* Toggle Switch */
+.toggle{
+  width:42px;height:22px;
+  border-radius:11px;
+  background:#cebda8;
+  cursor:pointer;
+  position:relative;
+  transition:.3s;
+  border:none;
+  padding:0;
+}
+.toggle.on{background:#493e38}
+.toggle::after{
+  content:'';
+  width:18px;height:18px;
+  border-radius:50%;
+  background:#e8ddcf;
+  position:absolute;
+  top:2px;left:2px;
+  transition:.3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 1px 2px rgba(0,0,0,.1);
+}
+.toggle.on::after{left:22px;background:#d8c9b6}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(26,21,18,.5);
+  z-index:200;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+}
+.modal-overlay.show{display:flex}
+.modal-content{
+  background:#e8ddcf;
+  border-radius:16px 16px 0 0;
+  padding:24px 20px env(safe-area-inset-bottom,20px);
+  width:100%;max-width:480px;
+  animation:slideUp .35s ease;
+  border-top:1px solid #d5c5b0;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{
+  font-size:17px;font-weight:500;
+  margin-bottom:16px;
+  text-align:center;
+  color:#3a322f;
+}
+.note-input{
+  width:100%;
+  padding:12px 14px;
+  border:1.5px solid #cebda8;
+  border-radius:8px;
+  font-size:13px;
+  font-family:inherit;
+  background:#d8c9b6;
+  resize:vertical;
+  min-height:80px;
+  outline:none;
+  transition:.3s;
+  color:#3a322f;
+}
+.note-input:focus{border-color:#b9a58a}
+.note-input::placeholder{color:#b9a58a;font-style:italic}
+.modal-actions{
+  display:flex;gap:10px;
+  margin-top:16px;
+}
+.save-btn,.btn-cancel{
+  flex:1;padding:12px;
+  border:none;border-radius:8px;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  transition:.2s;
+  font-family:inherit;
+}
+.save-btn{background:#493e38;color:#e8ddcf}
+.save-btn:active{transform:scale(.96)}
+.btn-cancel{background:#cebda8;color:#8a7a6a}
+.btn-cancel:active{transform:scale(.96)}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{
+  text-align:center;
+  padding:32px 16px;
+  color:#b9a58a;
+  font-size:13px;
+}
+.empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
+
+/* ===== CONFETTI ===== */
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100px) rotate(720deg);opacity:0}}
+.confetti-piece{
+  position:fixed;
+  width:7px;height:7px;
+  border-radius:1px;
+  z-index:300;
+  pointer-events:none;
+  animation:confettiFall 1.5s ease forwards;
+}
+
+/* ===== CREATURE CSS ===== */
+
+/* Gallery Stats Bar */
+.gallery-stats{
+  display:flex;gap:8px;margin-bottom:14px;
+  background:#d8c9b6;border-radius:10px;padding:12px 14px;
+  border:1px solid #cebda8;text-align:center;
+}
+body.dark .gallery-stats{background:#3a322f;border-color:#493e38}
+.gallery-stat{flex:1}
+.gallery-stat-value{font-size:22px;font-weight:400;color:#493e38;line-height:1.2}
+body.dark .gallery-stat-value{color:#d3b694}
+.gallery-stat-label{font-size:10px;color:#8a7a6a;margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+
+/* Filter */
+.filter-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{
+  padding:5px 12px;border:1.5px solid #cebda8;border-radius:16px;
+  background:transparent;font-family:inherit;font-size:11px;
+  color:#8a7a6a;cursor:pointer;transition:.2s;letter-spacing:.3px;
+  -webkit-tap-highlight-color:transparent;
+}
+.filter-btn.active{background:#493e38;color:#e8ddcf;border-color:#493e38}
+.filter-btn:active{transform:scale(.95)}
+body.dark .filter-btn{color:#8a7a6a;border-color:#493e38}
+body.dark .filter-btn.active{background:#c4aa8a;color:#1a1512;border-color:#c4aa8a}
+
+/* Creature Card */
+.creature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.creature-card{
+  background:#d8c9b6;border:1px solid transparent;
+  border-radius:12px;padding:12px 8px;
+  text-align:center;cursor:default;transition:.3s;
+  position:relative;overflow:hidden;
+}
+body.dark .creature-card{background:#3a322f;border-color:#493e38}
+.creature-card.newly-unlocked{
+  animation:newCreaturePulse .8s ease 3;
+  border-color:#c4aa8a;
+}
+@keyframes newCreaturePulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 0 rgba(196,170,138,0)}
+  50%{transform:scale(1.05);box-shadow:0 0 16px rgba(196,170,138,.3)}
+}
+.creature-svg-wrap{
+  width:80px;height:80px;margin:0 auto 6px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ===== TAMAGOTCHI CARD ===== */
+.tama-card{
+  background:#e8ddcf;border-radius:14px;padding:12px 10px;
+  text-align:center;position:relative;overflow:hidden;
+  transition:.3s;border:2px solid #d5c5b0;
+}
+body.dark .tama-card{background:#322a26;border-color:#493e38}
+.tama-screen{
+  background:#d8c9b6;border-radius:10px;padding:8px;
+  margin:0 auto 6px;border:2px solid #b9a58a;position:relative;
+  width:96px;height:96px;display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.1);
+}
+body.dark .tama-screen{background:#2a2520;border-color:#6a5a4a}
+.tama-screen-inner{
+  background:rgba(255,255,255,.05);border-radius:6px;
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+}
+.tama-name{font-size:11px;font-weight:600;color:#3a322f;margin-bottom:2px}
+body.dark .tama-name{color:#d9bb98}
+.tama-level{font-size:9px;color:#d4a017;font-weight:600;margin-bottom:4px}
+.tama-stats{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+.tama-stat{font-size:9px;color:#8a7a6a;background:#cebda8;border-radius:4px;padding:1px 6px;display:flex;align-items:center;gap:2px}
+body.dark .tama-stat{background:#493e38;color:#8a7a6a}
+.tama-hunger-fill{display:inline-block;width:4px;height:4px;border-radius:50%;margin:0 1px}
+.tama-btns{display:flex;gap:4px;justify-content:center}
+.tama-btn{padding:3px 10px;border:none;border-radius:5px;font-size:9px;font-family:inherit;
+  cursor:pointer;transition:.2s;font-weight:500;letter-spacing:.3px}
+.tama-btn:active{transform:scale(.9)}
+.tama-btn-feed{background:#d4a017;color:#fff}
+.tama-btn-play{background:#7cb342;color:#fff}
+body.dark .tama-btn-feed{background:#b8942e}
+body.dark .tama-btn-play{background:#5a8a2e}
+
+/* Locked Tama */
+.tama-locked{background:rgba(216,201,182,.3);border-color:#cebda8;border-style:dashed}
+body.dark .tama-locked{background:rgba(50,42,38,.2);border-color:#3a322f}
+.tama-locked .tama-screen{opacity:.3;filter:grayscale(1)}
+.creature-svg-wrap svg{width:100%;height:100%}
+.creature-name{font-size:12px;font-weight:600;color:#3a322f;margin-bottom:2px}
+body.dark .creature-name{color:#d9bb98}
+.creature-rarity{
+  font-size:9px;letter-spacing:.3px;margin-bottom:2px;
+}
+.rarity-普通{color:#8a7a6a}
+.rarity-稀有{color:#5c9e5c}
+.rarity-史诗{color:#7c5cbf}
+.rarity-传说{color:#d4a017}
+.creature-desc{font-size:9px;color:#8a7a6a;line-height:1.4}
+
+/* Locked Creature */
+.creature-locked{
+  position:relative;
+  background:rgba(216,201,182,.4);
+  border:1px dashed #cebda8;
+}
+body.dark .creature-locked{background:rgba(50,42,38,.4);border-color:#3a322f}
+body.dark .creature-locked .creature-svg-wrap{opacity:.25;filter:grayscale(1)}
+body.dark .creature-locked .creature-name{color:#6a5a4a}
+.creature-locked .creature-name::after{content:'  ?';opacity:.4}
+.creature-locked .creature-desc{color:#b9a58a;font-style:italic}
+.creature-locked .creature-rarity{opacity:.4}
+.progress-badge-empty{
+  display:inline-block;padding:2px 6px;border-radius:3px;
+  background:#cebda8;font-size:8px;color:#8a7a6a;margin-top:2px;
+}
+body.dark .progress-badge-empty{background:#3a322f;color:#6a5a4a}
+
+/* Unlock Modal */
+.unlock-modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(26,21,18,.7);
+  z-index:300;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.unlock-modal-overlay.show{display:flex}
+.unlock-modal-content{
+  background:#e8ddcf;
+  border-radius:20px;
+  padding:32px 24px;
+  max-width:340px;
+  width:100%;
+  text-align:center;
+  animation:unlockPop .5s cubic-bezier(.34,1.56,.64,1);
+  border:2px solid #493e38;
+  position:relative;
+  overflow:hidden;
+}
+body.dark .unlock-modal-content{background:#322a26;border-color:#c4aa8a}
+@keyframes unlockPop{
+  0%{transform:scale(.5);opacity:0}
+  60%{transform:scale(1.08)}
+  100%{transform:scale(1);opacity:1}
+}
+.unlock-emoji{
+  font-size:72px;display:block;margin-bottom:8px;
+  animation:unlockBounce .6s ease infinite alternate;
+}
+@keyframes unlockBounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.unlock-title{font-size:20px;font-weight:600;color:#3a322f;margin-bottom:4px}
+body.dark .unlock-title{color:#d9bb98}
+.unlock-subtitle{font-size:13px;color:#8a7a6a;margin-bottom:4px}
+body.dark .unlock-subtitle{color:#8a7a6a}
+.unlock-rarity{font-size:12px;margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.unlock-svg-wrap{width:120px;height:120px;margin:0 auto 12px}
+.unlock-svg-wrap svg{width:100%;height:100%}
+.unlock-desc{font-size:13px;color:#8a7a6a;margin-bottom:16px;line-height:1.5}
+.unlock-btn{
+  padding:10px 32px;border:none;border-radius:10px;
+  background:#493e38;color:#e8ddcf;
+  font-family:inherit;font-size:14px;font-weight:500;
+  cursor:pointer;transition:.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+body.dark .unlock-btn{background:#c4aa8a;color:#1a1512}
+.unlock-btn:active{transform:scale(.95)}
+.unlock-sparkle{
+  position:absolute;pointer-events:none;
+  font-size:18px;animation:sparkleFloat 1.5s ease forwards;opacity:0;
+}
+@keyframes sparkleFloat{
+  0%{transform:translateY(0) scale(0);opacity:1}
+  50%{opacity:1}
+  100%{transform:translateY(-80px) scale(1.2);opacity:0}
+}
+
+/* ===== WEIGHT TRACKER ===== */
+.weight-row{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.weight-input{
+  flex:1;padding:12px 14px;
+  border:1.5px solid #cebda8;border-radius:8px;
+  font-size:16px;font-family:inherit;outline:none;
+  background:#d8c9b6;color:#3a322f;transition:.3s;
+  -moz-appearance:textfield;
+}
+.weight-input::-webkit-outer-spin-button,.weight-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.weight-input:focus{border-color:#b9a58a}
+body.dark .weight-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+.weight-unit{font-size:14px;color:#8a7a6a;flex-shrink:0;font-weight:500}
+.weight-change{
+  font-size:13px;margin-top:4px;font-weight:500;
+}
+.weight-change-positive{color:#4caf50}
+body.dark .weight-change-positive{color:#8fc75a}
+.weight-change-negative{color:#e53935}
+body.dark .weight-change-negative{color:#e57373}
+.weight-history{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.weight-history-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 8px;border-radius:6px;font-size:12px;
+  background:#d8c9b6;color:#8a7a6a;
+}
+body.dark .weight-history-item{background:#3a322f;color:#8a7a6a}
+.weight-history-date{font-size:11px;font-weight:500;color:#8a7a6a}
+.weight-history-value{font-weight:600;color:#493e38}
+body.dark .weight-history-value{color:#d9bb98}
+.weight-trend{
+  display:flex;gap:4px;margin-top:8px;
+  align-items:flex-end;height:60px;
+}
+.weight-trend-bar{
+  flex:1;border-radius:2px 2px 0 0;
+  background:#c4aa8a;min-height:4px;
+  transition:.4s;position:relative;
+}
+body.dark .weight-trend-bar{background:#6a5a4a}
+.weight-trend-bar.today{background:#493e38}
+body.dark .weight-trend-bar.today{background:#c4aa8a}
+.weight-trend-label{font-size:7px;color:#8a7a6a;text-align:center;margin-top:2px}
+.weight-start-note{font-size:11px;color:#8a7a6a;font-style:italic;margin-top:6px;text-align:center}
+.stat-highlight{font-weight:600;color:#493e38}
+body.dark .stat-highlight{color:#d3b694}
+.creature-progress-text{font-size:9px;color:#8a7a6a;margin-top:2px;line-height:1.3}
+
+/* ===== MOBILE TOUCH ===== */
+@media(hover:none){
+  .habit-delete{opacity:1;opacity:.3}
+}
+
+/* ===== PWA SPLASH ===== */
+@media(display-mode:standalone){
+  .header{padding-top:40px}
+}
+
+/* ===== COFFEE TRACKER ===== */
+.coffee-hero{
+  text-align:center;
+  padding:24px 0 16px;
+}
+.coffee-hero-icon{font-size:56px;line-height:1;margin-bottom:8px}
+.coffee-hero-count{
+  font-size:48px;
+  font-weight:400;
+  color:#493e38;
+  line-height:1.1;
+}
+body.dark .coffee-hero-count{color:#d3b694}
+.coffee-hero-label{
+  font-size:12px;
+  color:#8a7a6a;
+  margin-top:4px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.coffee-log-btn{
+  display:block;
+  width:100%;
+  padding:16px;
+  border:2px dashed #b9a58a;
+  border-radius:12px;
+  background:transparent;
+  font-family:inherit;
+  font-size:16px;
+  color:#493e38;
+  cursor:pointer;
+  transition:.25s;
+  margin:12px 0 8px;
+  -webkit-tap-highlight-color:transparent;
+}
+.coffee-log-btn:active{
+  background:#cebda8;
+  transform:scale(.97);
+}
+body.dark .coffee-log-btn{
+  border-color:#6a5a4a;
+  color:#c4aa8a;
+}
+body.dark .coffee-log-btn:active{background:#493e38}
+.coffee-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.coffee-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  background:#d8c9b6;
+  border-radius:8px;
+  font-size:13px;
+  animation:fadeIn .3s ease;
+}
+body.dark .coffee-item{background:#3a322f}
+.coffee-item-icon{font-size:18px;flex-shrink:0}
+.coffee-item-label{flex:1;font-weight:500;color:#3a322f}
+body.dark .coffee-item-label{color:#d9bb98}
+.coffee-item-time{font-size:11px;color:#8a7a6a;flex-shrink:0}
+.coffee-item-delete{
+  width:24px;height:24px;
+  border:none;background:transparent;
+  color:#b9a58a;font-size:12px;
+  cursor:pointer;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:.2s;
+  opacity:.4;
+}
+.coffee-item-delete:active{opacity:1;color:#493e38}
+body.dark .coffee-item-delete:active{color:#d9bb98}
+.coffee-types{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin:8px 0 4px;
+}
+.coffee-type-btn{
+  padding:6px 14px;
+  border:1.5px solid #b9a58a;
+  border-radius:20px;
+  background:transparent;
+  font-family:inherit;
+  font-size:12px;
+  color:#8a7a6a;
+  cursor:pointer;
+  transition:.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.coffee-type-btn:active,.coffee-type-btn.selected{
+  background:#493e38;
+  border-color:#493e38;
+  color:#e8ddcf;
+}
+body.dark .coffee-type-btn{border-color:#6a5a4a;color:#8a7a6a}
+body.dark .coffee-type-btn:active,
+body.dark .coffee-type-btn.selected{
+  background:#c4aa8a;border-color:#c4aa8a;color:#1a1512;
+}
+.coffee-week-chart{
+  display:flex;
+  justify-content:space-between;
+  gap:6px;
+  margin-top:4px;
+}
+.coffee-day-bar{
+  flex:1;
+  text-align:center;
+}
+.coffee-bar{
+  width:100%;
+  border-radius:3px 3px 0 0;
+  background:#cebda8;
+  min-height:4px;
+  transition:.4s;
+  position:relative;
+}
+body.dark .coffee-bar{background:#493e38}
+.coffee-bar-fill{
+  width:100%;
+  border-radius:3px 3px 0 0;
+  background:#493e38;
+  transition:.6s;
+  position:absolute;bottom:0;left:0;
+}
+body.dark .coffee-bar-fill{background:#c4aa8a}
+.coffee-bar-label{
+  font-size:9px;
+  color:#8a7a6a;
+  margin-top:4px;
+  text-transform:uppercase;
+}
+.coffee-bar-count{
+  font-size:10px;
+  font-weight:600;
+  color:#493e38;
+  margin-top:2px;
+}
+body.dark .coffee-bar-count{color:#c4aa8a}
+.coffee-quick-select{
+  display:flex;
+  gap:6px;
+  margin-bottom:8px;
+}
+.coffee-quick-btn{
+  flex:1;
+  padding:10px;
+  border:1.5px solid #b9a58a;
+  border-radius:10px;
+  background:transparent;
+  font-family:inherit;
+  font-size:18px;
+  cursor:pointer;
+  transition:.2s;
+  text-align:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.coffee-quick-btn:active{
+  background:#cebda8;
+  transform:scale(.95);
+}
+body.dark .coffee-quick-btn{border-color:#6a5a4a}
+body.dark .coffee-quick-btn:active{background:#493e38}
+.coffee-quick-btn .coffee-quick-label{
+  display:block;
+  font-size:10px;
+  color:#8a7a6a;
+  font-weight:500;
+  margin-top:2px;
+  letter-spacing:.3px;
+}
+body.dark .coffee-quick-btn .coffee-quick-label{color:#8a7a6a}
+
+/* ===== WATER TRACKER ===== */
+.water-card{display:flex;align-items:center;gap:12px;padding:4px 0}
+.water-icon{font-size:28px;flex-shrink:0;line-height:1}
+.water-count{font-size:24px;font-weight:400;color:#493e38;min-width:28px;text-align:center}
+body.dark .water-count{color:#d3b694}
+.water-label{font-size:12px;color:#8a7a6a;flex:1;letter-spacing:.3px}
+.water-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid #b9a58a;
+  background:transparent;font-size:18px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:.2s;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;font-family:inherit;color:#493e38}
+body.dark .water-btn{color:#c4aa8a;border-color:#6a5a4a}
+.water-btn:active{transform:scale(.9);background:#cebda8}
+body.dark .water-btn:active{background:#493e38}
+.water-goal{font-size:10px;color:#8a7a6a;margin-top:2px;letter-spacing:.3px}
+
+/* ===== EXP BAR ===== */
+.exp-section{margin-top:14px;padding-top:14px;border-top:1px solid #cebda8}
+body.dark .exp-section{border-color:#493e38}
+.exp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.exp-level{font-size:13px;font-weight:600;color:#493e38}
+body.dark .exp-level{color:#c4aa8a}
+.exp-level-badge{display:inline-block;background:#c4aa8a;color:#1a1512;
+  border-radius:6px;padding:1px 8px;font-size:11px;font-weight:600;margin-right:4px}
+.exp-numbers{font-size:10px;color:#8a7a6a;letter-spacing:.3px}
+.exp-bar-wrap{height:6px;border-radius:3px;background:#cebda8;overflow:hidden;position:relative}
+body.dark .exp-bar-wrap{background:#493e38}
+.exp-bar-fill{height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#b2946e,#c4aa8a,#d3b694);
+  transition:width .6s cubic-bezier(.34,1.56,.64,1);position:relative}
+.exp-bar-fill::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  animation:expShimmer 2s ease infinite}
+@keyframes expShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.exp-gain{font-size:10px;color:#8a7a6a;margin-top:3px;text-align:right;opacity:0;transition:.3s}
+.exp-gain.show{opacity:1}
+
+/* ===== LEVEL UP ANIMATION ===== */
+@keyframes levelUpPop{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.level-up-overlay{position:fixed;inset:0;z-index:400;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(26,21,18,.6);padding:24px}
+.level-up-overlay.show{display:flex}
+.level-up-content{background:#e8ddcf;border-radius:20px;padding:32px 24px;
+  max-width:300px;width:100%;text-align:center;
+  animation:levelUpPop .5s cubic-bezier(.34,1.56,.64,1);
+  border:2px solid #c4aa8a;position:relative;overflow:hidden}
+body.dark .level-up-content{background:#322a26;border-color:#c4aa8a}
+.level-up-emoji{font-size:56px;display:block;margin-bottom:8px}
+.level-up-title{font-size:22px;font-weight:600;color:#493e38;margin-bottom:4px}
+body.dark .level-up-title{color:#d9bb98}
+.level-up-sub{font-size:13px;color:#8a7a6a;margin-bottom:12px}
+.level-up-btn{padding:10px 32px;border:none;border-radius:10px;
+  background:#493e38;color:#e8ddcf;font-family:inherit;font-size:14px;
+  font-weight:500;cursor:pointer;transition:.2s}
+body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
+.level-up-btn:active{transform:scale(.95)}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1 id="greetingName"><span class="serif">∞</span> 今日</h1>
+      <div class="date-display" id="dateDisplay"></div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌙</button>
+  </div>
+
+  <!-- QUOTE / EXP LEVEL -->
+  <div class="card" style="padding:14px 18px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><span class="exp-level-badge" id="expLevelBadge" style="font-size:12px;padding:2px 10px">Lv.1 🌱萌芽者</span></div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <span style="font-size:13px;font-weight:600;color:#d4a017">🪙 <span id="coinDisplay">0</span></span>
+        <button onclick="toggleShop()" style="background:none;border:1px solid #b9a58a;border-radius:6px;padding:2px 8px;font-size:11px;font-family:inherit;color:#8a7a6a;cursor:pointer">🏪 商店</button>
+      </div>
+    </div>
+    <div class="exp-bar-wrap" style="margin-top:8px;height:8px;border-radius:4px">
+      <div class="exp-bar-fill" id="expBarFill" style="width:0%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">
+      <div class="exp-gain" id="expGain" style="text-align:left;margin:0">✨ 习惯、喝水、体重、咖啡</div>
+      <div style="font-size:10px;color:#8a7a6a"><span id="expCurrent">0</span>/<span id="expNext">100</span> EXP</div>
+    </div>
+  </div>
+
+  <!-- VIEW: TODAY -->
+  <div class="view active" id="viewToday">
+
+    <!-- STATS -->
+    <div class="card">
+      <div class="card-header">📊 今日进度</div>
+      <div class="stats-row" id="statsRow">
+        <div class="stat-item">
+          <div class="stat-value" id="statDone">0</div>
+          <div class="stat-label">已完成</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">总项数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statRate">0%</div>
+          <div class="stat-label">完成率</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statStreak">0</div>
+          <div class="stat-label">连续</div>
+        </div>
+      </div>
+
+      <!-- STREAK -->
+      <div class="streak-section">
+        <div class="streak-box">
+          <div class="streak-number" id="streakCurrent">0</div>
+          <div class="streak-label">当前连续</div>
+        </div>
+        <div class="streak-box">
+          <div class="streak-number" id="streakBest">0</div>
+          <div class="streak-label">最长连续</div>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="progress-section">
+        <div class="progress-label">
+          <span>今日完成</span>
+          <span id="progressText">0 / 0</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HABIT LIST -->
+    <div class="card">
+      <div class="card-header">☐ 今日小事 <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">每项 +15 EXP · 全勤 +30</span></div>
+      <div class="habit-list" id="habitList">
+        <!-- rendered by JS -->
+      </div>
+
+      <!-- ADD HABIT -->
+      <div class="add-habit-bar">
+        <input class="add-habit-input" id="habitInput" placeholder="添加新习惯…" maxlength="50">
+        <button class="add-btn" id="addHabitBtn">＋</button>
+      </div>
+    </div>
+
+    <!-- WATER TRACKER -->
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+        <span>💧 喝水 <span id="waterCount" style="font-weight:400">0</span> 杯</span>
+        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">每杯 +10 EXP</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="position:relative;width:64px;height:80px;flex-shrink:0" onclick="logWater(1)">
+          <div style="position:absolute;bottom:0;left:10px;right:10px;height:12px;background:#cebda8;border-radius:0 0 8px 8px"></div>
+          <div style="position:absolute;bottom:12px;left:10px;right:10px;background:linear-gradient(to top,#64b5f6,#bbdefb);border-radius:2px 2px 0 0;transition:height .4s ease;height:0%" id="waterFill"></div>
+          <div style="position:absolute;top:0;left:4px;right:4px;height:20px;background:transparent;border:2.5px solid #b9a58a;border-bottom:none;border-radius:50% 50% 0 0"></div>
+        </div>
+        <div style="flex:1">
+          <div style="display:flex;flex-wrap:wrap;gap:4px" id="waterDots">
+            <!-- rendered by JS: 8 dots -->
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="water-btn" id="waterPlusBtn" style="width:auto;padding:0 20px;border-radius:8px;font-size:13px;font-weight:500">+ 喝一杯</button>
+            <button class="water-btn" id="waterMinusBtn" style="width:32px;height:32px;font-size:14px">−</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEK -->
+    <div class="card">
+      <div class="week-section">
+        <div class="section-title">📅 本周</div>
+        <div class="week-row" id="weekRow">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATURE SNEAK PEEK -->
+    <div class="card" style="cursor:pointer" onclick="switchView('viewCreatures')">
+      <div class="card-header">🧚 我的精灵</div>
+      <div id="creatureSneakPeek" style="text-align:center;padding:8px 0">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VIEW: WEEKLY -->
+  <div class="view" id="viewWeekly">
+    <div class="card">
+      <div class="card-header">📊 本周报告</div>
+      <div id="weeklyReport"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: CREATURES -->
+  <div class="view" id="viewCreatures">
+
+    <!-- Gallery Stats -->
+    <div class="gallery-stats">
+      <div class="gallery-stat">
+        <div class="gallery-stat-value" id="galleryCollected">0</div>
+        <div class="gallery-stat-label">已收集</div>
+      </div>
+      <div class="gallery-stat">
+        <div class="gallery-stat-value" id="galleryTotal">12</div>
+        <div class="gallery-stat-label">总图鉴</div>
+      </div>
+      <div class="gallery-stat">
+        <div class="gallery-stat-value" id="galleryProgress">0%</div>
+        <div class="gallery-stat-label">完成度</div>
+      </div>
+    </div>
+
+    <!-- WEIGHT TRACKER (for creature unlocking) -->
+    <div class="card">
+      <div class="card-header">⚖️ 体重记录 · 解锁精灵</div>
+      <div class="weight-row">
+        <input class="weight-input" id="weightInput" type="number" step="0.1" placeholder="输入体重" inputmode="decimal">
+        <span class="weight-unit">kg</span>
+        <button class="add-btn" id="saveWeightBtn" style="width:auto;padding:0 16px;font-size:13px;font-weight:500">记录</button>
+      </div>
+      <div class="weight-change" id="weightChange" style="display:none"></div>
+      <div id="weightHistory"></div>
+      <div style="font-size:11px;color:#8a7a6a;margin-top:8px;line-height:1.6">
+        🥚 小暖暖：首次记录 &nbsp;·&nbsp; 🍃 轻飘飘：−1kg &nbsp;·&nbsp; ☁️ 云朵朵：−3kg<br>
+        🦄 小独角：−5kg &nbsp;·&nbsp; 🌙 眠眠：连续7天记录
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="普通">普通</button>
+      <button class="filter-btn" data-filter="稀有">稀有</button>
+      <button class="filter-btn" data-filter="史诗">史诗</button>
+      <button class="filter-btn" data-filter="传说">传说</button>
+    </div>
+
+    <!-- Creature Grid -->
+    <div class="creature-grid" id="creatureGrid">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- VIEW: SETTINGS -->
+  <div class="view" id="viewSettings">
+    <div class="card">
+      <div class="card-header">⚙️ 设置</div>
+      <div class="settings-section">
+        <div class="setting-row">
+          <span class="setting-label">🌙 深色模式</span>
+          <button class="toggle" id="darkModeToggle"></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">📊 每日完成提醒</span>
+          <button class="toggle" id="reminderToggle"></button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">🔄 数据</div>
+      <div class="settings-section">
+        <div class="setting-row">
+          <span class="setting-label">导出数据</span>
+          <button class="save-btn" id="exportDataBtn" style="padding:5px 12px;font-size:11px;flex:0">导出</button>
+        </div>
+        <div class="setting-row" style="border:none">
+          <span class="setting-label" style="color:#8a7a6a">重置所有数据</span>
+          <button class="btn-cancel" id="resetDataBtn" style="padding:5px 12px;font-size:11px;flex:0;background:#cebda8;color:#6a5a4a">重置</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: CREATURES -->
+
+</div>
+
+<!-- NAV -->
+<div class="nav-bar" id="navBar">
+  <div class="nav-slider" id="navSlider" style="transform:translateX(0%)"></div>
+  <button class="nav-btn active" data-view="viewToday">🌱<span>今日</span></button>
+  <button class="nav-btn" data-view="viewCreatures">🧚<span>精灵</span></button>
+  <button class="nav-btn" data-view="viewWeekly">📊<span>周报</span></button>
+  <button class="nav-btn" data-view="viewSettings">⚙️<span>设置</span></button>
+</div>
+
+<!-- UNLOCK MODAL -->
+<div class="unlock-modal-overlay" id="unlockModal">
+  <div class="unlock-modal-content">
+    <div class="unlock-svg-wrap" id="unlockSvgWrap"></div>
+    <div class="unlock-emoji" id="unlockEmoji">🌟</div>
+    <div class="unlock-title" id="unlockTitle">新的精灵！</div>
+    <div class="unlock-subtitle" id="unlockSubtitle">✨ 你解锁了</div>
+    <div class="unlock-rarity" id="unlockRarity">✨ 稀有</div>
+    <div class="unlock-desc" id="unlockDesc">描述</div>
+    <button class="unlock-btn" onclick="closeUnlockModal()">太棒了！</button>
+  </div>
+</div>
+
+<!-- LEVEL UP MODAL -->
+<div class="level-up-overlay" id="levelUpModal">
+  <div class="level-up-content">
+    <span class="level-up-emoji">🎉</span>
+    <div class="level-up-title" id="levelUpTitle">升级了！</div>
+    <div class="level-up-sub" id="levelUpSub">达到 Lv.2</div>
+    <button class="level-up-btn" onclick="closeLevelUp()">继续加油！</button>
+  </div>
+</div>
+
+<!-- SHOP MODAL -->
+<div class="level-up-overlay" id="shopModal">
+  <div class="level-up-content" style="max-width:360px">
+    <span style="font-size:40px;display:block;margin-bottom:4px">🏪</span>
+    <div class="level-up-title" style="font-size:18px">精灵商店</div>
+    <div class="level-up-sub" style="margin-bottom:16px">🪙 <span id="shopCoinDisplay">0</span> 金币</div>
+    <div id="shopItems" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <!-- rendered by JS -->
+    </div>
+    <button class="level-up-btn" onclick="toggleShop()" style="width:100%">关闭</button>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const DEFAULT_HABITS = [
+  { id:'h1', label:'起床 ≤ 目标时间', desc:'' },
+  { id:'h2', label:'出门走了 5 分钟', desc:'' },
+  { id:'h3', label:'做了一件为自己做的事', desc:'' },
+  { id:'h4', label:'喝了水以外的东西', desc:'' },
+];
+const QUOTES = [
+  '✨ 每一小步，都是你对自己温柔的回应。',
+  '🌱 今天种下的习惯，是明天长出的自由。',
+  '💜 你不用完美，你只需要出现。',
+  '🌟 你值得拥有一个让你感到安稳的节奏。',
+  '🌸 温柔地对待自己，世界也会温柔地回应你。',
+  '🌿 掌控感不是控制一切，而是知道自己在往前走。',
+  '🫧 你正在照顾自己，这本身就是一件了不起的事。',
+  '🌙 完成比完美更重要。',
+  '☀️ 新的一天，新的选择。',
+  '💫 每一个打勾，都是你在对自己说："我可以"。',
+  '🧚 收集精灵就像收集自己的成长。',
+  '🍃 今天走了多远？看看图鉴就知道。',
+];
+const WEEKDAYS = ['日','一','二','三','四','五','六'];
+
+// ===== CREATURE DEFINITIONS =====
+const CREATURES = [
+  {
+    id:'warmegg', name:'小暖暖', emoji:'🥚', rarity:'普通',
+    desc:'一颗暖暖的蛋，记录体重的第一步。',
+    check:s=>Object.keys(s.weightLogs||{}).length>=1,
+    design:{bodyColor:'#f5d0a9',accent:'#e8a87c',shape:'egg',eyes:'big',accessory:'none',blush:true,legs:false}
+  },
+  {
+    id:'sprout', name:'豆豆芽', emoji:'🌱', rarity:'普通',
+    desc:'从泥土里探出的小嫩芽，第一次全勤。',
+    check:s=>{
+      const key=todayKey(); const rec=s.records?.[key];
+      const habits=s.habits||[];
+      return rec && habits.length>0 && habits.every(h=>rec[h.id]===true);
+    },
+    design:{bodyColor:'#b5d6a3',accent:'#7cb342',shape:'tall',eyes:'happy',accessory:'leaf',blush:false,legs:false}
+  },
+  {
+    id:'clover3', name:'三叶', emoji:'🍀', rarity:'稀有',
+    desc:'连续三天全勤，开始长叶子了。',
+    check:s=>{const st=getStreakFromState(s); return st.current>=3},
+    design:{bodyColor:'#7cb342',accent:'#4caf50',shape:'round',eyes:'big',accessory:'flower',blush:true,legs:true}
+  },
+  {
+    id:'sevastar', name:'小七星', emoji:'💜', rarity:'史诗',
+    desc:'七天的星光汇聚而成的小守护者。',
+    check:s=>{const st=getStreakFromState(s); return st.current>=7},
+    design:{bodyColor:'#c9b8e8',accent:'#9575cd',shape:'star',eyes:'star',accessory:'star',blush:true,legs:true}
+  },
+  {
+    id:'lightfloat', name:'轻飘飘', emoji:'🍃', rarity:'稀有',
+    desc:'减掉 1kg，身体变轻了。',
+    check:s=>{const w=getWeightProgress(s); return w.lost>=1},
+    design:{bodyColor:'#b8d4e3',accent:'#64b5f6',shape:'round',eyes:'sleepy',accessory:'scarf',blush:false,legs:false}
+  },
+  {
+    id:'cloudpuff', name:'云朵朵', emoji:'☁️', rarity:'史诗',
+    desc:'减掉 3kg，轻得像一朵云。',
+    check:s=>{const w=getWeightProgress(s); return w.lost>=3},
+    design:{bodyColor:'#e0e0e0',accent:'#b0bec5',shape:'wide',eyes:'happy',accessory:'bow',blush:true,legs:false}
+  },
+  {
+    id:'littlehorn', name:'小独角', emoji:'🦄', rarity:'传说',
+    desc:'减掉 5kg 后出现的传说生物！',
+    check:s=>{const w=getWeightProgress(s); return w.lost>=5},
+    design:{bodyColor:'#f8e8ff',accent:'#ce93d8',shape:'round',eyes:'star',accessory:'crown',blush:true,legs:true}
+  },
+  {
+    id:'footprint', name:'小脚丫', emoji:'🏃', rarity:'普通',
+    desc:'累计 10 次打卡，迈出了第一步。',
+    check:s=>getTotalCompleted(s)>=10,
+    design:{bodyColor:'#ffcc80',accent:'#ff9800',shape:'wide',eyes:'happy',accessory:'none',blush:true,legs:true}
+  },
+  {
+    id:'flamephoenix', name:'小火凤', emoji:'🔥', rarity:'传说',
+    desc:'连续 30 天全勤，浴火重生。',
+    check:s=>{const st=getStreakFromState(s); return st.current>=30},
+    design:{bodyColor:'#ffab91',accent:'#ff5252',shape:'tall',eyes:'star',accessory:'crown',blush:false,legs:false}
+  },
+  {
+    id:'fourleaf', name:'四叶草', emoji:'🍀', rarity:'稀有',
+    desc:'收集 5 只精灵后出现的幸运使者。',
+    check:s=>(s.collectedCreatures||[]).length>=5,
+    design:{bodyColor:'#66bb6a',accent:'#2e7d32',shape:'star',eyes:'big',accessory:'flower',blush:true,legs:true}
+  },
+  {
+    id:'moonpie', name:'眠眠', emoji:'🌙', rarity:'稀有',
+    desc:'连续记录体重 7 天，月亮守护你。',
+    check:s=>getWeightStreak(s)>=7,
+    design:{bodyColor:'#b0bec5',accent:'#78909c',shape:'round',eyes:'sleepy',accessory:'bow',blush:true,legs:false}
+  },
+  {
+    id:'coffeebean', name:'咖咖', emoji:'☕', rarity:'普通',
+    desc:'累计 30 杯咖啡，咖啡因小精灵。',
+    check:s=>getTotalCoffees(s)>=30,
+    design:{bodyColor:'#a1887f',accent:'#6d4c41',shape:'egg',eyes:'sleepy',accessory:'bow',blush:false,legs:true}
+  },
+];
+
+// ===== STATE =====
+let state = {
+  habits: [],
+  records: {},       // "YYYY-MM-DD": { "h1": true, ... }
+  coffeeLogs: {},    // "YYYY-MM-DD": [{ id, type, time, ts }, ...]
+  weightLogs: {},    // "YYYY-MM-DD": { weight: 68.5, ts: 123456 }
+  waterLogs: {},     // "YYYY-MM-DD": number of cups
+  exp: 0,            // total experience points
+  level: 1,          // current level
+  coins: 0,          // gold coins
+  creatureLevels: {},// creature ID → level (starting at 1)
+  inventory: {},     // food item → count
+  collectedCreatures: [], // creature IDs
+  newUnlocks: [],         // creature IDs unlocked this session (for animation)
+  settings: { darkMode: false, reminder: true }
+};
+let firstWeightRecorded = false;
+
+// ===== INIT =====
+function init(){
+  loadState();
+  if(state.habits.length === 0){
+    state.habits = DEFAULT_HABITS.map(h => ({...h}));
+  }
+  if(!state.weightLogs) state.weightLogs = {};
+  if(!state.collectedCreatures) state.collectedCreatures = [];
+  if(!state.newUnlocks) state.newUnlocks = [];
+  renderToday();
+  renderWeek();
+  renderWeeklyView();
+  renderGallery();
+  setupTheme();
+  bindUI();
+  saveState();
+  checkMilestones();
+
+  if(state.settings.reminder && 'Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
+}
+
+// ===== STORAGE =====
+function loadState(){
+  try{
+    const raw = localStorage.getItem('inflife_state');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state.habits = parsed.habits || [];
+      state.records = parsed.records || {};
+      state.coffeeLogs = parsed.coffeeLogs || {};
+      state.weightLogs = parsed.weightLogs || {};
+      state.waterLogs = parsed.waterLogs || {};
+      state.exp = parsed.exp || 0;
+      state.level = parsed.level || 1;
+      state.coins = parsed.coins || 0;
+      state.creatureLevels = parsed.creatureLevels || {};
+      state.inventory = parsed.inventory || {};
+      state.collectedCreatures = parsed.collectedCreatures || [];
+      state.newUnlocks = [];
+      state.settings = parsed.settings || { darkMode: false, reminder: true };
+    }
+  }catch(e){console.warn('load failed',e)}
+}
+
+function saveState(){
+  try{
+    localStorage.setItem('inflife_state', JSON.stringify({
+      habits: state.habits,
+      records: state.records,
+      coffeeLogs: state.coffeeLogs,
+      weightLogs: state.weightLogs,
+      waterLogs: state.waterLogs,
+      exp: state.exp,
+      level: state.level,
+      coins: state.coins,
+      creatureLevels: state.creatureLevels,
+      inventory: state.inventory,
+      collectedCreatures: state.collectedCreatures,
+      settings: state.settings,
+    }));
+  }catch(e){console.warn('save failed',e)}
+}
+
+// ===== DATE HELPERS =====
+function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') }
+function getDateKey(offset){ const d=new Date(); d.setDate(d.getDate()+offset); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') }
+function formatDate(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  return (d.getMonth()+1)+'月'+d.getDate()+'日';
+}
+function getWeekDates(){
+  const now=new Date();
+  const day=now.getDay();
+  const start=new Date(now); start.setDate(now.getDate()-day);
+  const dates=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    dates.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));
+  }
+  return dates;
+}
+
+// ===== RECORDS =====
+function getTodayRecord(){
+  const key=todayKey();
+  if(!state.records[key]) state.records[key]={};
+  return state.records[key];
+}
+function toggleHabit(habitId){
+  const rec=getTodayRecord();
+  const wasDone=!!rec[habitId];
+  rec[habitId]=!rec[habitId];
+  saveState();
+  renderToday();
+  renderWeek();
+  renderWeeklyView();
+  renderSneakPeek();
+  checkAllDone();
+  checkMilestones();
+  // EXP: +15 when checking on, +fullDay bonus if all done
+  if(!wasDone && rec[habitId]){
+    addExp(EXP_RATES.habit, '✅');
+    addCoins(COIN_RATES.habit, '✅');
+    const {done,total}=getDayStats(todayKey());
+    if(done===total && total>0) addExp(EXP_RATES.fullDay, '🌟全勤');
+  }
+}
+function isHabitDone(habitId,dateKey){
+  return state.records[dateKey] && state.records[dateKey][habitId]===true;
+}
+function getDayStats(dateKey){
+  const total=state.habits.length;
+  let done=0;
+  for(const h of state.habits){
+    if(isHabitDone(h.id,dateKey)) done++;
+  }
+  return {done,total,rate:total>0?Math.round(done/total*100):0};
+}
+function getStreak(){
+  let current=0;
+  const d=new Date();
+  while(true){
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const {done,total}=getDayStats(key);
+    if(done===total && total>0){
+      current++;
+      d.setDate(d.getDate()-1);
+    }else break;
+  }
+  let best=0,streak=0;
+  const start=new Date('2025-01-01');
+  const end=new Date();
+  for(let dd=new Date(start); dd<=end; dd.setDate(dd.getDate()+1)){
+    const key=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
+    const {done,total}=getDayStats(key);
+    if(done===total && total>0){
+      streak++;
+      best=Math.max(best,streak);
+    }else streak=0;
+  }
+  return {current,best};
+}
+
+// Streak helper that works on state (no DOM)
+function getStreakFromState(s){
+  let current=0;
+  const d=new Date();
+  while(true){
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const rec=s.records?.[key];
+    const habits=s.habits||[];
+    const done=habits.length>0 && habits.every(h=>rec && rec[h.id]===true);
+    if(done){
+      current++;
+      d.setDate(d.getDate()-1);
+    }else break;
+  }
+  let best=0,streak=0;
+  const start=new Date('2025-01-01');
+  const end=new Date();
+  for(let dd=new Date(start); dd<=end; dd.setDate(dd.getDate()+1)){
+    const key=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
+    const rec=s.records?.[key];
+    const habits=s.habits||[];
+    const done=habits.length>0 && habits.every(h=>rec && rec[h.id]===true);
+    if(done){
+      streak++;
+      best=Math.max(best,streak);
+    }else streak=0;
+  }
+  return {current,best};
+}
+
+function getTotalCompleted(s){
+  let total=0;
+  for(const dateKey in (s.records||{})){
+    for(const hid in s.records[dateKey]){
+      if(s.records[dateKey][hid]) total++;
+    }
+  }
+  return total;
+}
+
+function getTotalCoffees(s){
+  let total=0;
+  for(const dateKey in (s.coffeeLogs||{})){
+    total += (s.coffeeLogs[dateKey]||[]).length;
+  }
+  return total;
+}
+
+// ===== WEIGHT TRACKER =====
+function getWeightProgress(s){
+  const logs=s.weightLogs||{};
+  const dates=Object.keys(logs).sort();
+  if(dates.length===0) return {first:null,latest:null,lost:0,percent:0};
+  const first=logs[dates[0]].weight;
+  const latest=logs[dates[dates.length-1]].weight;
+  const lost=first-latest;
+  const percent=first>0?Math.round(lost/first*1000)/10:0;
+  return {first,latest,lost,percent};
+}
+
+function getWeightStreak(s){
+  const logs=s.weightLogs||{};
+  let streak=0;
+  const d=new Date();
+  while(true){
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(logs[key]){
+      streak++;
+      d.setDate(d.getDate()-1);
+    }else break;
+  }
+  return streak;
+}
+
+function saveWeight(){
+  const input=document.getElementById('weightInput');
+  const val=parseFloat(input.value);
+  if(!val||val<20||val>300){ alert('请输入合理的体重（20-300 kg）'); return; }
+  const key=todayKey();
+  if(!state.weightLogs) state.weightLogs={};
+  const isNew=!state.weightLogs[key];
+  state.weightLogs[key]={weight:val,ts:Date.now()};
+  input.value='';
+  saveState();
+  renderWeight();
+  checkMilestones();
+  if(isNew) addExp(EXP_RATES.weight, '⚖️');
+  if(isNew) addCoins(COIN_RATES.weight, '⚖️');
+}
+
+function renderWeight(){
+  const changeEl=document.getElementById('weightChange');
+  const historyEl=document.getElementById('weightHistory');
+  const w=getWeightProgress(state);
+
+  // Show latest weight
+  if(w.latest!==null){
+    const diff=w.lost;
+    const sign=diff>0?'−':diff<0?'+':'';
+    const colorClass=diff>0?'weight-change-positive':diff<0?'weight-change-negative':'';
+    const arrow=diff>0?'📉 ':diff<0?'📈 ':'⚖️ ';
+    changeEl.style.display='block';
+    changeEl.innerHTML=`
+      ${arrow}当前 <span class="stat-highlight">${w.latest} kg</span>
+      &nbsp; 起始 ${w.first} kg
+      &nbsp; <span class="${colorClass}">${sign}${Math.abs(diff).toFixed(1)} kg</span>
+    `;
+  }else{
+    changeEl.style.display='none';
+  }
+
+  // History (last 7)
+  const dates=getWeekDates();
+  const historyHtml=dates.filter(d=>state.weightLogs?.[d]).slice(-7).reverse().map(d=>{
+    const entry=state.weightLogs[d];
+    return `<div class="weight-history-item">
+      <span class="weight-history-date">${formatDate(d)}</span>
+      <span class="weight-history-value">${entry.weight} kg</span>
+    </div>`;
+  }).join('');
+
+  if(historyHtml){
+    historyEl.innerHTML=`
+      <div style="font-size:11px;color:#8a7a6a;margin:8px 0 4px;letter-spacing:.5px;text-transform:uppercase">最近记录</div>
+      ${historyHtml}
+    `;
+  }else{
+    historyEl.innerHTML='<div class="weight-start-note">开始记录体重吧，这是收集精灵的第一步 🥚</div>';
+  }
+}
+
+// ===== CONFETTI =====
+function spawnConfetti(){
+  const colors=['#c4aa8a','#493e38','#d3b694','#b2946e','#8a7a6a','#b9a58a'];
+  for(let i=0;i<24;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw';
+    el.style.background=colors[i%colors.length];
+    el.style.animationDuration=(1+Math.random()*1)+'s';
+    el.style.animationDelay=Math.random()*0.5+'s';
+    el.style.width=(4+Math.random()*5)+'px';
+    el.style.height=(4+Math.random()*5)+'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),2000);
+  }
+}
+
+function checkAllDone(){
+  const {done,total}=getDayStats(todayKey());
+  if(done===total && total>0){
+    spawnConfetti();
+  }
+}
+
+// ===== MILESTONE ENGINE =====
+function checkMilestones(){
+  if(!state.collectedCreatures) state.collectedCreatures=[];
+  if(!state.newUnlocks) state.newUnlocks=[];
+  let newFound=false;
+
+  for(const c of CREATURES){
+    if(state.collectedCreatures.includes(c.id)) continue;
+    if(c.check(state)){
+      state.collectedCreatures.push(c.id);
+      state.newUnlocks.push(c.id);
+      newFound=true;
+    }
+  }
+
+  if(newFound){
+    saveState();
+    const lastUnlock=state.newUnlocks[state.newUnlocks.length-1];
+    const creature=CREATURES.find(c=>c.id===lastUnlock);
+    if(creature) showUnlockModal(creature);
+    renderGallery();
+    renderSneakPeek();
+    spawnConfetti();
+  }
+}
+
+// ===== UNLOCK MODAL =====
+function showUnlockModal(creature){
+  const modal=document.getElementById('unlockModal');
+  document.getElementById('unlockEmoji').textContent=creature.emoji;
+  document.getElementById('unlockTitle').textContent='✨ 获得新精灵！';
+  document.getElementById('unlockSubtitle').textContent=creature.name;
+  document.getElementById('unlockRarity').textContent='🧚 '+creature.rarity+'精灵';
+  document.getElementById('unlockRarity').style.color=getRarityColor(creature.rarity);
+  document.getElementById('unlockDesc').textContent=creature.desc;
+  document.getElementById('unlockSvgWrap').innerHTML=renderCreatureSVG(creature,80);
+  modal.classList.add('show');
+}
+
+function closeUnlockModal(){
+  document.getElementById('unlockModal').classList.remove('show');
+  state.newUnlocks=[];
+}
+
+function getRarityColor(rarity){
+  const map={'普通':'#8a7a6a','稀有':'#5c9e5c','史诗':'#7c5cbf','传说':'#d4a017'};
+  return map[rarity]||'#8a7a6a';
+}
+
+// ===== EXP / LEVEL SYSTEM =====
+const EXP_RATES = { water:10, habit:15, weight:20, coffee:5, fullDay:30 };
+
+function expForLevel(lvl){ return lvl*100; }  // EXP needed to go FROM lvl TO lvl+1
+function totalExpForLevel(lvl){ let t=0; for(let i=1;i<lvl;i++) t+=expForLevel(i); return t; }
+
+const TITLES = [
+  { min:1,  name:'萌芽者', icon:'🌱' },
+  { min:11, name:'探索者', icon:'🌿' },
+  { min:21, name:'守夜人', icon:'🌙' },
+  { min:31, name:'花匠', icon:'🌸' },
+  { min:41, name:'逐风者', icon:'🍃' },
+  { min:51, name:'星语者', icon:'💫' },
+  { min:61, name:'深潜者', icon:'🌊' },
+  { min:71, name:'浴火者', icon:'🔥' },
+  { min:81, name:'虹桥匠', icon:'🌈' },
+  { min:91, name:'传说', icon:'✨' },
+];
+
+function getTitle(lvl){
+  let t=TITLES[0];
+  for(const ti of TITLES){ if(lvl>=ti.min) t=ti; }
+  return t;
+}
+
+// ===== COIN SYSTEM =====
+const COIN_RATES = { water:3, habit:5, weight:10, coffee:2 };
+
+function addCoins(amount, label){
+  state.coins += amount;
+  saveState();
+  renderCoins();
+  // Flash coin display
+  const el=document.getElementById('coinDisplay');
+  if(el){
+    el.textContent=state.coins;
+    el.style.transition='transform .2s';
+    el.style.transform='scale(1.3)';
+    setTimeout(()=>el.style.transform='scale(1)',200);
+  }
+}
+
+function renderCoins(){
+  const el=document.getElementById('coinDisplay');
+  if(el) el.textContent=state.coins;
+  const sel=document.getElementById('shopCoinDisplay');
+  if(sel) sel.textContent=state.coins;
+}
+
+// ===== FOOD & SHOP =====
+const FOOD_ITEMS = [
+  { id:'berry', name:'莓果', emoji:'🫐', cost:5, desc:'基础食物 +1级' },
+  { id:'cake', name:'小蛋糕', emoji:'🧁', cost:15, desc:'美味甜点 +3级' },
+  { id:'milk', name:'牛奶', emoji:'🥛', cost:10, desc:'营养饮品 +2级' },
+  { id:'star', name:'星星糖', emoji:'⭐', cost:30, desc:'传说糖果 +5级' },
+];
+
+function toggleShop(){
+  const modal=document.getElementById('shopModal');
+  if(modal.classList.contains('show')){
+    modal.classList.remove('show');
+  }else{
+    renderShop();
+    modal.classList.add('show');
+  }
+}
+
+function renderShop(){
+  renderCoins();
+  const container=document.getElementById('shopItems');
+  container.innerHTML=FOOD_ITEMS.map(f=>{
+    const owned=state.inventory[f.id]||0;
+    return `<div style="background:#d8c9b6;border-radius:10px;padding:10px;text-align:center;${document.body.classList.contains('dark')?'background:#3a322f;':''}">
+      <div style="font-size:28px;margin-bottom:2px">${f.emoji}</div>
+      <div style="font-size:12px;font-weight:600;color:#3a322f">${f.name}</div>
+      <div style="font-size:9px;color:#8a7a6a;margin:2px 0">${f.desc}</div>
+      <div style="display:flex;gap:4px;justify-content:center;margin-top:4px">
+        <button onclick="buyFood('${f.id}')" style="background:#493e38;color:#e8ddcf;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-family:inherit;cursor:pointer">🪙${f.cost}</button>
+        <span style="font-size:10px;color:#8a7a6a;display:flex;align-items:center">×${owned}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buyFood(foodId){
+  const food=FOOD_ITEMS.find(f=>f.id===foodId);
+  if(!food) return;
+  if(state.coins<food.cost){ alert('金币不够！'); return; }
+  state.coins -= food.cost;
+  if(!state.inventory[foodId]) state.inventory[foodId]=0;
+  state.inventory[foodId]++;
+  saveState();
+  renderCoins();
+  renderShop();
+}
+
+// ===== FEEDING =====
+function feedCreature(creatureId){
+  // Check if we have any food
+  const items=Object.keys(state.inventory).filter(k=>state.inventory[k]>0);
+  if(items.length===0){ alert('没有食物，去商店买点吧！'); return; }
+  // Use the first available food
+  const foodId=items[0];
+  state.inventory[foodId]--;
+  if(!state.creatureLevels[creatureId]) state.creatureLevels[creatureId]=1;
+  const food=FOOD_ITEMS.find(f=>f.id===foodId);
+  const lvGain=food?{berry:1,cake:3,milk:2,star:5}[foodId]||1:1;
+  state.creatureLevels[creatureId] += lvGain;
+  saveState();
+  renderGallery();
+  // Show feedback
+  alert(`🍽️ ${CREATURES.find(c=>c.id===creatureId)?.name} 吃了${food?.name||'食物'}！等级 +${lvGain}`);
+}
+
+function playWithCreature(creatureId){
+  const c=CREATURES.find(c=>c.id===creatureId);
+  if(!c) return;
+  const lvl=state.creatureLevels[creatureId]||1;
+  // Playing gives a little exp to the creature and some coins back
+  const coinBonus=Math.min(5, Math.floor(lvl/2)+1);
+  state.coins += coinBonus;
+  saveState();
+  renderCoins();
+  renderGallery();
+  const moods=['跳跃！','转圈！','打滚！','开心！'];
+  alert(`🎾 ${c.name} ${moods[Math.floor(Math.random()*moods.length)]} 获得 ${coinBonus}🪙`);
+}
+
+// ===== PIXEL PET RENDERER =====
+// 16×16 pixel sprites with cute faces and expressions
+const PX = {}; // palette shorthand
+const PAL = {
+  warmegg:  {b:'#f5d0a9',a:'#e8a87c',e:'#3a322f',c:'#ffb74d'},
+  sprout:   {b:'#b5d6a3',a:'#7cb342',e:'#3a322f',c:'#81c784'},
+  clover3:  {b:'#81c784',a:'#4caf50',e:'#3a322f',c:'#66bb6a'},
+  sevastar: {b:'#c9b8e8',a:'#9575cd',e:'#3a322f',c:'#b39ddb'},
+  lightfloat:{b:'#b8d4e3',a:'#64b5f6',e:'#3a322f',c:'#90caf9'},
+  cloudpuff:{b:'#e0e0e0',a:'#b0bec5',e:'#3a322f',c:'#cfd8dc'},
+  littlehorn:{b:'#f8e8ff',a:'#ce93d8',e:'#3a322f',c:'#f48fb1'},
+  footprint:{b:'#ffcc80',a:'#ff9800',e:'#3a322f',c:'#ffb74d'},
+  flamephoenix:{b:'#ffab91',a:'#ff5252',e:'#3a322f',c:'#ff8a65'},
+  fourleaf:{b:'#66bb6a',a:'#2e7d32',e:'#3a322f',c:'#4caf50'},
+  moonpie:{b:'#b0bec5',a:'#78909c',e:'#3a322f',c:'#90a4ae'},
+  coffeebean:{b:'#a1887f',a:'#6d4c41',e:'#3a322f',c:'#8d6e63'},
+};
+
+// Each sprite is 16×16 grid: 0=transparent, 1=body, 2=accent, 3=eye, 4=white, 5=cheek, 6=mouth
+const SPRITES = {
+  warmegg: [
+    '0000111111000000','0001111111110000','0011222222221000',
+    '0011232323221000','0111232323221100','0111111111111100',
+    '0111155551111100','0011155551111000','0001111111110000',
+    '0000166666100000','0000001111000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  sprout: [
+    '0000001100000000','0000001100000000','0000012200000000',
+    '0000012200000000','0000011110000000','0000111111000000',
+    '0000113331000000','0000113331000000','0000111111000000',
+    '0000551111550000','0000551111550000','0000011111000000',
+    '0000006660000000','0000000000000000','0000000000000000','0000000000000000'],
+  clover3: [
+    '0001001001000000','0001001001000000','0000111110000000',
+    '0000111110000000','0000111110000000','0005551115550000',
+    '0000113331100000','0000113331100000','0000111111000000',
+    '0000066666000000','0000001110000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  sevastar: [
+    '0000001000000000','0000012200000000','0000123320000000',
+    '0000123320000000','0000011110000000','0000111111000000',
+    '0000113331000000','0000113331000000','0005511111550000',
+    '0000111111000000','0000066666000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  lightfloat: [
+    '0000110011000000','0001111111110000','0011111111111000',
+    '0011111111111000','0111133331111000','0111133331111000',
+    '0111111111111000','0011555555111000','0002555555520000',
+    '0000222222200000','0000000000000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  cloudpuff: [
+    '0001001001000000','0011111111110000','0111111111111000',
+    '1111111111111100','1111133331111100','1111133331111100',
+    '1111111111111100','0111555555111000','0011555555510000',
+    '0000066666600000','0000000000000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  littlehorn: [
+    '0000002000000000','0000022200000000','0000123320000000',
+    '0000111110000000','0001111111000000','0011111111100000',
+    '0011133331100000','0011133331100000','0011111111100000',
+    '0005551115500000','0000111111000000','0000066666000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  footprint: [
+    '0000011110000000','0000011110000000','0001111110000000',
+    '0011111111110000','0011133331110000','0011133331110000',
+    '0011111111110000','0011555551110000','0001111111000000',
+    '0000066666000000','0000000000000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  flamephoenix: [
+    '0000200200000000','0002120212000000','0021111112000000',
+    '0011111111110000','0011133331100000','0011133331100000',
+    '0011111111110000','0005511115500000','0000066666000000',
+    '0000002220000000','0000000200000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  fourleaf: [
+    '0010010010010000','0010010010010000','0001111111100000',
+    '0001111111100000','0001111111000000','0005551115500000',
+    '0000113331100000','0000113331100000','0000111111000000',
+    '0001001110010000','0011000000110000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  moonpie: [
+    '0000000100000000','0000001110000000','0000011111000000',
+    '0000111111100000','0011113331110000','0011113331110000',
+    '0001111111100000','0000555555500000','0000255555200000',
+    '0000022222000000','0000000000000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+  coffeebean: [
+    '0000002200000000','0000011110000000','0000111111100000',
+    '0011111111111000','0011133331110000','0011133331110000',
+    '0011111111111000','0001111111100000','0005511115500000',
+    '0000111111000000','0000066666000000','0000000000000000',
+    '0000000000000000','0000000000000000','0000000000000000','0000000000000000'],
+};
+
+function renderPetFace(id, size){
+  size=size||80;
+  const p=PAL[id]||PAL.warmegg;
+  const g=SPRITES[id];
+  if(!g) return '?';
+  const ps=size/16;
+  const cols={0:'transparent',1:p.b,2:p.a,3:p.e,4:'#fff',5:p.c,6:'#e57373'};
+  let cells=[];
+  for(let y=0;y<16;y++){
+    for(let x=0;x<16;x++){
+      const c=g[y][x];
+      if(c==='0') continue;
+      cells.push(`<rect x="${x*ps}" y="${y*ps}" width="${ps}" height="${ps}" fill="${cols[c]||p.b}" style="image-rendering:pixelated"/>`);
+    }
+  }
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${cells.join('')}</svg>`;
+}
+
+function addExp(amount, label){
+  state.exp += amount;
+  let newLevel=state.level;
+  while(state.exp >= totalExpForLevel(newLevel+1)) newLevel++;
+  if(newLevel > state.level){
+    state.level = newLevel;
+    saveState();
+    renderExp();
+    showLevelUp(newLevel);
+  }else{
+    saveState();
+    renderExp();
+  }
+  // Show "+N EXP" animation
+  const el=document.getElementById('expGain');
+  el.textContent='+'+amount+' EXP '+label;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+function showLevelUp(lvl){
+  const title=getTitle(lvl);
+  document.getElementById('levelUpTitle').textContent='🎉 升级了！';
+  document.getElementById('levelUpSub').innerHTML='达到 <b>Lv.'+lvl+'</b> '+title.icon+title.name;
+  document.getElementById('levelUpModal').classList.add('show');
+}
+
+function closeLevelUp(){
+  document.getElementById('levelUpModal').classList.remove('show');
+}
+
+function renderExp(){
+  const lvl=state.level;
+  const totalForCurrent=totalExpForLevel(lvl);
+  const totalForNext=totalExpForLevel(lvl+1);
+  const currentExp=state.exp - totalForCurrent;
+  const needExp=expForLevel(lvl);
+  const pct=Math.min(100, Math.round(currentExp/needExp*100));
+  const title=getTitle(lvl);
+  document.getElementById('expLevelBadge').innerHTML='Lv.'+lvl+' <span style="font-weight:400;font-size:10px">'+title.icon+title.name+'</span>';
+  document.getElementById('expCurrent').textContent=currentExp;
+  document.getElementById('expNext').textContent=needExp;
+  document.getElementById('expBarFill').style.width=pct+'%';
+}
+
+// ===== WATER TRACKER =====
+function getWaterCount(dateKey){
+  return state.waterLogs[dateKey]||0;
+}
+
+function logWater(n){
+  const key=todayKey();
+  const cur=state.waterLogs[key]||0;
+  const next=Math.max(0, cur+n);
+  if(next>20) return; // max 20 cups
+  if(next===cur) return;
+  state.waterLogs[key]=next;
+  saveState();
+  renderWater();
+  if(n>0) addExp(n*EXP_RATES.water, '💧');
+  if(n>0) addCoins(n*COIN_RATES.water, '💧');
+}
+
+function renderWater(){
+  const count=getWaterCount(todayKey());
+  const maxCups=8;
+  const wc=document.getElementById('waterCount');
+  if(wc) wc.textContent=count;
+  // Water fill in glass (height as percentage)
+  const fillPct=Math.min(100, count/maxCups*100);
+  const fillEl=document.getElementById('waterFill');
+  if(fillEl) fillEl.style.height=fillPct+'%';
+  // Dots
+  const dotsEl=document.getElementById('waterDots');
+  if(dotsEl){
+    dotsEl.innerHTML='';
+    for(let i=0;i<maxCups;i++){
+      const dot=document.createElement('span');
+      dot.style.cssText='width:20px;height:20px;border-radius:50%;border:2px solid #b9a58a;display:inline-flex;align-items:center;justify-content:center;font-size:10px;transition:.3s;background:'+(i<count?'#64b5f6':'transparent');
+      if(i<count) dot.textContent='💧';
+      dotsEl.appendChild(dot);
+    }
+  }
+}
+
+function renderCreatureSVG(creature,size){
+  const s=size||80;
+  const lvl=state.creatureLevels[creature.id]||1;
+  const lvlStr=lvl>1?`<div style="font-size:9px;color:#d4a017;margin-top:-4px">Lv.${lvl}</div>`:'';
+  return `<div style="text-align:center">
+    ${renderPetFace(creature.id, s)}
+    ${lvlStr}
+  </div>`;
+}
+
+// ===== RENDER: TODAY =====
+function renderToday(){
+  const rec=getTodayRecord();
+  const list=document.getElementById('habitList');
+  const {done,total,rate}=getDayStats(todayKey());
+  const streak=getStreak();
+
+  // Stats
+  document.getElementById('statDone').textContent=done;
+  document.getElementById('statTotal').textContent=total;
+  document.getElementById('statRate').textContent=rate+'%';
+  document.getElementById('statStreak').textContent=streak.current;
+  document.getElementById('streakCurrent').textContent=streak.current;
+  document.getElementById('streakBest').textContent=streak.best;
+  document.getElementById('progressText').textContent=done+' / '+total;
+  document.getElementById('progressFill').style.width=rate+'%';
+
+  // Date
+  const now=new Date();
+  const weekDay=WEEKDAYS[now.getDay()];
+  document.getElementById('dateDisplay').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 周'+weekDay;
+
+  // Greeting
+  const h=now.getHours();
+  let greet='下午好';
+  if(h<6) greet='夜深了';
+  else if(h<9) greet='早上好';
+  else if(h<12) greet='上午好';
+  else if(h<14) greet='中午好';
+  else if(h<18) greet='下午好';
+  else greet='晚上好';
+  document.getElementById('greetingName').innerHTML='<span class="serif">∞</span> '+greet;
+
+  // EXP + water
+  renderExp();
+  renderWater();
+  renderCoins();
+
+  // Habit list
+  if(state.habits.length===0){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🌱</div>还没有习惯，添加一个吧</div>';
+  } else {
+    list.innerHTML=state.habits.map(h=>{
+      const done=!!rec[h.id];
+      return `<div class="habit-item${done?' done':''}" data-id="${h.id}" onclick="toggleHabit('${h.id}')">
+      <div class="check-circle${done?' checked':''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e8ddcf" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <span class="habit-text${done?' done':''}">${h.label}</span>
+      <span style="font-size:10px;font-weight:500;color:#8a7a6a;flex-shrink:0;${done?'opacity:.5':''}">${done?'✓ +'+EXP_RATES.habit:'+'+EXP_RATES.habit+' EXP'}</span>
+      <span style="font-size:9px;color:#d4a017;flex-shrink:0;${done?'opacity:.5':''}">🪙${done?'+'+COIN_RATES.habit:'+'+COIN_RATES.habit}</span>
+      <button class="habit-delete" onclick="event.stopPropagation();deleteHabit('${h.id}')">✕</button>
+    </div>`;
+    }).join('');
+  }
+
+  // Weight
+  renderWeight();
+  renderSneakPeek();
+}
+
+// ===== RENDER: CREATURE SNEAK PEEK =====
+function renderSneakPeek(){
+  const el=document.getElementById('creatureSneakPeek');
+  const collected=state.collectedCreatures||[];
+  if(collected.length===0){
+    el.innerHTML='<div style="font-size:32px;opacity:.5">🧚</div><div style="font-size:11px;color:#8a7a6a;margin-top:4px">完成习惯和记录体重来收集精灵吧！</div>';
+    return;
+  }
+  // Show last 3 collected
+  const lastFew=collected.slice(-3).map(id=>CREATURES.find(c=>c.id===id)).filter(Boolean);
+  el.innerHTML=`
+    <div style="display:flex;gap:4px;justify-content:center;align-items:flex-end">
+      ${lastFew.map(c=>`<div style="text-align:center;width:56px">
+        ${renderCreatureSVG(c,48)}
+        <div style="font-size:9px;color:#8a7a6a;margin-top:2px">${c.name}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:#8a7a6a;margin-top:6px">
+      已收集 ${collected.length} / ${CREATURES.length}
+      <span style="font-size:10px;margin-left:4px;opacity:.6">点击查看全部 →</span>
+    </div>
+  `;
+}
+
+// ===== RENDER: WEEK =====
+function renderWeek(){
+  const dates=getWeekDates();
+  const today=todayKey();
+  const row=document.getElementById('weekRow');
+  const maxHabits=Math.max(1,state.habits.length);
+  const cx=50, cy=50, r=36, circ=2*Math.PI*r;
+
+  row.innerHTML=dates.map((d,i)=>{
+    const {done,total,rate}=getDayStats(d);
+    const isToday=d===today;
+    const offset=circ-(rate/100*circ);
+    const fillClass=done===total&&total>0?'done':'';
+
+    return `<div class="week-day${isToday?' today':''}">
+      <div class="week-label">${WEEKDAYS[i]}</div>
+      <div class="week-ring-wrap">
+        <svg viewBox="0 0 100 100">
+          <circle class="week-ring-bg" cx="${cx}" cy="${cy}" r="${r}"/>
+          <circle class="week-ring-fill ${fillClass}" cx="${cx}" cy="${cy}" r="${r}"
+            stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+        </svg>
+      </div>
+      <div class="week-score">${done}/${total}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== RENDER: WEEKLY VIEW =====
+function renderWeeklyView(){
+  const container=document.getElementById('weeklyReport');
+  const dates=getWeekDates();
+  const totalDone=dates.reduce((sum,d)=>{const s=getDayStats(d);return sum+s.done;},0);
+  const totalItems=dates.reduce((sum,d)=>{const s=getDayStats(d);return sum+s.total;},0);
+  const weekRate=totalItems>0?Math.round(totalDone/totalItems*100):0;
+  const streak=getStreak();
+
+  let html=`
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:32px;font-weight:400;color:#493e38">${weekRate}%</div>
+      <div style="font-size:11px;color:#8a7a6a;letter-spacing:1px;text-transform:uppercase">本周完成率</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div class="streak-box" style="flex:1">
+        <div class="streak-number">${totalDone}</div>
+        <div class="streak-label">总完成项</div>
+      </div>
+      <div class="streak-box" style="flex:1">
+        <div class="streak-number">${streak.current}</div>
+        <div class="streak-label">连续🔥</div>
+      </div>
+    </div>
+  `;
+
+  for(const d of dates){
+    const {done,total,rate}=getDayStats(d);
+    const label=formatDate(d);
+    const isToday=d===todayKey();
+    html+=`
+      <div class="weekly-card">
+        <div class="weekly-date">${label}${isToday?' · 今日':''} · ${rate}%</div>
+        <div class="progress-bar" style="height:3px;margin-bottom:6px">
+          <div class="progress-fill" style="width:${rate}%"></div>
+        </div>
+        <div class="weekly-items">
+          ${state.habits.map(h=>{
+            const done=isHabitDone(h.id,d);
+            return `<span class="weekly-badge${done?' done':''}">${h.label}</span>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML=html;
+}
+
+// ===== RENDER: GALLERY =====
+let galleryFilter='all';
+
+function renderGallery(){
+  const collected=state.collectedCreatures||[];
+  const grid=document.getElementById('creatureGrid');
+  const total=CREATURES.length;
+
+  document.getElementById('galleryCollected').textContent=collected.length;
+  document.getElementById('galleryTotal').textContent=total;
+  document.getElementById('galleryProgress').textContent=total>0?Math.round(collected.length/total*100)+'%':'0%';
+
+  const filtered=CREATURES.filter(c=>galleryFilter==='all'||c.rarity===galleryFilter);
+
+  grid.innerHTML=filtered.map(c=>{
+    const isCollected=collected.includes(c.id);
+    const isNew=state.newUnlocks?.includes(c.id);
+
+    if(isCollected){
+      const lvl=state.creatureLevels[c.id]||1;
+      const hunger=Math.min(5, Math.floor(lvl/3)+1);
+      const mood=lvl>=10?'😆':lvl>=5?'😊':lvl>=2?'🙂':'👶';
+      return `<div class="tama-card${isNew?' newly-unlocked':''}">
+        <div style="margin:-4px -2px 2px;text-align:center">${renderPetFace(c.id,72)}</div>
+        <div class="tama-name">${c.emoji} ${c.name}</div>
+        <div class="tama-level">Lv.${lvl} ${mood}</div>
+        <div class="tama-stats">
+          <span class="tama-stat">🍽️ ${'●'.repeat(hunger)}${'○'.repeat(5-hunger)}</span>
+        </div>
+        <div class="tama-btns">
+          <button class="tama-btn tama-btn-feed" onclick="feedCreature('${c.id}')">🍽️喂食</button>
+          <button class="tama-btn tama-btn-play" onclick="playWithCreature('${c.id}')">🎾玩耍</button>
+        </div>
+      </div>`;
+    } else {
+      // Show hint for unlock progress
+      let hint='';
+      if(c.id==='warmegg') hint='记录一次体重';
+      else if(c.id==='sprout') hint='今日全勤';
+      else if(c.id==='clover3') hint='连续3天全勤';
+      else if(c.id==='sevastar') hint='连续7天全勤';
+      else if(c.id==='lightfloat') hint='减重1kg';
+      else if(c.id==='cloudpuff') hint='减重3kg';
+      else if(c.id==='littlehorn') hint='减重5kg';
+      else if(c.id==='footprint') hint='累计10次打卡';
+      else if(c.id==='flamephoenix') hint='连续30天全勤';
+      else if(c.id==='fourleaf') hint='收集5只精灵';
+      else if(c.id==='moonpie') hint='连续7天记体重';
+      else if(c.id==='coffeebean') hint='累计30杯咖啡';
+
+      return `<div class="tama-card tama-locked">
+        <div style="margin:-4px -2px 2px;text-align:center;opacity:.35;filter:grayscale(1)">${renderPetFace(c.id,72)}</div>
+        <div class="tama-name">${c.name}</div>
+        <div class="tama-level" style="color:#8a7a6a">🔒 ${hint}</div>
+        <div class="tama-stats">
+          <span class="tama-stat">❓ 未解锁</span>
+          <span class="tama-stat">${c.rarity}</span>
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+// ===== QUOTE =====
+function updateQuote(){
+  const el=document.getElementById('quoteText');
+  if(!el) return;
+  const today=new Date().getDate();
+  const idx=today%QUOTES.length;
+  el.innerHTML='<span class="serif">✨</span> '+QUOTES[idx];
+}
+
+// ===== THEME =====
+function setupTheme(){
+  const btn=document.getElementById('themeToggle');
+  if(state.settings.darkMode){
+    document.body.classList.add('dark');
+    btn.textContent='☀️';
+  }else{
+    btn.textContent='🌙';
+  }
+  const dmToggle=document.getElementById('darkModeToggle');
+  if(state.settings.darkMode) dmToggle.classList.add('on');
+  else dmToggle.classList.remove('on');
+}
+
+function toggleDarkMode(){
+  state.settings.darkMode=!state.settings.darkMode;
+  saveState();
+  setupTheme();
+  const btn=document.getElementById('themeToggle');
+  if(state.settings.darkMode){
+    document.body.classList.add('dark');
+    btn.textContent='☀️';
+  }else{
+    document.body.classList.remove('dark');
+    btn.textContent='🌙';
+  }
+}
+
+// ===== HABIT CRUD =====
+function addHabit(){
+  const input=document.getElementById('habitInput');
+  const label=input.value.trim();
+  if(!label) return;
+  if(state.habits.length>=12){ alert('最多 12 个习惯哦'); return; }
+  state.habits.push({
+    id:'h'+Date.now(),
+    label: label,
+    desc: ''
+  });
+  input.value='';
+  saveState();
+  renderToday();
+  renderWeek();
+  renderWeeklyView();
+}
+
+function deleteHabit(id){
+  if(!confirm('确定删除这个习惯吗？')) return;
+  state.habits=state.habits.filter(h=>h.id!==id);
+  for(const dateKey in state.records){
+    delete state.records[dateKey][id];
+  }
+  saveState();
+  renderToday();
+  renderWeek();
+  renderWeeklyView();
+}
+
+// ===== COFFEE TRACKER =====
+function getCoffeeLogs(){
+  const key=todayKey();
+  if(!state.coffeeLogs[key]) state.coffeeLogs[key]=[];
+  return state.coffeeLogs[key];
+}
+function getCoffeeCount(dateKey){
+  return (state.coffeeLogs[dateKey]||[]).length;
+}
+function logCoffee(type){
+  const logs=getCoffeeLogs();
+  const now=new Date();
+  const timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  logs.push({
+    id:'c'+Date.now(),
+    type: type || '☕',
+    time: timeStr,
+    ts: now.getTime()
+  });
+  saveState();
+  renderCoffee();
+  checkMilestones();
+  addExp(EXP_RATES.coffee, '☕');
+  addCoins(COIN_RATES.coffee, '☕');
+}
+function deleteCoffee(id){
+  const logs=getCoffeeLogs();
+  state.coffeeLogs[todayKey()]=logs.filter(c=>c.id!==id);
+  saveState();
+  renderCoffee();
+}
+function renderCoffee(){
+  const el=document.getElementById('coffeeCount');
+  if(!el) return; // coffee view removed
+  const logs=getCoffeeLogs();
+  const count=logs.length;
+  document.getElementById('coffeeCount').textContent=count;
+
+  const list=document.getElementById('coffeeList');
+  if(count===0){
+    list.innerHTML='<div class="empty-state" style="padding:20px 16px"><div class="empty-icon" style="font-size:32px">☕</div><div style="font-size:12px">还没有记录，点上面按钮吧</div></div>';
+  }else{
+    list.innerHTML=logs.map(c=>
+      `<div class="coffee-item">
+        <span class="coffee-item-icon">${c.type}</span>
+        <span class="coffee-item-label">${typeName(c.type)}</span>
+        <span class="coffee-item-time">${c.time}</span>
+        <button class="coffee-item-delete" onclick="deleteCoffee('${c.id}')">✕</button>
+      </div>`
+    ).join('');
+  }
+
+  renderCoffeeWeekChart();
+}
+function typeName(type){
+  const names={'☕':'美式','🥛':'拿铁','🧊':'冷萃','✨':'手冲','🫘':'其他'};
+  return names[type]||'咖啡';
+}
+function renderCoffeeWeekChart(){
+  const dates=getWeekDates();
+  const maxCount=Math.max(1,...dates.map(d=>getCoffeeCount(d)));
+  const chart=document.getElementById('coffeeWeekChart');
+  chart.innerHTML=dates.map((d,i)=>{
+    const count=getCoffeeCount(d);
+    const pct=Math.round(count/maxCount*60+4);
+    const isToday=d===todayKey();
+    return `<div class="coffee-day-bar">
+      <div class="coffee-bar" style="height:64px">
+        <div class="coffee-bar-fill" style="height:${pct}%"></div>
+      </div>
+      <div class="coffee-bar-count">${count}</div>
+      <div class="coffee-bar-label">${WEEKDAYS[i]}${isToday?'·今':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== NAV =====
+function switchView(viewId){
+  const views=['viewToday','viewCreatures','viewWeekly','viewSettings'];
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>{
+    b.classList.toggle('active', b.dataset.view===viewId);
+  });
+  const idx=views.indexOf(viewId);
+  const slider=document.getElementById('navSlider');
+  slider.style.transform=`translateX(${idx*25}%)`;
+  if(viewId==='viewWeekly') renderWeeklyView();
+  if(viewId==='viewCreatures') renderGallery();
+}
+
+// ===== BIND UI =====
+function bindUI(){
+  // Theme
+  document.getElementById('themeToggle').addEventListener('click',toggleDarkMode);
+  document.getElementById('darkModeToggle').addEventListener('click',toggleDarkMode);
+
+  // Reminder toggle
+  const remToggle=document.getElementById('reminderToggle');
+  if(state.settings.reminder) remToggle.classList.add('on');
+  remToggle.addEventListener('click',()=>{
+    state.settings.reminder=!state.settings.reminder;
+    saveState();
+    remToggle.classList.toggle('on');
+    if(state.settings.reminder && 'Notification' in window && Notification.permission==='default'){
+      Notification.requestPermission();
+    }
+  });
+
+  // Add habit
+  document.getElementById('addHabitBtn').addEventListener('click',addHabit);
+  document.getElementById('habitInput').addEventListener('keydown',e=>{if(e.key==='Enter')addHabit()});
+
+  // Weight
+  document.getElementById('saveWeightBtn').addEventListener('click',saveWeight);
+  document.getElementById('weightInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveWeight()});
+
+  // Water
+  document.getElementById('waterPlusBtn').addEventListener('click',()=>logWater(1));
+  document.getElementById('waterMinusBtn').addEventListener('click',()=>logWater(-1));
+
+  // Nav
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>switchView(btn.dataset.view));
+  });
+
+  // Gallery filter
+  document.querySelectorAll('#filterBar .filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#filterBar .filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      galleryFilter=btn.dataset.filter;
+      renderGallery();
+    });
+  });
+
+  // Export
+  document.getElementById('exportDataBtn').addEventListener('click',()=>{
+    const data=JSON.stringify(state,null,2);
+    const blob=new Blob([data],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='inflife_backup_'+todayKey()+'.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Reset
+  document.getElementById('resetDataBtn').addEventListener('click',()=>{
+    if(!confirm('确定要重置所有数据吗？此操作不可恢复！')) return;
+    if(!confirm('再次确认：所有打卡记录、体重和精灵都将被清除。')) return;
+    state.habits=[];
+    state.records={};
+    state.coffeeLogs={};
+    state.weightLogs={};
+    state.collectedCreatures=[];
+    state.newUnlocks=[];
+    saveState();
+    init();
+    renderWeeklyView();
+  });
+}
+
+// ===== START =====
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
