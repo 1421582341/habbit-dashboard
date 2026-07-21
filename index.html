@@ -2548,10 +2548,6 @@ function bindUI(){
   document.getElementById('saveWeightBtn').addEventListener('click',saveWeight);
   document.getElementById('weightInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveWeight()});
 
-  // Water
-  document.getElementById('waterPlusBtn').addEventListener('click',()=>logWater(1));
-  document.getElementById('waterMinusBtn').addEventListener('click',()=>logWater(-1));
-
   // Nav
   document.querySelectorAll('.nav-btn').forEach(btn=>{
     btn.addEventListener('click',()=>switchView(btn.dataset.view));
