@@ -1967,18 +1967,14 @@ function renderPetFace(id, size){
   const px=SPRITE_PIXELS[id];
   if(!px) return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="35" fill="#ccc"/></svg>`;
   const s=Math.ceil(size/16);
-  const c=document.createElement('canvas');
-  c.width=16*s;
-  c.height=16*s;
-  const ctx=c.getContext('2d');
+  const w=16*s, h=16*s;
+  let rects='';
   for(let y=0;y<16;y++){for(let x=0;x<16;x++){
     const col=px[y][x];
-    if(col){ctx.fillStyle=col;ctx.fillRect(x*s,y*s,s,s);}
+    if(col) rects+=`<rect x="${x*s}" y="${y*s}" width="${s}" height="${s}" fill="${col}"/>`;
   }}
-  return `<img src="${c.toDataURL()}" width="${size}" height="${size}" alt="">`;
-}
-
-function addExp(amount, label){
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
+}function addExp(amount, label){
   state.exp += amount;
   let newLevel=state.level;
   while(state.exp >= totalExpForLevel(newLevel+1)) newLevel++;
