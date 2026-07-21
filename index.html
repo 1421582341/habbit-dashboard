@@ -1190,11 +1190,16 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
                 <stop offset="0%" stop-color="#b3d9ff"/>
                 <stop offset="100%" stop-color="#7ab3e6"/>
               </linearGradient>
+              <clipPath id="waterClip">
+                <rect x="0" y="0" width="48" height="68"/>
+              </clipPath>
             </defs>
-            <!-- Glass body -->
+            <!-- Glass body outline -->
             <path d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="rgba(255,255,255,0.1)" stroke="#d4c5b2" stroke-width="1.8"/>
-            <!-- Water fill -->
-            <path id="waterPath" d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="url(#waterGrad)" opacity="0"/>
+            <!-- Water fill (clipped) -->
+            <g clip-path="url(#waterClip)">
+              <path id="waterPath" d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="url(#waterGrad)" opacity="0"/>
+            </g>
             <!-- Handle -->
             <path d="M40 26 Q48 26 48 32 Q48 38 40 38" stroke="#d4c5b2" stroke-width="1.8" fill="none"/>
             <!-- Rim -->
@@ -2087,14 +2092,15 @@ function renderWater(){
   const maxCups=8;
   const wc=document.getElementById('waterCount');
   if(wc) wc.textContent=count;
-  // SVG water fill: use clipPath to reveal water from bottom up
+  // SVG water fill: move clipPath rect up from bottom
   const fillPct=Math.min(100, count/maxCups*100);
-  const clipH=52; // height of glass body
-  const clipY=64-fillPct/100*clipH;
+  const clipH=52; // total height for water (68-16=52, from rim bottom to base)
+  const clipY=Math.round(68 - fillPct/100*clipH);
   const waterEl=document.getElementById('waterPath');
   if(waterEl){
-    waterEl.setAttribute('clip-path',`inset(${clipY}px 0 0 0)`);
     waterEl.style.opacity=count>0?'.7':'0';
+    const clipRect=document.querySelector('#waterClip rect');
+    if(clipRect) clipRect.setAttribute('y', clipY);
   }
   // Ripples
   const r1=document.getElementById('ripple1');
