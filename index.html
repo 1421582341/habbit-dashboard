@@ -1108,23 +1108,21 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
 .raise-btns{display:flex;gap:10px;justify-content:center;padding:10px 0 8px}
 .raise-dot{width:8px;height:8px;border-radius:50%;background:#d4c5b2;cursor:pointer;transition:.2s;display:inline-block}
 .raise-dot.active{background:#d63384;width:20px;border-radius:4px}
-.album-entry{display:flex;gap:12px;padding:14px;margin-bottom:10px;background:#f5ede4;border-radius:12px;align-items:flex-start;transition:.2s}
-.album-entry.locked{opacity:.75;background:#ede5d8}
-.album-entry.collected{background:linear-gradient(135deg,#f5ede4,#f0e6d8)}
-.album-sprite{flex-shrink:0;width:80px;height:80px;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden}
-.album-sprite.gray{opacity:.4;filter:grayscale(1)}
-.album-info{flex:1;min-width:0}
-.album-name{font-size:15px;font-weight:700;color:#493e38;margin-bottom:1px}
-.album-sub{font-size:10px;color:#8a7a6a;margin-bottom:4px}
-.album-badge{font-size:9px;color:#5c9e5c;font-weight:600;margin-bottom:4px}
-.album-hint{font-size:11px;color:#b9a58a;font-weight:500;margin-bottom:4px}
-.album-bio{font-size:11px;color:#6a5a4a;line-height:1.6;letter-spacing:.3px}
-body.dark .album-entry{background:#2a2520}
-body.dark .album-entry.locked{background:#221e1a}
-body.dark .album-name{color:#d9bb98}
-body.dark .album-bio{color:#b9a58a}
+.book-entry{background:#f5ede4;border-radius:10px;padding:10px 6px;text-align:center;transition:.2s}
+.book-entry.locked{opacity:.7;background:#ede5d8}
+.book-entry.collected{background:linear-gradient(135deg,#f5ede4,#f0e6d8)}
+.book-sprite{width:64px;height:64px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center}
+.book-sprite.gray{opacity:.4;filter:grayscale(1)}
+.book-name{font-size:12px;font-weight:700;color:#493e38;margin-bottom:1px}
+.book-tag{font-size:8px;color:#8a7a6a;margin-bottom:2px}
+.book-lvl{font-size:10px;color:#5c9e5c;font-weight:600}
+.book-hint{font-size:8px;color:#b9a58a;line-height:1.3;margin-top:1px}
+body.dark .book-entry{background:#2a2520}
+body.dark .book-entry.locked{background:#221e1a}
+body.dark .book-name{color:#d9bb98}
 body.dark .gallery-card{background:#2a2520}
 body.dark .gallery-name{color:#d9bb98}
+.gallery-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 80px}
 body.dark .raise-name{color:#d9bb98}
 </style>
 </head>
@@ -1297,7 +1295,7 @@ body.dark .raise-name{color:#d9bb98}
     </div>
 
     <!-- Creature Grid -->
-    <div class="creature-grid gallery-grid" id="creatureGrid">
+    <div class="creature-grid gallery-grid gallery-2col" id="creatureGrid">
       <!-- rendered by JS -->
     </div>
   </div>
@@ -2780,28 +2778,18 @@ function renderGallery(){
     else if(c.id==='butterfly') hint='🧚 收集全部17只';
 
     if(isCollected){
-      return '<div class="album-entry collected">'+
-        '<div class="album-sprite">'+
-          renderPetFace(c.id,80)+
-        '</div>'+
-        '<div class="album-info">'+
-          '<div class="album-name">'+c.emoji+' '+c.name+'</div>'+
-          '<div class="album-sub">'+mbtiTag+' · '+traitTag+' · Lv.'+lvl+'</div>'+
-          '<div class="album-badge">✅ 已收集</div>'+
-          '<div class="album-bio">'+bio+'</div>'+
-        '</div>'+
+      return '<div class="book-entry collected">'+
+        '<div class="book-sprite">'+renderPetFace(c.id,64)+'</div>'+
+        '<div class="book-name">'+c.emoji+' '+c.name+'</div>'+
+        '<div class="book-tag">'+mbtiTag+'</div>'+
+        '<div class="book-lvl">Lv.'+lvl+' ✅</div>'+
       '</div>';
     } else {
-      return '<div class="album-entry locked">'+
-        '<div class="album-sprite gray">'+
-          renderPetFace(c.id,80)+
-        '</div>'+
-        '<div class="album-info">'+
-          '<div class="album-name" style="color:#8a7a6a">'+c.emoji+' '+c.name+'</div>'+
-          '<div class="album-sub" style="color:#b9a58a">'+c.rarity+' · '+mbtiTag+'</div>'+
-          '<div class="album-hint">🔒 '+hint+'</div>'+
-          '<div class="album-bio" style="color:#b9a58a">'+bio+'</div>'+
-        '</div>'+
+      return '<div class="book-entry locked">'+
+        '<div class="book-sprite gray">'+renderPetFace(c.id,64)+'</div>'+
+        '<div class="book-name">'+c.emoji+' '+c.name+'</div>'+
+        '<div class="book-tag">'+c.rarity+'</div>'+
+        '<div class="book-hint">'+hint+'</div>'+
       '</div>';
     }
   }).join('');
