@@ -2324,16 +2324,16 @@ function renderSneakPeek(){
     return;
   }
   const lastFew=collected.slice(-3).map(id=>CREATURES.find(c=>c.id===id)).filter(Boolean);
-  el.innerHTML=\`
+  el.innerHTML=`
     <div style="display:flex;gap:4px;justify-content:center;align-items:flex-end">
-      \${lastFew.map(c=>'<div style="text-align:center;width:56px">'+
+      ${lastFew.map(c=>'<div style="text-align:center;width:56px">'+
         renderCreatureSVG(c,48)+
         '<div style="font-size:9px;color:#8a7a6a;margin-top:2px">'+c.name+'</div>'+
       '</div>').join('')}
     </div>
     <div style="font-size:11px;color:#8a7a6a;margin-top:6px">
-      已收集 \${collected.length} / \${CREATURES.length}
-    </div>\`;
+      已收集 ${collected.length} / ${CREATURES.length}
+    </div>`;
 }
 
 
