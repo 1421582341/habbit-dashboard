@@ -1177,14 +1177,19 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
         </div>
         <div style="flex:1;text-align:center">
           <div id="exerciseCoins" style="font-size:28px;font-weight:700;color:#d4a017">0</div>
-          <div style="font-size:11px;color:#8a7a6a">金币</div>
+          <div style="font-size:11px;color:#8a7a6a">💰 金币</div>
         </div>
         <div style="flex:1;text-align:center">
           <div id="exerciseStreak" style="font-size:28px;font-weight:700;color:#7c5cbf">0</div>
           <div style="font-size:11px;color:#8a7a6a">连续天数</div>
         </div>
       </div>
-      <div style="font-size:11px;color:#8a7a6a;text-align:center;padding-bottom:4px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button onclick="addExercise(15)" style="flex:1;padding:8px;border:1.5px solid #5c9e5c;border-radius:8px;background:rgba(92,158,92,.1);color:#5c9e5c;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+15 分钟</button>
+        <button onclick="addExercise(30)" style="flex:1;padding:8px;border:1.5px solid #d4a017;border-radius:8px;background:rgba(212,160,23,.1);color:#d4a017;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+30 分钟</button>
+        <button onclick="customExercise()" style="flex:1;padding:8px;border:1.5px solid #7c5cbf;border-radius:8px;background:rgba(124,92,191,.1);color:#7c5cbf;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">✏️ 手动</button>
+      </div>
+      <div style="font-size:10px;color:#8a7a6a;text-align:center;padding-top:6px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
     </div>
 
     <!-- HABIT LIST -->
@@ -1353,6 +1358,20 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
           <span class="setting-label" style="color:#8a7a6a">重置所有数据</span>
           <button class="btn-cancel" id="resetDataBtn" style="padding:5px 12px;font-size:11px;flex:0;background:#cebda8;color:#6a5a4a">重置</button>
         </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-header">⌚️ 自动同步 Apple Watch</div>
+      <div style="font-size:12px;color:#6a5a4a;line-height:1.7;padding:4px 0">
+        <p>每天运动完，在 iPhone「快捷指令」App 新建一个快捷指令：</p>
+        <ol style="padding-left:18px;margin:6px 0">
+          <li>添加「<b>健康</b>」→「<b>获取样本</b>」→ 选择「<b>运动分钟</b>」→ 范围「今天」</li>
+          <li>添加「<b>脚本</b>」→「<b>计算统计信息</b>」→ 对运动分钟求和</li>
+          <li>添加「<b>网页</b>」→「<b>打开 URL</b>」→ 填入：<br>
+          <span style="font-size:10px;word-break:break-all;background:#f0e8d8;padding:4px 6px;border-radius:4px;display:inline-block;margin:4px 0">https://1421582341.github.io/habbit-dashboard/?sync_exercise=</span><br>
+          然后在后面加上计算的分钟数</li>
+        </ol>
+        <p style="color:#8a7a6a;font-size:11px;margin-top:4px">💡 设置好后每天点一下快捷指令，运动数据自动同步到页面！</p>
       </div>
     </div>
   </div>
@@ -2036,6 +2055,28 @@ function renderExercise(){
   if(cel) cel.textContent=Math.floor(getTodayExercise(state)/30)*10;
   const sel=document.getElementById('exerciseStreak');
   if(sel) sel.textContent=getExerciseStreak(state);
+}
+
+function addExercise(mins){
+  const key=todayKey();
+  const prev=state.exerciseLogs[key]||0;
+  state.exerciseLogs[key]=prev+mins;
+  const earn=Math.floor((prev+mins)/30)*10 - Math.floor(prev/30)*10;
+  if(earn>0) state.coins+=earn;
+  saveState();
+  renderToday();
+  renderGallery();
+  checkMilestones();
+  showToast('🏃 +'+mins+'分钟'+(earn>0?' +'+earn+'💰':''));
+}
+
+function customExercise(){
+  const input=prompt('输入今日运动分钟数：','30');
+  if(input){
+    const mins=parseInt(input);
+    if(mins>0&&mins<600) addExercise(mins);
+    else showToast('请输入1-599之间的数字');
+  }
 }
 
 // ===== FOOD & SHOP =====
