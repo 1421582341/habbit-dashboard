@@ -1954,233 +1954,30 @@ function playWithCreature(creatureId){
 // ===== PIXEL PET RENDERER =====
 // 16×16 pixel sprites with cute faces and expressions
 const PX = {}; // palette shorthand
-// ===== CUTE SVG CREATURE RENDERER =====
-// Each creature is drawn as a cute kawaii-style SVG illustration
+// ===== SPRITE IMAGE RENDERER =====
+// Uses CC0 Kenney Roguelike Characters sprites
+
+const SPRITE_DATA = {
+  warmegg:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVlJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoopQSAqiCEwBgTVdX8GcD3eBJjDIQQz/NkjIEQ4nmejDEQQjzPkzEGQojneTLGQAir67VpYSSEYIxx+/3eGAMAEELc6/VijAEACCHu9XoxxgAAhBD3er0YYwAAQoj7/X6MMQAAIcTzPBljIIR4nidjDIQQz/NkjIEQ4nmejDEQQjzPkzEGQgjP8yTGGGRZ5nmejDF8/H7GGMzznOd5Msbw8fsZYzDPc57nyRgDAAAAAADgf+0Df9bMgbzEFqcAAAAASUVORK5CYII=',
+  sprout:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVBJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3cyXu9iTEGZ7fb9XoTYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYnN1uF6lNMcbg7Ha7SG2KMQZnt9tFalOMMThCCJyqKhBC4FQVhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMbghBC+EAJjDEIIXwiBMQYhhC+EwBiDEMIXQmCMQQjhCyEwxgAAAAAAAPC/9gGF0cyBkDHx7gAAAABJRU5ErkJggg==',
+  clover3:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVBJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3cyXu9iTEGZ7fb9XoTYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYnN1uF6lNMcbg7Ha7SG2KMQZnt9tFalOMMThCCJyqKhBC4FQVhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMbghBC+EAJjDEIIXwiBMQYhhC+EwBiDEMIXQmCMQQjhCyEwxgAAAAAAAPC/9gGF0cyBkDHx7gAAAABJRU5ErkJggg==',
+  sevastar:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVBJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3cyXu9iTEGZ7fb9XoTYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYnN1uF6lNMcbg7Ha7SG2KMQZnt9tFalOMMThCCJyqKhBC4FQVhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMbghBC+EAJjDEIIXwiBMQYhhC+EwBiDEMIXQmCMQQjhCyEwxgAAAAAAAPC/9gGF0cyBkDHx7gAAAABJRU5ErkJggg==',
+  lightfloat:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVlJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3cyXu9iTEGZ7fb9XoTYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYnN1uF6lNMcbg7Ha7SG2KMQZnt9tFalOMMThCCJyqKhBC4FQVhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMbghBC+EAJjDEIIXwiBMQYhhC+EwBiDEMIXQmCMQQjhCyEwxgAAAAAAAPC/9gGF0cyBkDHx7gAAAABJRU5ErkJggg==',
+  cloudpuff:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVlJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3cyXu9iTEGZ7fb9XoTYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYnN1uF6lNMcbg7Ha7SG2KMQZnt9tFalOMMThCCJyqKhBC4FQVhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMbghBC+EAJjDEIIXwiBMQYhhC+EwBiDEMIXQmCMQQjhCyEwxgAAAAAAAPC/9gGF0cyBkDHx7gAAAABJRU5ErkJggg==',
+  littlehorn:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVlJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3cyXu9iTEGZ7fb9XoTYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYnN1uF6lNMcbg7Ha7SG2KMQZnt9tFalOMMThCCJyqKhBC4FQVhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMbghBC+EAJjDEIIXwiBMQYhhC+EwBiDEMIXQmCMQQjhCyEwxgAAAAAAAPC/9gGF0cyBkDHx7gAAAABJRU5ErkJggg==',
+  footprint:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVBJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3cyXu9iTEGZ7fb9XoTYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYnN1uF6lNMcbg7Ha7SG2KMQZnt9tFalOMMThCCJyqKhBC4FQVhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMbghBC+EAJjDEIIXwiBMQYhhC+EwBiDEMIXQmCMQQjhCyEwxgAAAAAAAPC/9gGF0cyBkDHx7gAAAABJRU5ErkJggg==',
+  flamephoenix:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAUhJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3c5T5OYozB2e12vd7EGIOz2+0itSnGGJzdbhepTTHG4Ox2u0htijEGZ7fbRWpTjDE4u90uUptijMHZ7XaR2hRjDI4QAqeqCkIInKoqhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMYghBAFQgiMMQghREEIgTEGIURBCIExBiEEAAD4X/sAyqHMgbD5+UAAAAAASUVORK5CYII=',
+  fourleaf:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAUhJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2IGCUREhFx0snW2Z+a819JkX2yLctOkiRJkiRJOpBardbAGJNqrdOBEKkBgOq9d4wxAEBVVSGlBICqEEIwxkRVNVSVlFIYY6KqGkopAUBVEEJgjImqaiilBICqIITAGBNV1VBKCQCqghACY0xUVUMpJQBUBSEExpioqoZSSgBQFYQQGGOiqhpKKQGgKgghMMZEVTWUUgJAVRBCYIyJqmoo/f0CNR3c5T5OYozB2e12vd7EGIOz2+0itSnGGJzdbhepTTHG4Ox2u0htijEGZ7fbRWpTjDE4u90uUptijMHZ7XaR2hRjDI4QAqeqCkIInKoqhBA4VVUhhMApBE4IgVMIHO99iTEGIYT3vsQYgxDCF0JgjEEI4QshMMYghPCFEBhjEEJ4IQRCCJwQAkcI4QshMMYghBAFQgiMMQghREEIgTEGIURBCIExBiEEAAD4X/sAyqHMgbD5+UAAAAAASUVORK5CYII=',
+  moonpie:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVhJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2ICZ8QExFx0lX2ybbO/lfaJ0WJ7JNtWXaSJEmSJEnSgdRqtQbGmFRrnQ6ESA0AVO+9Y4wBAKqqKiQAqApCCIwxUVUNpZQAUBVCYIyJqmoo3wQKITDGRFU1lFICQFUQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKK3//gJ5rJv03hdqOrjLeZzEGIOz2+16vYkxBme320VqU4wxOLvdLlKbYozB2e12kdoUYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYHCEEISpCCEIUhBCEqAgh8J0QghAVIQROCEGIihACJ4QgREUIQYgKEIIQhBBCEKIQQhCiEEIQohBCEKIQOY8TIQQhCiEEIQohBCEKIQQhCiEEIQohBAAAAADgv/YBh7TMgYCFjM4AAAAASUVORK5CYII=',
+  coffeebean:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAVhJREFUeAHt1rENwjAQBdDfI2R0lIzGCIyA6SgZgVEYgVEYgREYIY2ICZ8QExFx0lX2ybbO/lfaJ0WJ7JNtWXaSJEmSJEnSgdRqtQbGmFRrnQ6ESA0AVO+9Y4wBAKqqKiQAqApCCIwxUVUNpZQAUBVCYIyJqmoo3wQKITDGRFU1lFICQFUQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKKUEgKoQYmCMiapqKK3//gJ5rJv03hdqOrjLeZzEGIOz2+16vYkxBme320VqU4wxOLvdLlKbYozB2e12kdoUYwzObreL1KYYY3B2u12kNsUYg7Pb7SK1KcYYHCEEISpCCEIUhBCEqAgh8J0QghAVIQROCEGIihACJ4QgREUIQYgKEIIQhBBCEKIQQhCiEEIQohBCEKIQOY8TIQQhCiEEIQohBCEKIQQhCiEEIQohBAAAAADgv/YBh7TMgYCFjM4AAAAASUVORK5CYII=',
+};
 
 function renderPetFace(id, size){
   size=size||80;
-  const w=Math.round(size), h=Math.round(size);
-  let body='';
-  const c=CREATURE_COLORS[id]||CREATURE_COLORS.warmegg;
-  // Common face parts
-  const eyes=`<g>
-    <ellipse cx="36" cy="48" rx="5.5" ry="6" fill="${c.eye}"/>
-    <ellipse cx="64" cy="48" rx="5.5" ry="6" fill="${c.eye}"/>
-    <ellipse cx="34" cy="45" rx="2.2" ry="2.5" fill="#fff"/>
-    <ellipse cx="62" cy="45" rx="2.2" ry="2.5" fill="#fff"/>
-    <ellipse cx="38" cy="50" rx="1" ry="1" fill="#fff" opacity="0.5"/>
-    <ellipse cx="66" cy="50" rx="1" ry="1" fill="#fff" opacity="0.5"/>
-  </g>`;
-  const blush=`<g opacity="0.3">
-    <ellipse cx="28" cy="58" rx="6" ry="3.5" fill="${c.blush}"/>
-    <ellipse cx="72" cy="58" rx="6" ry="3.5" fill="${c.blush}"/>
-  </g>`;
-  const mouth=`<path d="M46,58 Q50,62 54,58" fill="none" stroke="${c.eye}" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>`;
-  const mouthSmile=`<path d="M44,57 Q50,63 56,57" fill="none" stroke="${c.eye}" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>`;
-  const mouthOpen=`<ellipse cx="50" cy="59" rx="3.5" ry="3" fill="${c.eye}" opacity="0.5"/>`;
-  const mouthSleep=`<path d="M44,57 Q50,59 56,57" fill="none" stroke="${c.eye}" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>`;
-
-  switch(id){
-    case 'warmegg':
-      body=`<g>
-        <ellipse cx="50" cy="56" rx="27" ry="33" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="46" rx="14" ry="9" fill="#fff" opacity="0.2"/>
-        <ellipse cx="50" cy="56" rx="27" ry="33" fill="url(#warmeggGrad)"/>
-        <defs><radialGradient id="warmeggGrad" cx="40%" cy="35%"><stop offset="0%" stop-color="#fff8e7" stop-opacity="0.6"/><stop offset="100%" stop-color="#f5d0a9" stop-opacity="0"/></radialGradient></defs>
-        <path d="M30,68 Q35,60 40,68 q5,6 10,0" fill="none" stroke="${c.a}" stroke-width="1" opacity="0.3"/>
-        <path d="M42,65 L45,70 L48,65" fill="none" stroke="${c.a}" stroke-width="0.8" opacity="0.25"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${eyes}${blush}${mouth}${closeGrad}</svg>`;
-    case 'sprout':
-      body=`<g>
-        <ellipse cx="50" cy="60" rx="25" ry="28" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="50" rx="12" ry="7" fill="#fff" opacity="0.2"/>
-        <ellipse cx="50" cy="32" rx="4" ry="7" fill="${c.b}" stroke="${c.a}" stroke-width="1"/>
-        <ellipse cx="42" cy="26" rx="7" ry="4" fill="${c.g}" transform="rotate(-30 42 26)"/>
-        <ellipse cx="58" cy="26" rx="7" ry="4" fill="${c.g}" transform="rotate(30 58 26)"/>
-        <ellipse cx="50" cy="23" rx="5" ry="3.5" fill="${c.g}"/>
-        <defs><radialGradient id="sproutGrad" cx="40%" cy="35%"><stop offset="0%" stop-color="#e8f5e9" stop-opacity="0.6"/><stop offset="100%" stop-color="${c.b}" stop-opacity="0"/></radialGradient></defs>
-        <ellipse cx="50" cy="60" rx="25" ry="28" fill="url(#sproutGrad)"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${eyes}${blush}${mouthSmile}${closeGrad}</svg>`;
-    case 'clover3':
-      body=`<g>
-        <ellipse cx="50" cy="60" rx="24" ry="26" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="50" rx="11" ry="6" fill="#fff" opacity="0.2"/>
-        <circle cx="42" cy="30" r="9" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="58" cy="30" r="9" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="50" cy="22" r="9" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <path d="M50,31 L50,38" stroke="${c.a}" stroke-width="2" fill="none"/>
-        <defs><radialGradient id="cloverGrad" cx="40%" cy="35%"><stop offset="0%" stop-color="#e8f5e9" stop-opacity="0.5"/><stop offset="100%" stop-color="${c.b}" stop-opacity="0"/></radialGradient></defs>
-        <ellipse cx="50" cy="60" rx="24" ry="26" fill="url(#cloverGrad)"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${eyes}${blush}${mouthSmile}${closeGrad}</svg>`;
-    case 'sevastar':
-      body=`<g>
-        <polygon points="50,22 58,38 75,38 62,50 66,67 50,56 34,67 38,50 25,38 42,38" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="44" rx="10" ry="6" fill="#fff" opacity="0.2"/>
-        <circle cx="34" cy="34" r="2" fill="${c.a}" opacity="0.6"/>
-        <circle cx="66" cy="34" r="2" fill="${c.a}" opacity="0.6"/>
-        <circle cx="50" cy="26" r="2" fill="${c.a}" opacity="0.6"/>
-        <circle cx="28" cy="50" r="2" fill="${c.a}" opacity="0.5"/>
-        <circle cx="72" cy="50" r="2" fill="${c.a}" opacity="0.5"/>
-        <circle cx="38" cy="62" r="2" fill="${c.a}" opacity="0.5"/>
-        <circle cx="62" cy="62" r="2" fill="${c.a}" opacity="0.5"/>
-      </g>`;
-      const starEyes=`<g>
-        <ellipse cx="37" cy="44" rx="4.5" ry="5" fill="${c.eye}"/>
-        <ellipse cx="63" cy="44" rx="4.5" ry="5" fill="${c.eye}"/>
-        <ellipse cx="35" cy="42" rx="1.8" ry="2" fill="#fff"/>
-        <ellipse cx="61" cy="42" rx="1.8" ry="2" fill="#fff"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${starEyes}${blush}${mouthSmile}${closeGrad}</svg>`;
-    case 'lightfloat':
-      body=`<g>
-        <ellipse cx="50" cy="58" rx="28" ry="26" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="36" cy="48" rx="12" ry="10" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="64" cy="48" rx="12" ry="10" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="50" cy="42" rx="14" ry="11" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="50" cy="48" rx="10" ry="6" fill="#fff" opacity="0.25"/>
-        <circle cx="24" cy="52" r="4" fill="${c.a}" opacity="0.3"/>
-        <circle cx="76" cy="52" r="4" fill="${c.a}" opacity="0.3"/>
-      </g>`;
-      const sleepyEyes=`<g>
-        <ellipse cx="36" cy="52" rx="4" ry="4.5" fill="${c.eye}"/>
-        <ellipse cx="64" cy="52" rx="4" ry="4.5" fill="${c.eye}"/>
-        <ellipse cx="34" cy="50" rx="1.8" ry="2" fill="#fff"/>
-        <ellipse cx="62" cy="50" rx="1.8" ry="2" fill="#fff"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${sleepyEyes}${blush}${mouth}${closeGrad}</svg>`;
-    case 'cloudpuff':
-      body=`<g>
-        <ellipse cx="50" cy="58" rx="30" ry="24" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="35" cy="48" rx="14" ry="12" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="65" cy="48" rx="14" ry="12" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="50" cy="40" rx="16" ry="13" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="50" cy="48" rx="12" ry="7" fill="#fff" opacity="0.2"/>
-        <path d="M30,55 Q35,50 40,55 Q45,50 50,55 Q55,50 60,55 Q65,50 70,55" fill="none" stroke="${c.a}" stroke-width="1" opacity="0.4"/>
-        <path d="M72,58 Q76,54 80,56 L78,62" fill="none" stroke="${c.g}" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${eyes}${blush}${mouthSmile}${closeGrad}</svg>`;
-    case 'littlehorn':
-      body=`<g>
-        <ellipse cx="50" cy="58" rx="26" ry="30" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="48" rx="12" ry="7" fill="#fff" opacity="0.25"/>
-        <path d="M48,28 L50,14 Q50,12 52,14 L54,28" fill="none" stroke="${c.g}" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="50" cy="13" r="4" fill="${c.g}" opacity="0.6"/>
-        <ellipse cx="33" cy="28" rx="5" ry="3" fill="${c.g}" opacity="0.3" transform="rotate(-20 33 28)"/>
-        <ellipse cx="67" cy="28" rx="5" ry="3" fill="${c.g}" opacity="0.3" transform="rotate(20 67 28)"/>
-        <circle cx="36" cy="30" r="1.5" fill="#fff" opacity="0.4"/>
-        <circle cx="64" cy="30" r="1.5" fill="#fff" opacity="0.4"/>
-      </g>`;
-      const starryEyes=`<g>
-        <ellipse cx="37" cy="50" rx="5" ry="5.5" fill="${c.eye}"/>
-        <ellipse cx="63" cy="50" rx="5" ry="5.5" fill="${c.eye}"/>
-        <ellipse cx="35" cy="47" rx="2" ry="2.5" fill="#fff"/>
-        <ellipse cx="61" cy="47" rx="2" ry="2.5" fill="#fff"/>
-        <circle cx="39" cy="52" r="1" fill="#fff" opacity="0.5"/>
-        <circle cx="65" cy="52" r="1" fill="#fff" opacity="0.5"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${starryEyes}${blush}${mouthSmile}${closeGrad}</svg>`;
-    case 'footprint':
-      body=`<g>
-        <ellipse cx="50" cy="56" rx="24" ry="28" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="46" rx="11" ry="6" fill="#fff" opacity="0.2"/>
-        <ellipse cx="38" cy="78" rx="7" ry="4" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="62" cy="78" rx="7" ry="4" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="34" cy="34" r="3" fill="${c.b}" stroke="${c.a}" stroke-width="1"/>
-        <circle cx="50" cy="30" r="3" fill="${c.b}" stroke="${c.a}" stroke-width="1"/>
-        <circle cx="66" cy="34" r="3" fill="${c.b}" stroke="${c.a}" stroke-width="1"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${eyes}${blush}${mouthSmile}${closeGrad}</svg>`;
-    case 'flamephoenix':
-      body=`<g>
-        <path d="M50,18 Q62,24 68,34 Q74,46 66,56 Q58,66 50,70 Q42,66 34,56 Q26,46 32,34 Q38,24 50,18Z" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <path d="M50,22 Q58,28 62,36 Q66,44 60,52 Q54,60 50,62 Q46,60 40,52 Q34,44 38,36 Q42,28 50,22Z" fill="none" stroke="${c.g}" stroke-width="1.5" opacity="0.5"/>
-        <ellipse cx="50" cy="42" rx="10" ry="6" fill="#fff" opacity="0.15"/>
-        <path d="M28,40 Q22,34 24,28" fill="none" stroke="${c.g}" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-        <path d="M72,40 Q78,34 76,28" fill="none" stroke="${c.g}" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-        <path d="M44,14 Q50,10 56,14" fill="none" stroke="${c.g}" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-      </g>`;
-      const fireEyes=`<g>
-        <ellipse cx="38" cy="42" rx="4.5" ry="5" fill="${c.eye}"/>
-        <ellipse cx="62" cy="42" rx="4.5" ry="5" fill="${c.eye}"/>
-        <ellipse cx="36" cy="40" rx="1.8" ry="2" fill="#fff"/>
-        <ellipse cx="60" cy="40" rx="1.8" ry="2" fill="#fff"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${fireEyes}${blush}${mouthOpen}${closeGrad}</svg>`;
-    case 'fourleaf':
-      body=`<g>
-        <ellipse cx="50" cy="60" rx="24" ry="26" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="50" rx="11" ry="6" fill="#fff" opacity="0.15"/>
-        <circle cx="42" cy="28" r="8" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="58" cy="28" r="8" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="34" cy="36" r="8" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="66" cy="36" r="8" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="50" cy="26" r="3" fill="${c.g}"/>
-        <path d="M50,34 L50,42" stroke="${c.a}" stroke-width="1.5" fill="none"/>
-        <circle cx="30" cy="20" r="1.5" fill="#fff" opacity="0.3"/>
-        <circle cx="70" cy="20" r="1.5" fill="#fff" opacity="0.3"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${eyes}${blush}${mouthSmile}${closeGrad}</svg>`;
-    case 'moonpie':
-      body=`<g>
-        <ellipse cx="56" cy="56" rx="26" ry="28" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="56" cy="46" rx="12" ry="7" fill="#fff" opacity="0.2"/>
-        <ellipse cx="34" cy="48" rx="14" ry="16" fill="#d8c9b6" opacity="0.85"/>
-        <ellipse cx="34" cy="48" rx="14" ry="16" fill="none" stroke="${c.a}" stroke-width="1.5"/>
-        <ellipse cx="30" cy="8" rx="8" ry="3" fill="${c.b}" stroke="${c.a}" stroke-width="1.5"/>
-        <circle cx="30" cy="6" r="2.5" fill="#fff" opacity="0.3"/>
-      </g>`;
-      const moonEyes=`<g>
-        <ellipse cx="42" cy="48" rx="3.5" ry="4" fill="${c.eye}"/>
-        <ellipse cx="58" cy="48" rx="3.5" ry="4" fill="${c.eye}"/>
-        <ellipse cx="40" cy="46" rx="1.5" ry="1.8" fill="#fff"/>
-        <ellipse cx="56" cy="46" rx="1.5" ry="1.8" fill="#fff"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${moonEyes}${blush}${mouthSleep}${closeGrad}</svg>`;
-    case 'coffeebean':
-      body=`<g>
-        <ellipse cx="50" cy="58" rx="22" ry="30" fill="${c.b}" stroke="${c.a}" stroke-width="2"/>
-        <ellipse cx="50" cy="48" rx="10" ry="6" fill="#fff" opacity="0.15"/>
-        <path d="M44,26 L44,20 Q44,16 48,16 L52,16 Q56,16 56,20 L56,26" fill="none" stroke="${c.a}" stroke-width="2" stroke-linecap="round"/>
-        <path d="M40,22 Q36,18 38,14 Q40,10 44,12" fill="none" stroke="${c.a}" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-        <path d="M60,22 Q64,18 62,14 Q60,10 56,12" fill="none" stroke="${c.a}" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-        <path d="M36,28 L34,24" fill="none" stroke="${c.a}" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
-        <path d="M64,28 L66,24" fill="none" stroke="${c.a}" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
-        <circle cx="44" cy="30" r="1" fill="#fff" opacity="0.2"/>
-        <circle cx="56" cy="30" r="1" fill="#fff" opacity="0.2"/>
-      </g>`;
-      const beanEyes=`<g>
-        <ellipse cx="37" cy="50" rx="4" ry="5" fill="${c.eye}"/>
-        <ellipse cx="63" cy="50" rx="4" ry="5" fill="${c.eye}"/>
-        <ellipse cx="35" cy="48" rx="1.8" ry="2" fill="#fff"/>
-        <ellipse cx="61" cy="48" rx="1.8" ry="2" fill="#fff"/>
-      </g>`;
-      return `<svg viewBox="0 0 100 100" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${body}${beanEyes}${blush}${mouth}${closeGrad}</svg>`;
-    default:
-      return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="35" fill="#ccc"/></svg>`;
-  }
+  const src=SPRITE_DATA[id];
+  if(!src) return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="35" fill="#ccc"/></svg>`;
+  return `<img src="${src}" width="${size}" height="${size}" style="image-rendering:pixelated;image-rendering:-moz-crisp-edges" alt="">`;
 }
-
-// Color palettes for each creature
-const CREATURE_COLORS = {
-  warmegg:   {b:'#f5d0a9', a:'#e8a87c', eye:'#5c4033', blush:'#e8a87c', g:'#ffb74d'},
-  sprout:    {b:'#b5d6a3', a:'#7cb342', eye:'#3a322f', blush:'#81c784', g:'#66bb6a'},
-  clover3:   {b:'#81c784', a:'#4caf50', eye:'#3a322f', blush:'#66bb6a', g:'#2e7d32'},
-  sevastar:  {b:'#c9b8e8', a:'#9575cd', eye:'#3a322f', blush:'#b39ddb', g:'#7e57c2'},
-  lightfloat:{b:'#b8d4e3', a:'#64b5f6', eye:'#3a322f', blush:'#90caf9', g:'#42a5f5'},
-  cloudpuff: {b:'#e0e0e0', a:'#b0bec5', eye:'#3a322f', blush:'#cfd8dc', g:'#f48fb1'},
-  littlehorn:{b:'#f8e8ff', a:'#ce93d8', eye:'#3a322f', blush:'#f48fb1', g:'#ffd54f'},
-  footprint: {b:'#ffcc80', a:'#ff9800', eye:'#3a322f', blush:'#ffb74d', g:'#f57c00'},
-  flamephoenix:{b:'#ffab91', a:'#ff5252', eye:'#3a322f', blush:'#ff8a65', g:'#ffb74d'},
-  fourleaf:  {b:'#66bb6a', a:'#2e7d32', eye:'#3a322f', blush:'#4caf50', g:'#fdd835'},
-  moonpie:   {b:'#b0bec5', a:'#78909c', eye:'#3a322f', blush:'#90a4ae', g:'#5c6bc0'},
-  coffeebean:{b:'#a1887f', a:'#6d4c41', eye:'#3a322f', blush:'#8d6e63', g:'#4e342e'},
-};
-
-// Close current gradient definitions (used by all SVGs)
-const closeGrad='';
 
 function addExp(amount, label){
   state.exp += amount;
