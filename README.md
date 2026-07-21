@@ -18,8 +18,3 @@
 cd habit-dashboard
 python3 -m http.server 8080
 ```
-
-然后用 Serveo 隧道暴露到公网：
-```bash
-ssh -R 80:localhost:8080 serveo.net
-```
