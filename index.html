@@ -29,6 +29,35 @@ body{
   -webkit-overflow-scrolling:touch;
   transition:background .4s,color .4s;
 }
+body.auth-pending>.container,body.auth-pending>.nav-bar{visibility:hidden}
+body.sync-loading>.container,body.sync-loading>.nav-bar{pointer-events:none;opacity:.72}
+body.sync-loading{cursor:wait}
+.auth-gate{
+  position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:#d8c9b6;
+}
+.auth-gate[hidden]{display:none}
+.auth-card{
+  width:100%;max-width:380px;background:#e8ddcf;border:1px solid #d5c5b0;
+  border-radius:16px;padding:28px 22px;color:#3a322f;
+}
+.auth-title{font-size:22px;font-weight:600;margin-bottom:6px;text-align:center}
+.auth-subtitle{font-size:12px;color:#8a7a6a;line-height:1.6;text-align:center;margin-bottom:20px}
+.auth-field{display:block;font-size:11px;color:#6a5a4a;margin:12px 0 5px}
+.auth-input{
+  width:100%;padding:12px 13px;border:1.5px solid #cebda8;border-radius:8px;
+  background:#f5ede4;color:#3a322f;font:inherit;font-size:14px;outline:none;
+}
+.auth-input:focus{border-color:#8a7a6a}
+.auth-submit{width:100%;margin-top:18px;padding:12px;border:0;border-radius:8px;background:#493e38;color:#fff;font:inherit;cursor:pointer}
+.auth-submit:disabled{opacity:.55;cursor:wait}
+.auth-error{min-height:18px;margin-top:10px;color:#b04444;font-size:12px;text-align:center}
+.sync-status{font-size:11px;color:#8a7a6a;overflow-wrap:anywhere}
+.sync-conflict-actions{margin-top:8px;display:flex;gap:6px}
+.sync-conflict-actions[hidden]{display:none}
+body.dark .auth-gate{background:#1a1512}
+body.dark .auth-card{background:#322a26;border-color:#493e38;color:#d9bb98}
+body.dark .auth-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
 
 /* ===== DARK MODE ===== */
 body.dark{
@@ -1129,7 +1158,20 @@ body.dark .gallery-name{color:#d9bb98}
 body.dark .raise-name{color:#d9bb98}
 </style>
 </head>
-<body>
+<body class="auth-pending">
+
+<div class="auth-gate" id="authGate">
+  <form class="auth-card" id="loginForm" autocomplete="on">
+    <div class="auth-title">∞ INFPLife</div>
+    <div class="auth-subtitle">登录后读取你的个人数据，并在设备之间安全同步。</div>
+    <label class="auth-field" for="loginEmail">邮箱</label>
+    <input class="auth-input" id="loginEmail" name="email" type="email" autocomplete="username" required>
+    <label class="auth-field" for="loginPassword">密码</label>
+    <input class="auth-input" id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+    <button class="auth-submit" id="loginSubmit" type="submit">登录</button>
+    <div class="auth-error" id="loginError" role="alert"></div>
+  </form>
+</div>
 
 <div class="container">
 
@@ -1345,20 +1387,37 @@ body.dark .raise-name{color:#d9bb98}
           <span class="setting-label" style="color:#8a7a6a">重置所有数据</span>
           <button class="btn-cancel" id="resetDataBtn" style="padding:5px 12px;font-size:11px;flex:0;background:#cebda8;color:#6a5a4a">重置</button>
         </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">云端同步</div>
+            <div class="sync-status" id="syncStatus">正在检查登录状态…</div>
+            <div class="sync-conflict-actions" id="syncConflictActions" hidden>
+              <button class="btn-cancel" id="keepLocalBtn" type="button" style="padding:5px 9px;font-size:10px">保留本机</button>
+              <button class="btn-cancel" id="useCloudBtn" type="button" style="padding:5px 9px;font-size:10px">使用云端</button>
+            </div>
+          </div>
+          <button class="btn-cancel" id="reloadCloudBtn" style="padding:5px 12px;font-size:11px;flex:0">重新加载</button>
+        </div>
+        <div class="setting-row" style="border:none">
+          <div>
+            <div class="setting-label">当前账号</div>
+            <div class="sync-status" id="accountEmail">—</div>
+          </div>
+          <button class="btn-cancel" id="logoutBtn" style="padding:5px 12px;font-size:11px;flex:0">退出</button>
+        </div>
       </div>
     </div>
     <div class="card" style="margin-top:12px">
       <div class="card-header">⌚️ 自动同步 Apple Watch</div>
       <div style="font-size:12px;color:#6a5a4a;line-height:1.7;padding:4px 0">
-        <p>每天运动完，在 iPhone「快捷指令」App 新建一个快捷指令：</p>
+        <p>快捷指令现在通过受保护的 POST 请求写入，不再把健康数据或密钥放在网页 URL 中：</p>
         <ol style="padding-left:18px;margin:6px 0">
           <li>添加「<b>健康</b>」→「<b>获取样本</b>」→ 选择「<b>运动分钟</b>」→ 范围「今天」</li>
           <li>添加「<b>脚本</b>」→「<b>计算统计信息</b>」→ 对运动分钟求和</li>
-          <li>添加「<b>网页</b>」→「<b>打开 URL</b>」→ 填入：<br>
-          <span style="font-size:10px;word-break:break-all;background:#f0e8d8;padding:4px 6px;border-radius:4px;display:inline-block;margin:4px 0">https://1421582341.github.io/habbit-dashboard/?sync_exercise=</span><br>
-          然后在后面加上计算的分钟数</li>
+          <li>添加「<b>生成 UUID</b>」和「<b>当前日期</b>」，日期格式设为 <code>yyyy-MM-dd</code></li>
+          <li>添加「<b>获取 URL 内容</b>」，方法选 POST，按 README 配置 JSON 正文和 <code>x-shortcut-secret</code> 请求头</li>
         </ol>
-        <p style="color:#8a7a6a;font-size:11px;margin-top:4px">💡 设置好后每天点一下快捷指令，运动数据自动同步到页面！</p>
+        <p style="color:#8a7a6a;font-size:11px;margin-top:4px">💡 密钥只保存在快捷指令里；完整配置见项目 README。</p>
       </div>
     </div>
   </div>
@@ -1413,6 +1472,9 @@ body.dark .raise-name{color:#d9bb98}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8/dist/umd/supabase.min.js" integrity="sha384-Tve8O+C6PBzsIMK/IRCwHbi8fyEzXIlIs6OfVBZHubplwYhaQF/4Mzxqgg+pp/oy" crossorigin="anonymous"></script>
+<script src="src/sync-core.js"></script>
+<script src="src/supabase-sync.js"></script>
 <script>
 // ===== CONFIG =====
 const DEFAULT_HABITS = [
@@ -1575,6 +1637,7 @@ let state = {
   weightLogs: {},    // "YYYY-MM-DD": { weight: 68.5, ts: 123456 }
   waterLogs: {},     // "YYYY-MM-DD": number of cups
   exerciseLogs: {},  // "YYYY-MM-DD": minutes
+  taskLogs: {},      // "YYYY-MM-DD": completed task indexes
   exp: 0,            // total experience points
   level: 1,          // current level
   coins: 0,          // gold coins
@@ -1590,60 +1653,157 @@ let firstWeightRecorded = false;
 // ===== SUPABASE =====
 const SB_URL='https://xqvhcncxnwhokhfpyyjl.supabase.co';
 const SB_KEY='sb_publishable_k4sbBFCmfn-Zk2zvucVgNA_Trm0EADc';
-function deviceId(){
-  let d=localStorage.getItem('inflife_dev');
-  if(!d){ d=crypto.randomUUID?.()||'d'+Date.now(); localStorage.setItem('inflife_dev',d); }
-  return d;
+const sbClient=window.supabase.createClient(SB_URL,SB_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
+let cloud=null;
+let cloudReady=false;
+let authUiBound=false;
+let appUiBound=false;
+let cloudConflict=null;
+let cloudLoadPromise=null;
+
+function readOutbox(){
+  try{return JSON.parse(localStorage.getItem('inflife_outbox')||'null')}
+  catch(_error){return null}
 }
-async function sbLoad(){
-  try{
-    const r=await fetch(SB_URL+'/rest/v1/user_data?id=eq.'+encodeURIComponent(deviceId()),{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}});
-    if(!r.ok)return;
-    const a=await r.json();
-    if(a[0]?.state){
-      const p=a[0].state;
-      state.habits=p.habits||[];
-      state.records=p.records||{};
-      state.coffeeLogs=p.coffeeLogs||{};
-      state.weightLogs=p.weightLogs||{};
-      state.waterLogs=p.waterLogs||{};
-      state.exerciseLogs=p.exerciseLogs||{};
-      state.exp=p.exp||0;
-      state.level=p.level||1;
-      state.coins=p.coins||0;
-      state.creatureLevels=p.creatureLevels||{};
-      state.inventory=p.inventory||{};
-      state.collectedCreatures=p.collectedCreatures||[];
-      state.settings=p.settings||{darkMode:false,reminder:true};
-      localStorage.setItem('inflife_state',JSON.stringify(a[0].state));
-      // re-render after Supabase data syncs in
-      initApp();
-    }
-  }catch(e){console.warn('sbLoad',e)}
+
+function writeOutbox(entry){
+  if(entry)localStorage.setItem('inflife_outbox',JSON.stringify(entry));
+  else localStorage.removeItem('inflife_outbox');
 }
-let _sbTimer;
-function sbSave(){
-  clearTimeout(_sbTimer);
-  _sbTimer=setTimeout(async()=>{
+
+function setSyncStatus(status){
+  const el=document.getElementById('syncStatus');
+  if(!el)return;
+  el.textContent=status.message||status.kind;
+  el.style.color=status.kind==='error'||status.kind==='conflict'?'#b04444':'#8a7a6a';
+}
+
+function showLogin(message){
+  cloudReady=false;
+  document.body.classList.add('auth-pending');
+  document.getElementById('authGate').hidden=false;
+  document.getElementById('loginError').textContent=message||'';
+}
+
+function hideLogin(){
+  document.getElementById('authGate').hidden=true;
+  document.body.classList.remove('auth-pending');
+}
+
+function showSyncConflict(loaded){
+  cloudConflict=loaded;
+  setSyncStatus({kind:'conflict',message:'云端已有更新，请选择保留本机或使用云端'});
+  document.getElementById('syncConflictActions').hidden=false;
+}
+
+function clearSyncConflict(){
+  cloudConflict=null;
+  document.getElementById('syncConflictActions').hidden=true;
+}
+
+function setAppInteractionLocked(locked){
+  document.body.classList.toggle('sync-loading',locked);
+  for(const element of document.querySelectorAll('.container,.nav-bar'))element.inert=locked;
+}
+
+function replaceState(nextState){
+  state={...InflifeSyncCore.normalizeState(nextState),newUnlocks:[]};
+  localStorage.setItem('inflife_state',JSON.stringify(InflifeSyncCore.serializeState(state)));
+}
+
+function bindAuthUI(){
+  if(authUiBound)return;
+  authUiBound=true;
+  document.getElementById('loginForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const button=document.getElementById('loginSubmit');
+    const errorEl=document.getElementById('loginError');
+    button.disabled=true;
+    errorEl.textContent='';
     try{
-      const s={habits:state.habits,records:state.records,coffeeLogs:state.coffeeLogs,weightLogs:state.weightLogs,waterLogs:state.waterLogs,exerciseLogs:state.exerciseLogs,exp:state.exp,level:state.level,coins:state.coins,creatureLevels:state.creatureLevels,inventory:state.inventory,collectedCreatures:state.collectedCreatures,settings:state.settings};
-      await fetch(SB_URL+'/rest/v1/user_data',{method:'POST',headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:deviceId(),state:s,updated_at:new Date().toISOString()})});
-    }catch(e){console.warn('sbSave',e)}
-  },500);
+      await cloud.signIn(
+        document.getElementById('loginEmail').value.trim(),
+        document.getElementById('loginPassword').value
+      );
+      document.getElementById('loginPassword').value='';
+      await startAuthenticatedApp();
+    }catch(error){
+      errorEl.textContent=error.message||'登录失败';
+    }finally{
+      button.disabled=false;
+    }
+  });
+}
+
+async function performAuthenticatedStart(){
+  cloudReady=false;
+  const loaded=await cloud.load(InflifeSyncCore.serializeState(state));
+  const outbox=readOutbox();
+  const sourceState=outbox?.state||loaded.state;
+  replaceState(sourceState);
+  const beforeInit=JSON.stringify(InflifeSyncCore.serializeState(state));
+  initApp();
+  const afterInit=JSON.stringify(InflifeSyncCore.serializeState(state));
+  cloudReady=true;
+  const user=cloud.getUser();
+  document.getElementById('accountEmail').textContent=user?.email||'已登录';
+  hideLogin();
+  clearSyncConflict();
+  if(outbox?.state){
+    cloud.restorePending({state:InflifeSyncCore.serializeState(state),expectedVersion:outbox.expectedVersion});
+    if(Number(outbox.expectedVersion)===loaded.version){
+      await cloud.flush();
+    }else{
+      showSyncConflict(loaded);
+    }
+  }else if(afterInit!==beforeInit){
+    cloud.scheduleSave(InflifeSyncCore.serializeState(state));
+  }
+}
+
+async function startAuthenticatedApp(){
+  if(cloudLoadPromise)return cloudLoadPromise;
+  const wasCloudReady=cloudReady;
+  setAppInteractionLocked(true);
+  cloudLoadPromise=(async()=>{
+    try{
+      while(true){
+        try{return await performAuthenticatedStart()}
+        catch(error){
+          if(!InflifeSyncCore.isVersionConflict(error))throw error;
+        }
+      }
+    }catch(error){
+      cloudReady=wasCloudReady;
+      throw error;
+    }finally{
+      cloudLoadPromise=null;
+      setAppInteractionLocked(false);
+    }
+  })();
+  return cloudLoadPromise;
 }
 
 // ===== INIT =====
-function init(){
-  // Cache buster - redirect if no v param
-  var qs=new URLSearchParams(window.location.search);
-  if(!qs.has('v')){
-    var ts=Date.now();
-    window.location.replace(window.location.pathname+'?v='+ts);
-    return;
-  }
+async function init(){
   loadState();
-  initApp();
-  sbLoad();
+  bindAuthUI();
+  cloud=InflifeCloud.create({client:sbClient,onStatus:setSyncStatus,onOutboxChange:writeOutbox});
+  cloud.subscribeAuth((event,session)=>{
+    if(!session && event==='SIGNED_OUT')showLogin('');
+    if(session){
+      const email=document.getElementById('accountEmail');
+      if(email)email.textContent=session.user?.email||'已登录';
+    }
+  });
+  try{
+    await startAuthenticatedApp();
+  }catch(error){
+    if(error.message==='authentication_required')showLogin('');
+    else showLogin(error.message||'无法读取云端数据');
+  }
 }
 
 function initApp(){
@@ -1651,6 +1811,16 @@ function initApp(){
     state.habits = DEFAULT_HABITS.map(h => ({...h}));
   }
   if(!state.weightLogs) state.weightLogs = {};
+  if(!state.taskLogs) state.taskLogs = {};
+  const legacyTaskKey='inflife_tasks_'+todayKey();
+  if(!Object.prototype.hasOwnProperty.call(state.taskLogs,todayKey())){
+    try{
+      const legacyDone=JSON.parse(localStorage.getItem(legacyTaskKey)||'[]');
+      if(Array.isArray(legacyDone)&&legacyDone.length){
+        state.taskLogs[todayKey()]=legacyDone.filter(value=>Number.isInteger(value)&&value>=0&&value<100);
+      }
+    }catch(_error){}
+  }
   if(!state.collectedCreatures) state.collectedCreatures = [];
   if(!state.newUnlocks) state.newUnlocks = [];
   calcPetDecay(state);
@@ -1660,51 +1830,9 @@ function initApp(){
   renderRaise();
   updateRaiseSlide();
   setupTheme();
-  bindUI();
+  if(!appUiBound){bindUI();appUiBound=true;}
   saveState();
   checkMilestones();
-
-  // Remote water add via one-time URL token
-  const urlParams=new URLSearchParams(window.location.search);
-  const wt=urlParams.get('wt');
-  if(wt){
-    const used=JSON.parse(localStorage.getItem('inflife_used_tokens')||'[]');
-    if(!used.includes(wt)){
-      used.push(wt);
-      localStorage.setItem('inflife_used_tokens',JSON.stringify(used));
-      const n=parseInt(urlParams.get('n'))||1;
-      logWater(n);
-    }
-    const u=new URL(window.location);
-    u.searchParams.delete('wt');
-    u.searchParams.delete('n');
-    window.history.replaceState({},'',u);
-  }
-
-  // Sync exercise from Apple Watch via iOS Shortcut
-  const syncExercise = urlParams.get('sync_exercise');
-  if(syncExercise){
-    const mins = parseInt(syncExercise);
-    if(mins > 0 && mins < 600){
-      const key = todayKey();
-      const prev = state.exerciseLogs[key] || 0;
-      if(mins > prev){
-        state.exerciseLogs[key] = mins;
-        const newCoins = Math.floor(mins / 30) * 10;
-        const prevCoins = Math.floor(prev / 30) * 10;
-        const earn = newCoins - prevCoins;
-        if(earn > 0){
-          state.coins += earn;
-          showToast('🏃 运动'+mins+'分钟 +'+earn+'金币');
-        }
-        saveState();
-        renderToday();
-      }
-    }
-    const u=new URL(window.location);
-    u.searchParams.delete('sync_exercise');
-    window.history.replaceState({},'',u);
-  }
 
   if(state.settings.reminder && 'Notification' in window && Notification.permission === 'default'){
     Notification.requestPermission();
@@ -1723,12 +1851,14 @@ function loadState(){
       state.weightLogs = parsed.weightLogs || {};
       state.waterLogs = parsed.waterLogs || {};
       state.exerciseLogs = parsed.exerciseLogs || {};
+      state.taskLogs = parsed.taskLogs || {};
       state.exp = parsed.exp || 0;
       state.level = parsed.level || 1;
       state.coins = parsed.coins || 0;
       state.creatureLevels = parsed.creatureLevels || {};
       state.inventory = parsed.inventory || {};
       state.collectedCreatures = parsed.collectedCreatures || [];
+      state.petState = parsed.petState || {};
       state.newUnlocks = [];
       state.settings = parsed.settings || { darkMode: false, reminder: true };
     }
@@ -1737,22 +1867,9 @@ function loadState(){
 
 function saveState(){
   try{
-    localStorage.setItem('inflife_state', JSON.stringify({
-      habits: state.habits,
-      records: state.records,
-      coffeeLogs: state.coffeeLogs,
-      weightLogs: state.weightLogs,
-      waterLogs: state.waterLogs,
-      exerciseLogs: state.exerciseLogs,
-      exp: state.exp,
-      level: state.level,
-      coins: state.coins,
-      creatureLevels: state.creatureLevels,
-      inventory: state.inventory,
-      collectedCreatures: state.collectedCreatures,
-      settings: state.settings,
-    }));
-    sbSave();
+    const durableState=InflifeSyncCore.serializeState(state);
+    localStorage.setItem('inflife_state',JSON.stringify(durableState));
+    if(cloudReady)cloud.scheduleSave(durableState);
   }catch(e){console.warn('saveState',e)}
 }
 
@@ -1940,7 +2057,7 @@ function getWeightStreak(s){
 function saveWeight(){
   const input=document.getElementById('weightInput');
   const val=parseFloat(input.value);
-  if(!val||val<20||val>300){ alert('请输入合理的体重（20-300 kg）'); return; }
+  if(!val||val<20||val>400){ alert('请输入合理的体重（20-400 kg）'); return; }
   const key=todayKey();
   if(!state.weightLogs) state.weightLogs={};
   const isNew=!state.weightLogs[key];
@@ -2617,8 +2734,7 @@ function renderToday(){
 
   // Load today's tasks from JSON
   const key=todayKey();
-  const doneKey='inflife_tasks_'+key;
-  const done=JSON.parse(localStorage.getItem(doneKey)||'[]');
+  const done=state.taskLogs?.[key]||[];
   const list=document.getElementById('taskList');
   fetch('./tasks/tasks.json?'+Date.now()).then(r=>r.json()).then(data=>{
     const tasks=data[key]||[];
@@ -2644,15 +2760,17 @@ function renderToday(){
 }
 
 function toggleTask(idx){
-  const key='inflife_tasks_'+todayKey();
-  const done=JSON.parse(localStorage.getItem(key)||'[]');
+  const key=todayKey();
+  if(!state.taskLogs)state.taskLogs={};
+  const done=Array.isArray(state.taskLogs[key])?[...state.taskLogs[key]]:[];
   const i=done.indexOf(idx);
   if(i>-1) done.splice(i,1);
   else {
     done.push(idx);
     addExp(10);
   }
-  localStorage.setItem(key,JSON.stringify(done));
+  state.taskLogs[key]=done;
+  saveState();
   renderToday();
   checkMilestones();
 }
@@ -2742,7 +2860,7 @@ function renderWeeklyView(){
   // Calculate task completion for this week
   let totalTasks=0, doneTasks=0;
   for(const d of weekDates){
-    const t=JSON.parse(localStorage.getItem('inflife_tasks_'+d)||'[]');
+    const t=state.taskLogs?.[d]||[];
     if(t.length>0) totalTasks++;
     doneTasks+=t.length;
   }
@@ -2959,7 +3077,7 @@ function renderWeeklyView(){
   // Calculate task completion for this week
   let totalTasks=0, doneTasks=0;
   for(const d of weekDates){
-    const t=JSON.parse(localStorage.getItem('inflife_tasks_'+d)||'[]');
+    const t=state.taskLogs?.[d]||[];
     if(t.length>0) totalTasks++;
     doneTasks+=t.length;
   }
@@ -3241,6 +3359,7 @@ function bindUI(){
     state.weightLogs={};
     state.waterLogs={};
     state.exerciseLogs={};
+    state.taskLogs={};
     state.collectedCreatures=[];
     state.newUnlocks=[];
     state.exp=0;
@@ -3248,9 +3367,49 @@ function bindUI(){
     state.coins=0;
     state.creatureLevels={};
     state.inventory={};
+    state.petState={};
     saveState();
-    init();
-    renderWeeklyView();
+    initApp();
+  });
+
+  document.getElementById('reloadCloudBtn').addEventListener('click',async()=>{
+    try{await startAuthenticatedApp()}
+    catch(error){setSyncStatus({kind:'error',message:error.message||'重新加载失败'})}
+  });
+
+  document.getElementById('keepLocalBtn').addEventListener('click',async()=>{
+    if(!confirm('保留本机会覆盖云端在其他设备或快捷指令产生的更新，确认继续吗？'))return;
+    try{
+      cloud.rebasePending();
+      await cloud.flush();
+      clearSyncConflict();
+    }catch(error){
+      if(InflifeSyncCore.isVersionConflict(error))await startAuthenticatedApp();
+      else setSyncStatus({kind:'error',message:error.message||'同步失败'});
+    }
+  });
+
+  document.getElementById('useCloudBtn').addEventListener('click',()=>{
+    if(!cloudConflict)return;
+    if(!confirm('确认放弃本机尚未同步的更改，改用云端版本吗？'))return;
+    const loaded=cloudConflict;
+    cloud.discardPending();
+    cloudReady=false;
+    replaceState(loaded.state);
+    const beforeInit=JSON.stringify(InflifeSyncCore.serializeState(state));
+    initApp();
+    const afterInit=JSON.stringify(InflifeSyncCore.serializeState(state));
+    cloudReady=true;
+    clearSyncConflict();
+    if(afterInit!==beforeInit)cloud.scheduleSave(InflifeSyncCore.serializeState(state));
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click',async()=>{
+    try{await cloud.signOut();showLogin('')}
+    catch(error){
+      if(InflifeSyncCore.isVersionConflict(error))await startAuthenticatedApp();
+      else setSyncStatus({kind:'error',message:error.message||'退出失败，未同步数据仍保存在本机'});
+    }
   });
 }
 
@@ -3259,4 +3418,3 @@ document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
-
