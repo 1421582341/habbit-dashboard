@@ -1091,6 +1091,7 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
 .pet-bar-fill{height:100%;border-radius:3px;transition:width .3s}
 .pet-bar-hunger{background:linear-gradient(90deg,#f9a825,#ff8f00)}
 .pet-bar-happy{background:linear-gradient(90deg,#ef5350,#e91e63)}
+.pet-bar-intimacy{background:linear-gradient(90deg,#e91e63,#d63384)}
 .level-up-btn:active{transform:scale(.95)}
 </style>
 </head>
@@ -2117,12 +2118,155 @@ function playWithCreature(creatureId){
 // ===== PET RAISING SYSTEM =====
 const PET_DECAY_RATE = 3;
 
+// Intimacy dialogue - organized by MBTI type, 5 tiers per creature
+// Each tier: [feed_line, play_line]
+const INTIMACY_LINES = {
+  INFJ: [
+    ['谢谢。','……嗯。'],
+    ['你记得给我吃的……有点开心。','你也需要人陪吗？'],
+    ['和你在一起的时候，时间过得好快。','有你在，安心多了。'],
+    ['你是我唯一愿意打开心门的人。','只要有你在，我就不怕了。'],
+    ['你是我心里最温柔的存在。','……我也喜欢你。'],
+  ],
+  ENFP: [
+    ['哇！吃的！','来玩来玩！'],
+    ['好好吃！你对我真好～','和你玩最开心了！'],
+    ['每次你来找我，我都超·级·开·心！','嘿嘿，我就知道你会来陪我～'],
+    ['你是全世界最懂我的人！','和你在一起的每一秒都像在发光✨'],
+    ['我好像……离不开你了。','你是我最最最重要的人！'],
+  ],
+  ISFJ: [
+    ['不用麻烦你的……','你开心就好。'],
+    ['你特意来看我，我很感动。','我会一直记得你陪我玩。'],
+    ['你总是这么细心……谢谢。','看到你笑，我就很满足了。'],
+    ['我想一直照顾你。','你是我想要守护的人。'],
+    ['这辈子只想陪在你身边。','你幸福就是我最大的愿望。'],
+  ],
+  INTJ: [
+    ['嗯，放那吧。','没必要。'],
+    ['我有点习惯你出现了。','……五分钟。'],
+    ['你不在的时候，我会想你在做什么。','和你一起的时间，不算浪费。'],
+    ['你是少数几个我认可的人。','我愿意为你打破原则。'],
+    ['你是我计划之外的唯一变量。','我的未来里，有你。'],
+  ],
+  INFP: [
+    ['……谢谢。','你不忙吗？'],
+    ['你总是这么温柔呢。','和你一起，像做梦一样。'],
+    ['这个世界有你，真好。','我可以一直和你在一起吗？'],
+    ['你是我的光。','我想把所有的美好都给你。'],
+    ['你是我存在的意义。','我永远永远喜欢你。'],
+  ],
+  ENFJ: [
+    ['你饿了吧？来一起吃。','我就知道你会来找我！'],
+    ['你真的很会照顾人呢。','和你在一起我就充满能量！'],
+    ['有你在，我觉得自己可以做到任何事。','你是我最重要的伙伴。'],
+    ['你比你自己想象的更棒。','我想一直在你身边支持你。'],
+    ['你是我生命中最美的相遇。','我爱你。'],
+  ],
+  ENTJ: [
+    ['不错，按时来了。','跟上我的节奏。'],
+    ['你进步了。继续保持。','你配得上我的时间。'],
+    ['我开始期待你来找我了。','和你一起很有意思。'],
+    ['你已经成为我不可或缺的人了。','我想一直都在你身边。'],
+    ['你是唯一让我想要低头的人。','你属于我。'],
+  ],
+  ISFP: [
+    ['……嗯。','……好吧。'],
+    ['你记得我喜欢什么。','和你在一起很舒服。'],
+    ['我喜欢你来看我。','你是我愿意主动靠近的人。'],
+    ['我想把我的一切都分享给你。','不要离开我……好吗？'],
+    ['你是我的缪斯。','我想永远活在你的眼里。'],
+  ],
+  ENTP: [
+    ['就这个？没有别的了？','来啊，想看我做什么？'],
+    ['你今天怎么这么好？','和你玩还挺有意思的。'],
+    ['你好像越来越了解我了。','和你辩论都变得有趣了。'],
+    ['我承认……我很享受和你在一起。','你别对别人也这么好。'],
+    ['你让我想认真一次。','我好像……喜欢你了。'],
+  ],
+  ESFJ: [
+    ['你吃了吗？别光顾着我。','来来来一起玩！'],
+    ['你今天过得怎么样？','有我在，你不会孤单的！'],
+    ['你是我最在乎的人。','我想让每一天都充满你的笑声。'],
+    ['你的快乐就是我的快乐。','让我一直陪着你吧。'],
+    ['全世界最好的就是你。','我会一直在你身边。'],
+  ],
+  INTP: [
+    ['哦。','为什么想和我玩？'],
+    ['有趣。你很有趣。','……行吧，陪你一会。'],
+    ['我分析了一下，我喜欢你。','和你在一起的时间有很高的价值。'],
+    ['你是我的例外。','我所有的理论都想和你分享。'],
+    ['我爱你这件事，不需要论证。','你是我唯一的答案。'],
+  ],
+  ESTJ: [
+    ['不错。有效率。','玩可以，别太久。'],
+    ['你做得很好。继续保持。','我认可你。'],
+    ['我开始期待每天见到你了。','你是我想要珍惜的人。'],
+    ['你是我的骄傲。','我永远站在你这边。'],
+    ['我愿意为你放下所有原则。','这辈子认定你了。'],
+  ],
+  ISTJ: [
+    ['嗯。','……五分钟。'],
+    ['你很有规律。不错。','和你一起很安定。'],
+    ['我已经习惯了你在身边。','你是我生活的一部分。'],
+    ['你是我最信任的人。','我想和你一直这样下去。'],
+    ['我这辈子……只想对你一个人好。','你是我全部的安心。'],
+  ],
+  ESFP: [
+    ['好吃的！！我最爱你了！','玩起来！！'],
+    ['你喂我吃东西的样子好帅！','和你在一起好快乐！'],
+    ['你是世界上最有趣的人！','每次见你都像过节一样！'],
+    ['我只想和你一个人在一起。','你看我的时候，我心跳好快。'],
+    ['你是我的整个世界！','我爱你胜过一切！'],
+  ],
+  ISTP: [
+    ['……放置。','……来。'],
+    ['你记住了我的口味。','你身手还行。'],
+    ['你不在的时候总觉得少了什么。','和你一起，还不错。'],
+    ['我很少这么在意一个人。','你想去哪我都陪你去。'],
+    ['你是我唯一会主动靠近的人。','我不会离开你。'],
+  ],
+  ESTP: [
+    ['不错，知道我喜欢什么。','来，看我表现！'],
+    ['你挺懂我的嘛。','跟你玩就是刺激！'],
+    ['我开始有点想你了。','你是唯一能跟上我节奏的人。'],
+    ['我承认……你很重要。','我想带你去见所有人。'],
+    ['你是我最不想放手的人。','为了你我什么都愿意。'],
+  ],
+};
+
+function getIntimacyTier(intimacy){
+  if(intimacy >= 80) return 4;
+  if(intimacy >= 60) return 3;
+  if(intimacy >= 40) return 2;
+  if(intimacy >= 20) return 1;
+  return 0;
+}
+
+function getIntimacyLabel(intimacy){
+  if(intimacy >= 80) return '心动💕';
+  if(intimacy >= 60) return '亲密💗';
+  if(intimacy >= 40) return '熟悉💛';
+  if(intimacy >= 20) return '初识🤍';
+  return '陌生🖤';
+}
+
+function getIntimacyLine(creature, type, intimacy){
+  const tier = getIntimacyTier(intimacy);
+  const mbti = (creature.personality && creature.personality.mbti) || 'INFJ';
+  const lines = INTIMACY_LINES[mbti] || INTIMACY_LINES.INFJ;
+  const tierLines = lines[Math.min(tier, lines.length-1)];
+  if(!tierLines) return '';
+  return type === 'feed' ? tierLines[0] : (tierLines[1] || tierLines[0]);
+}
+
 function initPetState(creatureId){
   if(!state.petState) state.petState = {};
   if(!state.petState[creatureId]){
     state.petState[creatureId] = {
       hunger: 100,
       happiness: 100,
+      intimacy: 0,
       lastFeed: Date.now(),
       lastPlay: Date.now()
     };
@@ -2143,16 +2287,16 @@ function calcPetDecay(st){
 }
 
 function getMoodEmoji(happiness){
-  if(happiness >= 80) return '\ud83d\ude06';
-  if(happiness >= 60) return '\ud83d\ude42';
-  if(happiness >= 40) return '\ud83d\ude10';
-  if(happiness >= 20) return '\ud83d\ude22';
-  return '\ud83d\ude2d';
+  if(happiness >= 80) return '😆';
+  if(happiness >= 60) return '🙂';
+  if(happiness >= 40) return '😐';
+  if(happiness >= 20) return '😢';
+  return '😭';
 }
 
 function feedPet(creatureId){
   const items=Object.keys(state.inventory).filter(k=>state.inventory[k]>0);
-  if(items.length===0){ alert('没有食物了，去商店买点吧！'); return; }
+  if(items.length===0){ alert('🍽️ 没有食物了，去商店买点吧！'); return; }
   const c = CREATURES.find(function(cr){return cr.id===creatureId;});
   if(!c) return;
   initPetState(creatureId);
@@ -2161,13 +2305,14 @@ function feedPet(creatureId){
   state.inventory[foodId]--;
   p.lastFeed = Date.now();
   p.hunger = Math.min(100, (p.hunger||0) + 35);
+  p.intimacy = Math.min(100, (p.intimacy||0) + 3);
   if(!state.creatureLevels[creatureId]) state.creatureLevels[creatureId]=1;
   state.creatureLevels[creatureId] += 1;
   saveState();
   renderGallery();
   renderCoins();
-  var msg = (c.personality && c.personality.greeting) || '好吃！';
-  alert(c.name+' 吃了！ '+msg);
+  const line = getIntimacyLine(c, 'feed', p.intimacy);
+  alert(c.name+'：'+line);
 }
 
 function playPet(creatureId){
@@ -2177,15 +2322,15 @@ function playPet(creatureId){
   const p = state.petState[creatureId];
   p.lastPlay = Date.now();
   p.happiness = Math.min(100, (p.happiness||0) + 25);
+  p.intimacy = Math.min(100, (p.intimacy||0) + 5);
   const coinBonus = Math.floor(Math.random() * 3) + 2;
   state.coins += coinBonus;
   saveState();
   renderGallery();
   renderCoins();
-  const plays = ['开心地跳了起来！','围着你转圈～','蹭了蹭你的手','高兴地打了个滚'];
-  alert(c.name+' '+plays[Math.floor(Math.random()*plays.length)]+' 获得 '+coinBonus+'\ud83e\udd51');
+  const line = getIntimacyLine(c, 'play', p.intimacy);
+  alert(c.name+'：'+line+' 获得 '+coinBonus+'🪙');
 }
-
 // ===== PIXEL PET RENDERER =====
 // 16×16 pixel sprites with cute faces and expressions
 const PX = {}; // palette shorthand
@@ -2537,13 +2682,15 @@ function renderGallery(){
     if(isCollected){
       if(!state.petState) state.petState = {};
       if(!state.petState[c.id]) initPetState(c.id);
-      const p = state.petState[c.id] || {hunger:100, happiness:100};
+      const p = state.petState[c.id] || {hunger:100, happiness:100, intimacy:0};
       const lvl=state.creatureLevels[c.id]||1;
       const hungerPct = Math.round(p.hunger||0);
       const happyPct = Math.round(p.happiness||0);
+      const intimacyPct = Math.round(p.intimacy||0);
       const moodEmoji = getMoodEmoji(p.happiness||100);
       const mbtiTag = c.personality ? c.personality.mbti : '';
       const traitTag = c.personality ? c.personality.trait : '';
+      const intimacyLabel = getIntimacyLabel(p.intimacy||0);
       return `<div class="tama-card${isNew?' newly-unlocked':''}">
         <div style="margin:-4px -2px 2px;text-align:center">${renderPetFace(c.id,72)}</div>
         <div class="tama-name">${c.emoji} ${c.name}</div>
@@ -2553,12 +2700,17 @@ function renderGallery(){
           <div style="display:flex;align-items:center;gap:4px;font-size:10px;margin-bottom:2px">
             <span>🍽️</span>
             <div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-hunger" style="width:${hungerPct}%"></div></div>
-            <span style="color:#8a7a6a;font-size:9px;width:36px;text-align:right">${hungerPct}%</span>
+            <span style="color:#8a7a6a;font-size:9px;width:30px;text-align:right">${hungerPct}%</span>
           </div>
-          <div style="display:flex;align-items:center;gap:4px;font-size:10px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;margin-bottom:2px">
             <span>❤️</span>
             <div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-happy" style="width:${happyPct}%"></div></div>
-            <span style="color:#8a7a6a;font-size:9px;width:36px;text-align:right">${happyPct}%</span>
+            <span style="color:#8a7a6a;font-size:9px;width:30px;text-align:right">${happyPct}%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px">
+            <span>💕</span>
+            <div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-intimacy" style="width:${intimacyPct}%"></div></div>
+            <span style="color:#d63384;font-size:9px;width:30px;text-align:right">${intimacyLabel}</span>
           </div>
         </div>
         <div class="tama-btns">
