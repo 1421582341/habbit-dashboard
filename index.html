@@ -1179,7 +1179,7 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
     <div class="card">
       <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
         <span>💧 喝水 <span id="waterCount" style="font-weight:400">0</span> 杯</span>
-        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">阶梯经验 1→2→4→...</span>
+        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">阶梯 1·1·1·1·1·3·5·7</span>
       </div>
       <div style="display:flex;align-items:center;gap:16px">
         <div style="position:relative;width:48px;height:68px;flex-shrink:0">
@@ -2067,19 +2067,17 @@ function logWater(n){
   state.waterLogs[key]=next;
   saveState();
   renderWater();
-  // No per-cup EXP — all awarded as completion bonus at 8 cups
+  // Staircase EXP: cup 1-5→1, 6→3, 7→5, 8→7
+  const waterRewards=[0,1,1,1,1,1,3,5,7];
   if(n>0){
-    // 8-cup completion bonus (one-time when reaching 8)
-    if(was<8 && next>=8){
-      // Staircase total: 1+2+4+7+8+9+10 = 41, plus 10 bonus = 51
-      addExp(20, '💧🏆8杯达成');
-      addCoins(10, '💧🏆8杯达成');
+    for(let c=was+1; c<=next && c<waterRewards.length; c++){
+      const r=waterRewards[c];
+      if(r>0){addExp(r, '💧#'+c); addCoins(Math.ceil(r/2), '💧#'+c);}
     }
   }else{
-    // Remove completion bonus if dropping below 8
-    if(was>=8 && next<8){
-      addExp(-20, '💧');
-      addCoins(-10, '💧');
+    for(let c=was; c>next && c<waterRewards.length; c--){
+      const r=waterRewards[c];
+      if(r>0){addExp(-r, '💧'); addCoins(-Math.ceil(r/2), '💧');}
     }
   }
 }
