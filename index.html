@@ -1167,6 +1167,26 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
       </div>
     </div>
 
+    <!-- EXERCISE STATS -->
+    <div class="card">
+      <div class="card-header">🏃 今日运动</div>
+      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+        <div style="flex:1;text-align:center">
+          <div id="exerciseMinutes" style="font-size:28px;font-weight:700;color:#5c9e5c">0</div>
+          <div style="font-size:11px;color:#8a7a6a">分钟</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div id="exerciseCoins" style="font-size:28px;font-weight:700;color:#d4a017">0</div>
+          <div style="font-size:11px;color:#8a7a6a">金币</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div id="exerciseStreak" style="font-size:28px;font-weight:700;color:#7c5cbf">0</div>
+          <div style="font-size:11px;color:#8a7a6a">连续天数</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#8a7a6a;text-align:center;padding-bottom:4px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
+    </div>
+
     <!-- HABIT LIST -->
     <div class="card">
       <div class="card-header">☐ 今日小事 <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">每项 +15 EXP · 全勤 +30</span></div>
@@ -1414,117 +1434,95 @@ const WEEKDAYS = ['日','一','二','三','四','五','六'];
 const CREATURES = [
   {
     id:'warmegg', name:'小暖暖', emoji:'🥚', rarity:'普通',
-    desc:'一颗暖暖的蛋，记录体重的第一步。',
+    desc:'记录体重，健康生活的第一步！',
     check:s=>Object.keys(s.weightLogs||{}).length>=1,
-    design:{bodyColor:'#f5d0a9',accent:'#e8a87c',shape:'egg',eyes:'big',accessory:'none',blush:true,legs:false}
   },
   {
     id:'sprout', name:'豆豆芽', emoji:'🌱', rarity:'普通',
-    desc:'从泥土里探出的小嫩芽，第一次全勤。',
-    check:s=>{
-      const key=todayKey(); const rec=s.records?.[key];
-      const habits=s.habits||[];
-      return rec && habits.length>0 && habits.every(h=>rec[h.id]===true);
-    },
-    design:{bodyColor:'#b5d6a3',accent:'#7cb342',shape:'tall',eyes:'happy',accessory:'leaf',blush:false,legs:false}
+    desc:'单日运动达到 15 分钟，小嫩芽破土而出！',
+    check:s=>getTodayExercise(s)>=15,
   },
   {
     id:'clover3', name:'三叶', emoji:'🍀', rarity:'稀有',
-    desc:'连续三天全勤，开始长叶子了。',
-    check:s=>{const st=getStreakFromState(s); return st.current>=3},
-    design:{bodyColor:'#7cb342',accent:'#4caf50',shape:'round',eyes:'big',accessory:'flower',blush:true,legs:true}
+    desc:'连续 3 天运动 15 分钟以上，开始长叶子了。',
+    check:s=>getExerciseStreak(s,15)>=3,
   },
   {
     id:'sevastar', name:'小七星', emoji:'💜', rarity:'史诗',
-    desc:'七天的星光汇聚而成的小守护者。',
-    check:s=>{const st=getStreakFromState(s); return st.current>=7},
-    design:{bodyColor:'#c9b8e8',accent:'#9575cd',shape:'star',eyes:'star',accessory:'star',blush:true,legs:true}
+    desc:'累计运动 5 小时，星光汇聚而成的守护者。',
+    check:s=>getTotalExercise(s)>=300,
   },
   {
     id:'lightfloat', name:'轻飘飘', emoji:'🍃', rarity:'稀有',
-    desc:'减掉 1kg，身体变轻了。',
+    desc:'减掉 1kg，身体变轻了！',
     check:s=>{const w=getWeightProgress(s); return w.lost>=1},
-    design:{bodyColor:'#b8d4e3',accent:'#64b5f6',shape:'round',eyes:'sleepy',accessory:'scarf',blush:false,legs:false}
   },
   {
     id:'cloudpuff', name:'云朵朵', emoji:'☁️', rarity:'史诗',
     desc:'减掉 3kg，轻得像一朵云。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=3},
-    design:{bodyColor:'#e0e0e0',accent:'#b0bec5',shape:'wide',eyes:'happy',accessory:'bow',blush:true,legs:false}
   },
   {
     id:'littlehorn', name:'小独角', emoji:'🦄', rarity:'传说',
-    desc:'减掉 5kg 后出现的传说生物！',
-    check:s=>{const w=getWeightProgress(s); return w.lost>=5},
-    design:{bodyColor:'#f8e8ff',accent:'#ce93d8',shape:'round',eyes:'star',accessory:'crown',blush:true,legs:true}
+    desc:'单日运动 60 分钟，传说中的独角现身！',
+    check:s=>{const k=todayKey(); return (s.exerciseLogs?.[k]||0)>=60},
   },
   {
     id:'mushroom', name:'小蘑菇', emoji:'🍄', rarity:'普通',
-    desc:'森林里冒出来的可爱小蘑菇。',
-    check:s=>{const st=getStreakFromState(s); return st.current>=5},
-    design:{bodyColor:'#d9443e',accent:'#f5f5f5',shape:'round',eyes:'big',accessory:'bow',blush:true,legs:false}
+    desc:'减掉 0.5kg，森林里冒出来的小蘑菇。',
+    check:s=>{const w=getWeightProgress(s); return w.lost>=0.5},
   },
   {
     id:'flamephoenix', name:'小火凤', emoji:'🔥', rarity:'传说',
-    desc:'连续 30 天全勤，浴火重生。',
-    check:s=>{const st=getStreakFromState(s); return st.current>=30},
-    design:{bodyColor:'#ffab91',accent:'#ff5252',shape:'tall',eyes:'star',accessory:'crown',blush:false,legs:false}
+    desc:'累计运动 50 小时，浴火重生！',
+    check:s=>getTotalExercise(s)>=3000,
   },
   {
     id:'fourleaf', name:'四叶草', emoji:'🍀', rarity:'稀有',
-    desc:'收集 5 只精灵后出现的幸运使者。',
-    check:s=>(s.collectedCreatures||[]).length>=5,
-    design:{bodyColor:'#66bb6a',accent:'#2e7d32',shape:'star',eyes:'big',accessory:'flower',blush:true,legs:true}
+    desc:'单日运动 30 分钟，幸运使者降临。',
+    check:s=>{const k=todayKey(); return (s.exerciseLogs?.[k]||0)>=30},
   },
   {
     id:'moonpie', name:'眠眠', emoji:'🌙', rarity:'稀有',
-    desc:'连续记录体重 7 天，月亮守护你。',
-    check:s=>getWeightStreak(s)>=7,
-    design:{bodyColor:'#b0bec5',accent:'#78909c',shape:'round',eyes:'sleepy',accessory:'bow',blush:true,legs:false}
+    desc:'连续 7 天运动 15 分钟以上，月亮守护你。',
+    check:s=>getExerciseStreak(s,15)>=7,
   },
   {
     id:'coffeebean', name:'咖咖', emoji:'☕', rarity:'普通',
-    desc:'累计 30 杯咖啡，咖啡因小精灵。',
-    check:s=>getTotalCoffees(s)>=30,
-    design:{bodyColor:'#a1887f',accent:'#6d4c41',shape:'egg',eyes:'sleepy',accessory:'bow',blush:false,legs:true}
+    desc:'累计运动 10 小时，咖啡因小精灵！',
+    check:s=>getTotalExercise(s)>=600,
   },
   {
     id:'snowball', name:'雪团团', emoji:'❄️', rarity:'普通',
-    desc:'冰冰凉凉的小雪球，累计完成 20 次打卡。',
-    check:s=>getTotalCompleted(s)>=20,
-    design:{bodyColor:'#e8f0fe',accent:'#90caf9',shape:'round',eyes:'happy',accessory:'bow',blush:true,legs:false}
+    desc:'累计运动 3 小时，冰冰凉凉的小雪球。',
+    check:s=>getTotalExercise(s)>=180,
   },
   {
     id:'candy', name:'糖糖', emoji:'🍬', rarity:'稀有',
-    desc:'甜甜的糖果精灵，连续全勤 14 天。',
-    check:s=>{const st=getStreakFromState(s); return st.current>=14},
-    design:{bodyColor:'#f8bbd0',accent:'#ec407a',shape:'round',eyes:'star',accessory:'bow',blush:true,legs:true}
+    desc:'累计运动 20 小时，甜甜的糖果精灵。',
+    check:s=>getTotalExercise(s)>=1200,
   },
   {
     id:'bell', name:'小铃铛', emoji:'🔔', rarity:'稀有',
-    desc:'叮叮当当的小铃铛，减掉 8kg 后出现。',
+    desc:'减掉 8kg，叮叮当当的小铃铛。',
     check:s=>{const w=getWeightProgress(s); return w.lost>=8},
-    design:{bodyColor:'#fff9c4',accent:'#fdd835',shape:'round',eyes:'big',accessory:'bow',blush:true,legs:true}
   },
   {
     id:'shell', name:'小贝壳', emoji:'🐚', rarity:'史诗',
-    desc:'来自海洋的小贝壳，收集 10 只精灵后出现。',
-    check:s=>(s.collectedCreatures||[]).length>=10,
-    design:{bodyColor:'#fce4ec',accent:'#f48fb1',shape:'wide',eyes:'big',accessory:'flower',blush:true,legs:false}
+    desc:'累计运动 30 小时，来自海洋的小贝壳。',
+    check:s=>getTotalExercise(s)>=1800,
   },
   {
     id:'rainbow', name:'小彩虹', emoji:'🌈', rarity:'传说',
-    desc:'七彩小彩虹，连续记录体重 30 天。',
-    check:s=>getWeightStreak(s)>=30,
-    design:{bodyColor:'#e8f5e9',accent:'#66bb6a',shape:'tall',eyes:'happy',accessory:'crown',blush:true,legs:true}
+    desc:'累计运动 80 小时，七彩小彩虹！',
+    check:s=>getTotalExercise(s)>=4800,
   },
   {
     id:'butterfly', name:'小蝶蝶', emoji:'🦋', rarity:'传说',
-    desc:'梦幻的小蝴蝶，收集所有 18 只精灵后出现！',
+    desc:'收集所有 17 只精灵后出现的神秘精灵！',
     check:s=>(s.collectedCreatures||[]).length>=17,
-    design:{bodyColor:'#e1bee7',accent:'#ab47bc',shape:'star',eyes:'star',accessory:'flower',blush:true,legs:false}
   },
-];
+];];
 
 // ===== STATE =====
 let state = {
@@ -1533,6 +1531,7 @@ let state = {
   coffeeLogs: {},    // "YYYY-MM-DD": [{ id, type, time, ts }, ...]
   weightLogs: {},    // "YYYY-MM-DD": { weight: 68.5, ts: 123456 }
   waterLogs: {},     // "YYYY-MM-DD": number of cups
+  exerciseLogs: {},  // "YYYY-MM-DD": minutes
   exp: 0,            // total experience points
   level: 1,          // current level
   coins: 0,          // gold coins
@@ -1580,6 +1579,33 @@ function init(){
     window.history.replaceState({},'',u);
   }
 
+  // Sync exercise from Apple Watch via iOS Shortcut
+  const syncExercise = urlParams.get('sync_exercise');
+  if(syncExercise){
+    const mins = parseInt(syncExercise);
+    if(mins > 0 && mins < 600){
+      const key = todayKey();
+      const prev = state.exerciseLogs[key] || 0;
+      if(mins > prev){
+        state.exerciseLogs[key] = mins;
+        // Award coins: 30min = 10 coins, proportional
+        const newCoins = Math.floor(mins / 30) * 10;
+        const prevCoins = Math.floor(prev / 30) * 10;
+        const earn = newCoins - prevCoins;
+        if(earn > 0){
+          state.coins += earn;
+          showToast('🏃 运动'+mins+'分钟 +'+earn+'金币');
+        }
+        saveState();
+        renderToday();
+      }
+    }
+    // Clean param
+    const u=new URL(window.location);
+    u.searchParams.delete('sync_exercise');
+    window.history.replaceState({},'',u);
+  }
+
   if(state.settings.reminder && 'Notification' in window && Notification.permission === 'default'){
     Notification.requestPermission();
   }
@@ -1596,6 +1622,7 @@ function loadState(){
       state.coffeeLogs = parsed.coffeeLogs || {};
       state.weightLogs = parsed.weightLogs || {};
       state.waterLogs = parsed.waterLogs || {};
+      state.exerciseLogs = parsed.exerciseLogs || {};
       state.exp = parsed.exp || 0;
       state.level = parsed.level || 1;
       state.coins = parsed.coins || 0;
@@ -1616,6 +1643,7 @@ function saveState(){
       coffeeLogs: state.coffeeLogs,
       weightLogs: state.weightLogs,
       waterLogs: state.waterLogs,
+      exerciseLogs: state.exerciseLogs,
       exp: state.exp,
       level: state.level,
       coins: state.coins,
@@ -1753,6 +1781,33 @@ function getTotalCoffees(s){
     total += (s.coffeeLogs[dateKey]||[]).length;
   }
   return total;
+}
+
+// ===== EXERCISE HELPERS =====
+function getTodayExercise(s){
+  const key=todayKey();
+  return s.exerciseLogs?.[key]||0;
+}
+function getTotalExercise(s){
+  let total=0;
+  for(const mins of Object.values(s.exerciseLogs||{})){
+    total+=mins;
+  }
+  return total;
+}
+function getExerciseStreak(s, minMins){
+  minMins=minMins||15;
+  let streak=0;
+  const d=new Date();
+  while(true){
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const mins=s.exerciseLogs?.[key]||0;
+    if(mins>=minMins){
+      streak++;
+      d.setDate(d.getDate()-1);
+    }else break;
+  }
+  return streak;
 }
 
 // ===== WEIGHT TRACKER =====
@@ -1972,6 +2027,15 @@ function renderCoins(){
   if(el) el.textContent=state.coins;
   const sel=document.getElementById('shopCoinDisplay');
   if(sel) sel.textContent=state.coins;
+}
+
+function renderExercise(){
+  const el=document.getElementById('exerciseMinutes');
+  if(el) el.textContent=getTodayExercise(state);
+  const cel=document.getElementById('exerciseCoins');
+  if(cel) cel.textContent=Math.floor(getTodayExercise(state)/30)*10;
+  const sel=document.getElementById('exerciseStreak');
+  if(sel) sel.textContent=getExerciseStreak(state);
 }
 
 // ===== FOOD & SHOP =====
@@ -2225,6 +2289,7 @@ function renderToday(){
   renderExp();
   renderWater();
   renderCoins();
+  renderExercise();
 
   // Habit list
   if(state.habits.length===0){
