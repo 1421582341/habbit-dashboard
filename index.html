@@ -1179,7 +1179,7 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
     <div class="card">
       <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
         <span>💧 喝水 <span id="waterCount" style="font-weight:400">0</span> 杯</span>
-        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">每杯 +10 EXP</span>
+        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">阶梯经验 1→2→4→...</span>
       </div>
       <div style="display:flex;align-items:center;gap:16px">
         <div style="position:relative;width:64px;height:80px;flex-shrink:0" onclick="logWater(1)">
@@ -1193,9 +1193,11 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
           <div style="display:flex;flex-wrap:wrap;gap:4px" id="waterDots">
             <!-- rendered by JS: 8 dots -->
           </div>
-          <div style="display:flex;gap:8px;margin-top:8px">
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
             <button class="water-btn" id="waterPlusBtn" style="width:auto;padding:0 20px;border-radius:8px;font-size:13px;font-weight:500">+ 喝一杯</button>
             <button class="water-btn" id="waterMinusBtn" style="width:32px;height:32px;font-size:14px">−</button>
+            <button class="water-btn" id="waterPhotoBtn" style="width:auto;padding:0 12px;border-radius:8px;font-size:12px;font-weight:400" title="拍照认证喝水">📸 拍照</button>
+            <input type="file" accept="image/*" capture="environment" id="waterPhotoInput" style="display:none">
           </div>
         </div>
       </div>
@@ -2039,17 +2041,18 @@ function logWater(n){
   state.waterLogs[key]=next;
   saveState();
   renderWater();
-  // Only grant EXP for increasing cups, up to daily cap (8 cups)
-  const dailyCap=8;
+  // Staircase EXP: cup #1→1, #2→2, #3→4, #4→6, #5→8, #6→10, #7→12, #8→15
+  const waterRewards=[0,1,2,4,6,8,10,12,15];
   if(n>0){
-    const rewardable=Math.min(n, Math.max(0, dailyCap-was));
-    if(rewardable>0) addExp(rewardable*EXP_RATES.water, '💧');
-    if(rewardable>0) addCoins(rewardable*COIN_RATES.water, '💧');
+    for(let c=was+1; c<=next && c<waterRewards.length; c++){
+      const r=waterRewards[c];
+      if(r>0){addExp(r, '💧#'+c); addCoins(Math.ceil(r/2), '💧#'+c);}
+    }
   }else{
-    // Subtracting water: remove EXP too
-    const rewarded=Math.min(-n, Math.max(0, Math.min(dailyCap, was)-Math.min(dailyCap, next)));
-    if(rewarded>0) addExp(-rewarded*EXP_RATES.water, '💧');
-    if(rewarded>0) addCoins(-rewarded*COIN_RATES.water, '💧');
+    for(let c=was; c>next && c<waterRewards.length; c--){
+      const r=waterRewards[c];
+      if(r>0){addExp(-r, '💧'); addCoins(-Math.ceil(r/2), '💧');}
+    }
   }
 }
 
@@ -2475,6 +2478,26 @@ function bindUI(){
   // Theme
   document.getElementById('themeToggle').addEventListener('click',toggleDarkMode);
   document.getElementById('darkModeToggle').addEventListener('click',toggleDarkMode);
+
+  // Water photo verification
+  document.getElementById('waterPhotoBtn').addEventListener('click',()=>{
+    document.getElementById('waterPhotoInput').click();
+  });
+  document.getElementById('waterPhotoInput').addEventListener('change',function(e){
+    if(this.files && this.files[0]){
+      const reader=new FileReader();
+      reader.onload=function(ev){
+        // Show a preview + instruction
+        const preview=document.getElementById('waterPhotoPreview')||document.createElement('div');
+        preview.id='waterPhotoPreview';
+        preview.style.cssText='margin-top:8px;text-align:center';
+        preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;max-height:120px;border-radius:8px;border:2px solid #b9a58a">
+          <div style="font-size:10px;color:#8a7a6a;margin-top:4px">📤 把这张照片发给我，我确认后帮你加经验</div>`;
+        document.getElementById('waterPhotoBtn').parentElement.appendChild(preview);
+      };
+      reader.readAsDataURL(this.files[0]);
+    }
+  });
 
   // Reminder toggle
   const remToggle=document.getElementById('reminderToggle');
