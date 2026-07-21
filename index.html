@@ -1182,33 +1182,36 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
         <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">阶梯经验 1→2→4→...</span>
       </div>
       <div style="display:flex;align-items:center;gap:16px">
-        <div style="position:relative;width:56px;height:76px;flex-shrink:0" onclick="logWater(1)">
-          <!-- Cup body (glass) -->
-          <div style="position:absolute;bottom:0;left:2px;right:2px;top:16px;border:2px solid #b9a58a;border-bottom:3px solid #b9a58a;border-radius:0 0 6px 6px;background:rgba(255,255,255,.15);overflow:hidden">
+        <div style="position:relative;width:48px;height:68px;flex-shrink:0">
+          <!-- Cup body - minimalist ins style -->
+          <svg width="48" height="68" viewBox="0 0 48 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#b3d9ff"/>
+                <stop offset="100%" stop-color="#7ab3e6"/>
+              </linearGradient>
+            </defs>
+            <!-- Glass body -->
+            <path d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="rgba(255,255,255,0.1)" stroke="#d4c5b2" stroke-width="1.8"/>
             <!-- Water fill -->
-            <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(100,181,246,.85),rgba(30,136,229,.7));border-radius:0 0 4px 4px;transition:height .5s cubic-bezier(.34,1.56,.64,1);height:0%" id="waterFill">
-              <!-- Shimmer -->
-              <div style="position:absolute;top:4px;left:6px;width:8px;height:60%;background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);border-radius:2px;opacity:.6"></div>
-            </div>
-            <!-- Empty glass inner shadow -->
-            <div style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:0 0 4px 4px;box-shadow:inset 0 2px 4px rgba(0,0,0,.06);pointer-events:none"></div>
-          </div>
-          <!-- Cup rim -->
-          <div style="position:absolute;top:8px;left:0;right:0;height:10px;border:2px solid #b9a58a;border-radius:4px 4px 0 0;background:rgba(255,255,255,.25);box-shadow:0 -1px 3px rgba(0,0,0,.05)"></div>
-          <!-- Handle -->
-          <div style="position:absolute;top:30px;right:-8px;width:10px;height:22px;border:2px solid #b9a58a;border-left:none;border-radius:0 6px 6px 0;background:transparent;pointer-events:none"></div>
-          <!-- Water drops/bubbles indicator -->
-          <div style="position:absolute;top:26px;left:20px;width:3px;height:3px;border-radius:50%;background:#90caf9;opacity:.5;transition:.5s" id="bubble1"></div>
-          <div style="position:absolute;top:40px;left:32px;width:2px;height:2px;border-radius:50%;background:#90caf9;opacity:.3;transition:.5s" id="bubble2"></div>
+            <path id="waterPath" d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="url(#waterGrad)" opacity="0"/>
+            <!-- Handle -->
+            <path d="M40 26 Q48 26 48 32 Q48 38 40 38" stroke="#d4c5b2" stroke-width="1.8" fill="none"/>
+            <!-- Rim -->
+            <rect x="4" y="12" width="40" height="5" rx="2.5" fill="#fff5e6" stroke="#d4c5b2" stroke-width="1.2"/>
+            <!-- Water ripples -->
+            <line id="ripple1" x1="12" y1="38" x2="36" y2="38" stroke="#fff" stroke-width=".8" opacity="0"/>
+            <line id="ripple2" x1="14" y1="42" x2="34" y2="42" stroke="#fff" stroke-width=".6" opacity="0"/>
+            <!-- Highlight -->
+            <line x1="14" y1="20" x2="14" y2="52" stroke="#fff" stroke-width="1.2" opacity=".15"/>
+          </svg>
         </div>
         <div style="flex:1">
           <div style="display:flex;flex-wrap:wrap;gap:4px" id="waterDots">
             <!-- rendered by JS: 8 dots -->
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="water-btn" id="waterPlusBtn" style="width:auto;padding:0 20px;border-radius:8px;font-size:13px;font-weight:500">+ 喝一杯</button>
-            <button class="water-btn" id="waterMinusBtn" style="width:32px;height:32px;font-size:14px">−</button>
-            <button class="water-btn" id="waterPhotoBtn" style="width:auto;padding:0 12px;border-radius:8px;font-size:12px;font-weight:400" title="拍照认证喝水">📸 拍照</button>
+            <button class="water-btn" id="waterPhotoBtn" style="width:auto;padding:0 16px;border-radius:8px;font-size:13px;font-weight:500">📸 拍照认证喝水</button>
             <input type="file" accept="image/*" capture="environment" id="waterPhotoInput" style="display:none">
           </div>
         </div>
@@ -2077,15 +2080,20 @@ function renderWater(){
   const maxCups=8;
   const wc=document.getElementById('waterCount');
   if(wc) wc.textContent=count;
-  // Water fill in glass
+  // SVG water fill: use clipPath to reveal water from bottom up
   const fillPct=Math.min(100, count/maxCups*100);
-  const fillEl=document.getElementById('waterFill');
-  if(fillEl) fillEl.style.height=fillPct+'%';
-  // Bubbles appear when water present
-  const b1=document.getElementById('bubble1');
-  const b2=document.getElementById('bubble2');
-  if(b1) b1.style.opacity=count>0?'.6':'0';
-  if(b2) b2.style.opacity=count>2?'.4':'0';
+  const clipH=52; // height of glass body
+  const clipY=64-fillPct/100*clipH;
+  const waterEl=document.getElementById('waterPath');
+  if(waterEl){
+    waterEl.setAttribute('clip-path',`inset(${clipY}px 0 0 0)`);
+    waterEl.style.opacity=count>0?'.7':'0';
+  }
+  // Ripples
+  const r1=document.getElementById('ripple1');
+  const r2=document.getElementById('ripple2');
+  if(r1) r1.style.opacity=count>0?'.5':'0';
+  if(r2) r2.style.opacity=count>2?'.35':'0';
   // Dots
   const dotsEl=document.getElementById('waterDots');
   if(dotsEl){
