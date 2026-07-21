@@ -22,6 +22,8 @@ body{
   min-height:100dvh;
   padding:0 0 100px 0;
   overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   transition:background .4s,color .4s;
 }
 
@@ -447,7 +449,8 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
   -webkit-backdrop-filter:blur(16px);
   border-top:1px solid #cebda8;
   z-index:100;
-  padding:6px 0 env(safe-area-inset-bottom,8px);
+  padding:6px 0 env(safe-area-inset-bottom,12px);
+  pointer-events:auto;
 }
 .nav-btn{
   flex:1;
