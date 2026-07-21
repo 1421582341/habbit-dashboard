@@ -1121,66 +1121,63 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
     </div>
   </div>
 
-  <!-- VIEW: TODAY -->
+    <!-- VIEW: TODAY -->
   <div class="view active" id="viewToday">
 
-    <!-- STATS -->
-    <div class="card">
-      <div class="card-header">📊 今日进度</div>
-      <div class="stats-row" id="statsRow">
-        <div class="stat-item">
-          <div class="stat-value" id="statDone">0</div>
-          <div class="stat-label">已完成</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="statTotal">0</div>
-          <div class="stat-label">总项数</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="statRate">0%</div>
-          <div class="stat-label">完成率</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="statStreak">0</div>
-          <div class="stat-label">连续</div>
+    <!-- COLLECTION PROGRESS -->
+    <div class="card" onclick="switchView('viewCreatures')" style="cursor:pointer">
+      <div class="card-header">🧚 精灵收集</div>
+      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+        <div class="gallery-stats" style="flex:1;padding:0">
+          <div class="gallery-stat">
+            <div class="gallery-stat-value" id="galleryCollected">0</div>
+            <div class="gallery-stat-label">已收集</div>
+          </div>
+          <div class="gallery-stat">
+            <div class="gallery-stat-value" id="galleryTotal">12</div>
+            <div class="gallery-stat-label">总图鉴</div>
+          </div>
+          <div class="gallery-stat">
+            <div class="gallery-stat-value" id="galleryProgress">0%</div>
+            <div class="gallery-stat-label">完成度</div>
+          </div>
         </div>
       </div>
-
-      <!-- STREAK -->
-      <div class="streak-section">
-        <div class="streak-box">
-          <div class="streak-number" id="streakCurrent">0</div>
-          <div class="streak-label">当前连续</div>
-        </div>
-        <div class="streak-box">
-          <div class="streak-number" id="streakBest">0</div>
-          <div class="streak-label">最长连续</div>
-        </div>
-      </div>
-
-      <!-- PROGRESS BAR -->
-      <div class="progress-section">
-        <div class="progress-label">
-          <span>今日完成</span>
-          <span id="progressText">0 / 0</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill" style="width:0%"></div>
-        </div>
+      <div id="creatureSneakPeek" style="text-align:center;padding:4px 0">
+        <!-- rendered by JS -->
       </div>
     </div>
 
-    <!-- HABIT LIST -->
+    <!-- EXERCISE STATS -->
     <div class="card">
-      <div class="card-header">☐ 今日小事 <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">每项 +15 EXP · 全勤 +30</span></div>
-      <div class="habit-list" id="habitList">
-        <!-- rendered by JS -->
+      <div class="card-header">🏃 今日运动</div>
+      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+        <div style="flex:1;text-align:center">
+          <div id="exerciseMinutes" style="font-size:28px;font-weight:700;color:#5c9e5c">0</div>
+          <div style="font-size:11px;color:#8a7a6a">分钟</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div id="exerciseCoins" style="font-size:28px;font-weight:700;color:#d4a017">0</div>
+          <div style="font-size:11px;color:#8a7a6a">💰 金币</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div id="exerciseStreak" style="font-size:28px;font-weight:700;color:#7c5cbf">0</div>
+          <div style="font-size:11px;color:#8a7a6a">连续天数</div>
+        </div>
       </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button onclick="addExercise(15)" style="flex:1;padding:8px;border:1.5px solid #5c9e5c;border-radius:8px;background:rgba(92,158,92,.1);color:#5c9e5c;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+15 分钟</button>
+        <button onclick="addExercise(30)" style="flex:1;padding:8px;border:1.5px solid #d4a017;border-radius:8px;background:rgba(212,160,23,.1);color:#d4a017;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+30 分钟</button>
+        <button onclick="customExercise()" style="flex:1;padding:8px;border:1.5px solid #7c5cbf;border-radius:8px;background:rgba(124,92,191,.1);color:#7c5cbf;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">✏️ 手动</button>
+      </div>
+      <div style="font-size:10px;color:#8a7a6a;text-align:center;padding-top:6px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
+    </div>
 
-      <!-- ADD HABIT -->
-      <div class="add-habit-bar">
-        <input class="add-habit-input" id="habitInput" placeholder="添加新习惯…" maxlength="50">
-        <button class="add-btn" id="addHabitBtn">＋</button>
+    <!-- TODAY'S TASKS -->
+    <div class="card">
+      <div class="card-header">☑️ 今日任务</div>
+      <div class="habit-list" id="taskList">
+        <div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">📭 今天没有任务，休息一天吧</div>
       </div>
     </div>
 
@@ -1192,7 +1189,6 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
       </div>
       <div style="display:flex;align-items:center;gap:16px">
         <div style="position:relative;width:48px;height:68px;flex-shrink:0">
-          <!-- Cup body - minimalist ins style -->
           <svg width="48" height="68" viewBox="0 0 48 68" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1203,26 +1199,19 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
                 <rect x="0" y="0" width="48" height="68"/>
               </clipPath>
             </defs>
-            <!-- Glass body outline -->
             <path d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="rgba(255,255,255,0.1)" stroke="#d4c5b2" stroke-width="1.8"/>
-            <!-- Water fill (clipped) -->
             <g clip-path="url(#waterClip)">
               <path id="waterPath" d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="url(#waterGrad)" opacity="0"/>
             </g>
-            <!-- Handle -->
             <path d="M40 26 Q48 26 48 32 Q48 38 40 38" stroke="#d4c5b2" stroke-width="1.8" fill="none"/>
-            <!-- Rim -->
             <rect x="4" y="12" width="40" height="5" rx="2.5" fill="#fff5e6" stroke="#d4c5b2" stroke-width="1.2"/>
-            <!-- Water ripples -->
             <line id="ripple1" x1="12" y1="38" x2="36" y2="38" stroke="#fff" stroke-width=".8" opacity="0"/>
             <line id="ripple2" x1="14" y1="42" x2="34" y2="42" stroke="#fff" stroke-width=".6" opacity="0"/>
-            <!-- Highlight -->
             <line x1="14" y1="20" x2="14" y2="52" stroke="#fff" stroke-width="1.2" opacity=".15"/>
           </svg>
         </div>
         <div style="flex:1">
           <div style="display:flex;flex-wrap:wrap;gap:4px" id="waterDots">
-            <!-- rendered by JS: 8 dots -->
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
             <button class="water-btn" id="waterPhotoBtn" style="width:auto;padding:0 16px;border-radius:8px;font-size:13px;font-weight:500">📸 拍照认证喝水</button>
@@ -1232,27 +1221,7 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
       </div>
     </div>
 
-    <!-- WEEK -->
-    <div class="card">
-      <div class="week-section">
-        <div class="section-title">📅 本周</div>
-        <div class="week-row" id="weekRow">
-          <!-- rendered by JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- CREATURE SNEAK PEEK -->
-    <div class="card" style="cursor:pointer" onclick="switchView('viewCreatures')">
-      <div class="card-header">🧚 我的精灵</div>
-      <div id="creatureSneakPeek" style="text-align:center;padding:8px 0">
-        <!-- rendered by JS -->
-      </div>
-    </div>
-
-  </div>
-
-  <!-- VIEW: WEEKLY -->
+  </div><!-- VIEW: WEEKLY -->
   <div class="view" id="viewWeekly">
     <div class="card">
       <div class="card-header">📊 本周报告</div>
@@ -1263,23 +1232,7 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
   <!-- VIEW: CREATURES -->
   <div class="view" id="viewCreatures">
 
-    <!-- Gallery Stats -->
-    <div class="gallery-stats">
-      <div class="gallery-stat">
-        <div class="gallery-stat-value" id="galleryCollected">0</div>
-        <div class="gallery-stat-label">已收集</div>
-      </div>
-      <div class="gallery-stat">
-        <div class="gallery-stat-value" id="galleryTotal">12</div>
-        <div class="gallery-stat-label">总图鉴</div>
-      </div>
-      <div class="gallery-stat">
-        <div class="gallery-stat-value" id="galleryProgress">0%</div>
-        <div class="gallery-stat-label">完成度</div>
-      </div>
-    </div>
-
-    <!-- EXERCISE STATS -->
+<!-- EXERCISE STATS -->
     <div class="card">
       <div class="card-header">🏃 今日运动</div>
       <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
@@ -2296,30 +2249,13 @@ function renderCreatureSVG(creature,size){
     ${lvlStr}
   </div>`;
 }
-
 // ===== RENDER: TODAY =====
 function renderToday(){
-  const rec=getTodayRecord();
-  const list=document.getElementById('habitList');
-  const {done,total,rate}=getDayStats(todayKey());
-  const streak=getStreak();
-
-  // Stats
-  document.getElementById('statDone').textContent=done;
-  document.getElementById('statTotal').textContent=total;
-  document.getElementById('statRate').textContent=rate+'%';
-  document.getElementById('statStreak').textContent=streak.current;
-  document.getElementById('streakCurrent').textContent=streak.current;
-  document.getElementById('streakBest').textContent=streak.best;
-  document.getElementById('progressText').textContent=done+' / '+total;
-  document.getElementById('progressFill').style.width=rate+'%';
-
-  // Date
   const now=new Date();
   const weekDay=WEEKDAYS[now.getDay()];
-  document.getElementById('dateDisplay').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 周'+weekDay;
 
-  // Greeting
+  // Date + greeting
+  document.getElementById('dateDisplay').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 周'+weekDay;
   const h=now.getHours();
   let greet='下午好';
   if(h<6) greet='夜深了';
@@ -2330,35 +2266,53 @@ function renderToday(){
   else greet='晚上好';
   document.getElementById('greetingName').innerHTML='<span class="serif">∞</span> '+greet;
 
-  // EXP + water
+  // EXP + water + coins + exercise
   renderExp();
   renderWater();
   renderCoins();
   renderExercise();
-
-  // Habit list
-  if(state.habits.length===0){
-    list.innerHTML='<div class="empty-state"><div class="empty-icon">🌱</div>还没有习惯，添加一个吧</div>';
-  } else {
-    list.innerHTML=state.habits.map(h=>{
-      const done=!!rec[h.id];
-      return `<div class="habit-item${done?' done':''}" data-id="${h.id}" onclick="toggleHabit('${h.id}')">
-      <div class="check-circle${done?' checked':''}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#e8ddcf" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-      </div>
-      <span class="habit-text${done?' done':''}">${h.label}</span>
-      <span style="font-size:10px;font-weight:500;color:#8a7a6a;flex-shrink:0;${done?'opacity:.5':''}">${done?'✓ +'+EXP_RATES.habit:'+'+EXP_RATES.habit+' EXP'}</span>
-      <span style="font-size:9px;color:#d4a017;flex-shrink:0;${done?'opacity:.5':''}">🪙${done?'+'+COIN_RATES.habit:'+'+COIN_RATES.habit}</span>
-      <button class="habit-delete" onclick="event.stopPropagation();deleteHabit('${h.id}')">✕</button>
-    </div>`;
-    }).join('');
-  }
-
-  // Weight
-  renderWeight();
   renderSneakPeek();
+
+  // Load today's tasks from JSON
+  const key=todayKey();
+  const doneKey='inflife_tasks_'+key;
+  const done=JSON.parse(localStorage.getItem(doneKey)||'[]');
+  const list=document.getElementById('taskList');
+  fetch('./tasks/tasks.json?'+Date.now()).then(r=>r.json()).then(data=>{
+    const tasks=data[key]||[];
+    if(tasks.length===0){
+      list.innerHTML='<div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">📭 今天没有任务，休息一天吧</div>';
+    } else {
+      list.innerHTML=tasks.map((t,i)=>{
+        const isDone=done.includes(i);
+        return '<div class="habit-item'+(isDone?' done':'')+'" onclick="toggleTask('+i+')">'+
+          '<div class="check-circle'+(isDone?' checked':'')+'">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#e8ddcf" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">'+
+              '<polyline points="20 6 9 17 4 12"/>'+
+            '</svg>'+
+          '</div>'+
+          '<span class="habit-text'+(isDone?' done':'')+'">'+t+'</span>'+
+          '<span style="font-size:10px;font-weight:500;color:#8a7a6a;flex-shrink:0'+(isDone?';opacity:.5':'')+'">'+(isDone?'✓ 完成':'▶ 待办')+'</span>'+
+        '</div>';
+      }).join('');
+    }
+  }).catch(()=>{
+    list.innerHTML='<div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">⚠️ 加载任务失败</div>';
+  });
+}
+
+function toggleTask(idx){
+  const key='inflife_tasks_'+todayKey();
+  const done=JSON.parse(localStorage.getItem(key)||'[]');
+  const i=done.indexOf(idx);
+  if(i>-1) done.splice(i,1);
+  else {
+    done.push(idx);
+    addExp(10);
+  }
+  localStorage.setItem(key,JSON.stringify(done));
+  renderToday();
+  checkMilestones();
 }
 
 // ===== RENDER: CREATURE SNEAK PEEK =====
@@ -2366,24 +2320,22 @@ function renderSneakPeek(){
   const el=document.getElementById('creatureSneakPeek');
   const collected=state.collectedCreatures||[];
   if(collected.length===0){
-    el.innerHTML='<div style="font-size:32px;opacity:.5">🧚</div><div style="font-size:11px;color:#8a7a6a;margin-top:4px">完成习惯和记录体重来收集精灵吧！</div>';
+    el.innerHTML='<div style="font-size:24px;opacity:.5">🧚</div><div style="font-size:11px;color:#8a7a6a;margin-top:4px">记录体重和运动来收集精灵吧！</div>';
     return;
   }
-  // Show last 3 collected
   const lastFew=collected.slice(-3).map(id=>CREATURES.find(c=>c.id===id)).filter(Boolean);
-  el.innerHTML=`
+  el.innerHTML=\`
     <div style="display:flex;gap:4px;justify-content:center;align-items:flex-end">
-      ${lastFew.map(c=>`<div style="text-align:center;width:56px">
-        ${renderCreatureSVG(c,48)}
-        <div style="font-size:9px;color:#8a7a6a;margin-top:2px">${c.name}</div>
-      </div>`).join('')}
+      \${lastFew.map(c=>'<div style="text-align:center;width:56px">'+
+        renderCreatureSVG(c,48)+
+        '<div style="font-size:9px;color:#8a7a6a;margin-top:2px">'+c.name+'</div>'+
+      '</div>').join('')}
     </div>
     <div style="font-size:11px;color:#8a7a6a;margin-top:6px">
-      已收集 ${collected.length} / ${CREATURES.length}
-      <span style="font-size:10px;margin-left:4px;opacity:.6">点击查看全部 →</span>
-    </div>
-  `;
+      已收集 \${collected.length} / \${CREATURES.length}
+    </div>\`;
 }
+
 
 // ===== RENDER: WEEK =====
 function renderWeek(){
@@ -2416,48 +2368,77 @@ function renderWeek(){
 // ===== RENDER: WEEKLY VIEW =====
 function renderWeeklyView(){
   const container=document.getElementById('weeklyReport');
-  const dates=getWeekDates();
-  const totalDone=dates.reduce((sum,d)=>{const s=getDayStats(d);return sum+s.done;},0);
-  const totalItems=dates.reduce((sum,d)=>{const s=getDayStats(d);return sum+s.total;},0);
-  const weekRate=totalItems>0?Math.round(totalDone/totalItems*100):0;
-  const streak=getStreak();
+  const now=new Date();
+  const weekStart=new Date(now);
+  weekStart.setDate(weekStart.getDate()-weekStart.getDay());
 
-  let html=`
+  // Calculate weekly stats
+  let totalExercise=0, totalWater=0, totalWeightDays=0, taskDone=0, collectedThisWeek=0;
+  const allCollected=state.collectedCreatures||[];
+  const weekDates=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(weekStart);
+    d.setDate(d.getDate()+i);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    weekDates.push(key);
+    totalExercise+=state.exerciseLogs?.[key]||0;
+    totalWater+=state.waterLogs?.[key]||0;
+    if(state.weightLogs?.[key]) totalWeightDays++;
+  }
+
+  const firstWeight=Object.values(state.weightLogs||{})[0]?.weight;
+  const lastWeight=Object.values(state.weightLogs||{}).pop()?.weight;
+  const weightChange=firstWeight&&lastWeight?lastWeight-firstWeight:null;
+
+  const weekStartStr=weekDates[0];
+  const weekEndStr=weekDates[6];
+  collectedThisWeek=allCollected.filter(cid=>{
+    // Estimate: check if creature was unlocked recently (simplified)
+    return allCollected.indexOf(cid)>=(allCollected.length-3);
+  }).length;
+
+  // Calculate task completion for this week
+  let totalTasks=0, doneTasks=0;
+  for(const d of weekDates){
+    const t=JSON.parse(localStorage.getItem('inflife_tasks_'+d)||'[]');
+    if(t.length>0) totalTasks++;
+    doneTasks+=t.length;
+  }
+
+  const html=`
     <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:32px;font-weight:400;color:#493e38">${weekRate}%</div>
-      <div style="font-size:11px;color:#8a7a6a;letter-spacing:1px;text-transform:uppercase">本周完成率</div>
+      <div style="font-size:13px;color:#8a7a6a;margin-top:2px">${weekStartStr} ~ ${weekEndStr}</div>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <div class="streak-box" style="flex:1">
-        <div class="streak-number">${totalDone}</div>
-        <div class="streak-label">总完成项</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#5c9e5c">${totalExercise}</div>
+        <div class="streak-label">🏃 运动分钟</div>
       </div>
-      <div class="streak-box" style="flex:1">
-        <div class="streak-number">${streak.current}</div>
-        <div class="streak-label">连续🔥</div>
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#4fc3f7">${totalWater}</div>
+        <div class="streak-label">💧 喝水杯数</div>
       </div>
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#d4a017">${doneTasks}</div>
+        <div class="streak-label">☑️ 任务完成</div>
+      </div>
+      <div class="streak-box" style="flex:1;min-width:0">
+        <div class="streak-number" style="color:#ab47bc">${allCollected.length}</div>
+        <div class="streak-label">🧚 精灵收集</div>
+      </div>
+    </div>
+    ${weightChange!==null?`
+      <div style="text-align:center;padding:10px;background:rgba(92,158,92,.08);border-radius:8px;margin-bottom:12px">
+        <span style="font-size:13px;color:#8a7a6a">⚖️ 体重变化 </span>
+        <span style="font-size:16px;font-weight:700;color:${weightChange<=0?'#5c9e5c':'#e57373'}">
+          ${weightChange<=0?''+Math.abs(weightChange).toFixed(1)+'kg ✓':'+'+weightChange.toFixed(1)+'kg'}
+        </span>
+      </div>
+    `:''}
+    <div style="font-size:11px;color:#8a7a6a;text-align:center;padding:6px 0">
+      ${totalWeightDays>=7?'📝 坚持每天记录体重！':totalWeightDays>0?'📝 本周记录体重 '+totalWeightDays+' 天':''}
     </div>
   `;
-
-  for(const d of dates){
-    const {done,total,rate}=getDayStats(d);
-    const label=formatDate(d);
-    const isToday=d===todayKey();
-    html+=`
-      <div class="weekly-card">
-        <div class="weekly-date">${label}${isToday?' · 今日':''} · ${rate}%</div>
-        <div class="progress-bar" style="height:3px;margin-bottom:6px">
-          <div class="progress-fill" style="width:${rate}%"></div>
-        </div>
-        <div class="weekly-items">
-          ${state.habits.map(h=>{
-            const done=isHabitDone(h.id,d);
-            return `<span class="weekly-badge${done?' done':''}">${h.label}</span>`;
-          }).join('')}
-        </div>
-      </div>
-    `;
-  }
 
   container.innerHTML=html;
 }
