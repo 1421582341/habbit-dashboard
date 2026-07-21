@@ -1661,7 +1661,7 @@ function toggleHabit(habitId){
   rec[habitId]=!rec[habitId];
   saveState();
   renderToday();
-  renderWeek();
+  
   renderWeeklyView();
   renderSneakPeek();
   checkAllDone();
@@ -2564,7 +2564,7 @@ function addHabit(){
   input.value='';
   saveState();
   renderToday();
-  renderWeek();
+  
   renderWeeklyView();
 }
 
@@ -2576,7 +2576,7 @@ function deleteHabit(id){
   }
   saveState();
   renderToday();
-  renderWeek();
+  
   renderWeeklyView();
 }
 
