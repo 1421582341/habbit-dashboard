@@ -2041,18 +2041,22 @@ function logWater(n){
   state.waterLogs[key]=next;
   saveState();
   renderWater();
-  // Staircase EXP: cup #1→1, #2→2, #3→4, #4→6, #5→8, #6→10, #7→12, #8→15
-  const waterRewards=[0,1,2,4,6,8,10,12,15];
+  // Staircase EXP: cup #1→1, #2→2, #3→4, #4→6, #5→8, #6→10, #7→0, #8→0 +10 bonus
+  const waterRewards=[0,1,2,4,6,8,10,0,0];
   if(n>0){
     for(let c=was+1; c<=next && c<waterRewards.length; c++){
       const r=waterRewards[c];
       if(r>0){addExp(r, '💧#'+c); addCoins(Math.ceil(r/2), '💧#'+c);}
     }
+    // 8-cup completion bonus (one-time when reaching 8)
+    if(was<8 && next>=8){addExp(10, '💧🏆8杯达成'); addCoins(5, '💧🏆8杯达成');}
   }else{
     for(let c=was; c>next && c<waterRewards.length; c--){
       const r=waterRewards[c];
       if(r>0){addExp(-r, '💧'); addCoins(-Math.ceil(r/2), '💧');}
     }
+    // Remove completion bonus if dropping below 8
+    if(was>=8 && next<8){addExp(-10, '💧'); addCoins(-5, '💧');}
   }
 }
 
