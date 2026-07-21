@@ -1313,7 +1313,7 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
 
 <!-- NAV -->
 <div class="nav-bar" id="navBar">
-  <div class="nav-slider" id="navSlider" style="transform:translateX(0%)"></div>
+  <div class="nav-slider" id="navSlider" style="left:0"></div>
   <button class="nav-btn active" data-view="viewToday">🌱<span>今日</span></button>
   <button class="nav-btn" data-view="viewCreatures">🧚<span>精灵</span></button>
   <button class="nav-btn" data-view="viewWeekly">📊<span>周报</span></button>
@@ -2521,8 +2521,14 @@ function bindUI(){
     state.records={};
     state.coffeeLogs={};
     state.weightLogs={};
+    state.waterLogs={};
     state.collectedCreatures=[];
     state.newUnlocks=[];
+    state.exp=0;
+    state.level=1;
+    state.coins=0;
+    state.creatureLevels={};
+    state.inventory={};
     saveState();
     init();
     renderWeeklyView();
