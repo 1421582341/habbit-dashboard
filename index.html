@@ -1520,14 +1520,21 @@ function init(){
   saveState();
   checkMilestones();
 
-  // Remote water add via URL param
+  // Remote water add via one-time URL token
   const urlParams=new URLSearchParams(window.location.search);
-  if(urlParams.get('addwater')){
-    const n=parseInt(urlParams.get('addwater'))||1;
-    logWater(n);
-    // Clean param from URL without reload
+  const wt=urlParams.get('wt');
+  if(wt){
+    const used=JSON.parse(localStorage.getItem('inflife_used_tokens')||'[]');
+    if(!used.includes(wt)){
+      used.push(wt);
+      localStorage.setItem('inflife_used_tokens',JSON.stringify(used));
+      const n=parseInt(urlParams.get('n'))||1;
+      logWater(n);
+    }
+    // Clean params from URL
     const u=new URL(window.location);
-    u.searchParams.delete('addwater');
+    u.searchParams.delete('wt');
+    u.searchParams.delete('n');
     window.history.replaceState({},'',u);
   }
 
