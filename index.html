@@ -1315,8 +1315,9 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
       <div class="weight-change" id="weightChange" style="display:none"></div>
       <div id="weightHistory"></div>
       <div style="font-size:11px;color:#8a7a6a;margin-top:8px;line-height:1.6">
-        🥚 小暖暖：首次记录 &nbsp;·&nbsp; 🍃 轻飘飘：−1kg &nbsp;·&nbsp; ☁️ 云朵朵：−3kg<br>
-        🦄 小独角：−5kg &nbsp;·&nbsp; 🌙 眠眠：连续7天记录
+        🥚 小暖暖：记录一次体重 &nbsp;·&nbsp; 🌱 豆豆芽：单日运动15分 &nbsp;·&nbsp; 🍀 三叶：连续3天运动<br>
+        🍄 小蘑菇：−0.5kg &nbsp;·&nbsp; 🍃 轻飘飘：−1kg &nbsp;·&nbsp; ☁️ 云朵朵：−3kg<br>
+        🦄 小独角：−5kg &nbsp;·&nbsp; 🔔 小铃铛：−8kg
       </div>
     </div>
 
@@ -2500,18 +2501,24 @@ function renderGallery(){
     } else {
       // Show hint for unlock progress
       let hint='';
-      if(c.id==='warmegg') hint='记录一次体重';
-      else if(c.id==='sprout') hint='今日全勤';
-      else if(c.id==='clover3') hint='连续3天全勤';
-      else if(c.id==='sevastar') hint='连续7天全勤';
-      else if(c.id==='lightfloat') hint='减重1kg';
-      else if(c.id==='cloudpuff') hint='减重3kg';
-      else if(c.id==='littlehorn') hint='减重5kg';
-      else if(c.id==='footprint') hint='累计10次打卡';
-      else if(c.id==='flamephoenix') hint='连续30天全勤';
-      else if(c.id==='fourleaf') hint='收集5只精灵';
-      else if(c.id==='moonpie') hint='连续7天记体重';
-      else if(c.id==='coffeebean') hint='累计30杯咖啡';
+      if(c.id==='warmegg') hint='📝 记录一次体重';
+      else if(c.id==='sprout') hint='🏃 单日运动15分钟';
+      else if(c.id==='clover3') hint='🏃 连续3天运动15分钟+';
+      else if(c.id==='sevastar') hint='🏃 累计运动5小时';
+      else if(c.id==='lightfloat') hint='⚖️ 减重1kg';
+      else if(c.id==='cloudpuff') hint='⚖️ 减重3kg';
+      else if(c.id==='littlehorn') hint='⚖️ 减重5kg';
+      else if(c.id==='mushroom') hint='⚖️ 减重0.5kg';
+      else if(c.id==='fourleaf') hint='🏃 单日运动30分钟';
+      else if(c.id==='moonpie') hint='🏃 连续7天运动15分钟+';
+      else if(c.id==='flamephoenix') hint='🏃 累计运动50小时';
+      else if(c.id==='coffeebean') hint='🏃 累计运动10小时';
+      else if(c.id==='snowball') hint='🏃 累计运动3小时';
+      else if(c.id==='candy') hint='🏃 累计运动20小时';
+      else if(c.id==='bell') hint='⚖️ 减重8kg';
+      else if(c.id==='shell') hint='🏃 累计运动30小时';
+      else if(c.id==='rainbow') hint='🏃 累计运动80小时';
+      else if(c.id==='butterfly') hint='🧚 收集全部17只精灵';
 
       return `<div class="tama-card tama-locked">
         <div style="margin:-4px -2px 2px;text-align:center;opacity:.7;filter:grayscale(1)">${renderPetFace(c.id,72)}</div>
