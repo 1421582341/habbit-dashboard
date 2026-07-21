@@ -1093,6 +1093,21 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
 .pet-bar-happy{background:linear-gradient(90deg,#ef5350,#e91e63)}
 .pet-bar-intimacy{background:linear-gradient(90deg,#e91e63,#d63384)}
 .level-up-btn:active{transform:scale(.95)}
+.gallery-card{background:#f5ede4;border-radius:10px;padding:10px 8px;text-align:center;position:relative}
+.gallery-card.locked{opacity:.85}
+.gallery-name{font-size:12px;font-weight:600;color:#493e38;margin:2px 0}
+.gallery-lvl{font-size:10px;color:#5c9e5c;font-weight:500}
+.gallery-hint{font-size:9px;color:#b9a58a;margin-top:2px;line-height:1.3}
+.raise-card{min-width:100%;box-sizing:border-box;padding:0 4px;text-align:center}
+.raise-header{text-align:center;padding:8px 0 4px}
+.raise-name{font-size:16px;font-weight:600;color:#493e38}
+.raise-stat-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;max-width:220px;margin-left:auto;margin-right:auto}
+.raise-btns{display:flex;gap:10px;justify-content:center;padding:10px 0 8px}
+.raise-dot{width:8px;height:8px;border-radius:50%;background:#d4c5b2;cursor:pointer;transition:.2s;display:inline-block}
+.raise-dot.active{background:#d63384;width:20px;border-radius:4px}
+body.dark .gallery-card{background:#2a2520}
+body.dark .gallery-name{color:#d9bb98}
+body.dark .raise-name{color:#d9bb98}
 </style>
 </head>
 <body>
@@ -3129,7 +3144,7 @@ function renderCoffeeWeekChart(){
 
 // ===== NAV =====
 function switchView(viewId){
-  const views=['viewToday','viewCreatures','viewWeekly','viewSettings'];
+  const views=['viewToday','viewCreatures','viewRaise','viewWeekly','viewSettings'];
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(viewId).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach((b,i)=>{
@@ -3137,7 +3152,7 @@ function switchView(viewId){
   });
   const idx=views.indexOf(viewId);
   const slider=document.getElementById('navSlider');
-  slider.style.left=`${idx*25}%`;
+  slider.style.left=`${idx*20}%`;
   if(viewId==='viewWeekly') renderWeeklyView();
   if(viewId==='viewCreatures') renderGallery();
   if(viewId==='viewRaise'){raiseSlideIdx=0;renderRaise();updateRaiseSlide();}
