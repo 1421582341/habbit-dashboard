@@ -1529,7 +1529,6 @@ function init(){
   if(!state.collectedCreatures) state.collectedCreatures = [];
   if(!state.newUnlocks) state.newUnlocks = [];
   renderToday();
-  renderWeek();
   renderWeeklyView();
   renderGallery();
   setupTheme();
@@ -2337,34 +2336,34 @@ function renderSneakPeek(){
 }
 
 
-// ===== RENDER: WEEK =====
-function renderWeek(){
-  const dates=getWeekDates();
-  const today=todayKey();
-  const row=document.getElementById('weekRow');
-  const maxHabits=Math.max(1,state.habits.length);
-  const cx=50, cy=50, r=36, circ=2*Math.PI*r;
-
-  row.innerHTML=dates.map((d,i)=>{
-    const {done,total,rate}=getDayStats(d);
-    const isToday=d===today;
-    const offset=circ-(rate/100*circ);
-    const fillClass=done===total&&total>0?'done':'';
-
-    return `<div class="week-day${isToday?' today':''}">
-      <div class="week-label">${WEEKDAYS[i]}</div>
-      <div class="week-ring-wrap">
-        <svg viewBox="0 0 100 100">
-          <circle class="week-ring-bg" cx="${cx}" cy="${cy}" r="${r}"/>
-          <circle class="week-ring-fill ${fillClass}" cx="${cx}" cy="${cy}" r="${r}"
-            stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
-        </svg>
-      </div>
-      <div class="week-score">${done}/${total}</div>
-    </div>`;
-  }).join('');
-}
-
+// // ===== RENDER: WEEK =====
+// function renderWeek(){
+//   const dates=getWeekDates();
+//   const today=todayKey();
+//   const row=document.getElementById('weekRow');
+//   const maxHabits=Math.max(1,state.habits.length);
+//   const cx=50, cy=50, r=36, circ=2*Math.PI*r;
+// 
+//   row.innerHTML=dates.map((d,i)=>{
+//     const {done,total,rate}=getDayStats(d);
+//     const isToday=d===today;
+//     const offset=circ-(rate/100*circ);
+//     const fillClass=done===total&&total>0?'done':'';
+// 
+//     return `<div class="week-day${isToday?' today':''}">
+//       <div class="week-label">${WEEKDAYS[i]}</div>
+//       <div class="week-ring-wrap">
+//         <svg viewBox="0 0 100 100">
+//           <circle class="week-ring-bg" cx="${cx}" cy="${cy}" r="${r}"/>
+//           <circle class="week-ring-fill ${fillClass}" cx="${cx}" cy="${cy}" r="${r}"
+//             stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+//         </svg>
+//       </div>
+//       <div class="week-score">${done}/${total}</div>
+//     </div>`;
+//   }).join('');
+// }
+// 
 // ===== RENDER: WEEKLY VIEW =====
 function renderWeeklyView(){
   const container=document.getElementById('weeklyReport');
