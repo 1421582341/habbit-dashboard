@@ -3972,6 +3972,37 @@ function addManualMeal(){
   addCoins(COIN_RATES.coffee,'🍽️');
 }
 
+// iOS: hide nav bar when keyboard opens on mobile
+(function fixMobileKeyboardNav(){
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!isIOS)return;
+  const navBar=document.getElementById('navBar');
+  let keyboardTimer=null;
+  document.addEventListener('focusin',function onFocus(e){
+    const tag=e.target.tagName;
+    if(tag!=='INPUT'&&tag!=='SELECT'&&tag!=='TEXTAREA')return;
+    clearTimeout(keyboardTimer);
+    navBar.style.display='none';
+  });
+  document.addEventListener('focusout',function onBlur(e){
+    const tag=e.target.tagName;
+    if(tag!=='INPUT'&&tag!=='SELECT'&&tag!=='TEXTAREA')return;
+    clearTimeout(keyboardTimer);
+    keyboardTimer=setTimeout(()=>{navBar.style.display='flex'},200);
+  });
+  // visualViewport: fix blank space after keyboard closes
+  if(window.visualViewport){
+    let lastHeight=window.visualViewport.height;
+    window.visualViewport.addEventListener('resize',()=>{
+      const h=window.visualViewport.height;
+      if(h>lastHeight&&navBar.style.display==='none'){
+        navBar.style.display='flex';
+      }
+      lastHeight=h;
+    });
+  }
+})();
+
 // ===== NAV =====
 function switchView(viewId){
   const views=['viewToday','viewCreatures','viewRaise','viewWeekly','viewMeals','viewSettings'];
