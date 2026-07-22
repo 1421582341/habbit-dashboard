@@ -1221,7 +1221,6 @@ body.dark .raise-name{color:#d9bb98}
       <div class="date-display" id="dateDisplay"></div>
     </div>
     <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌙</button>
-  </div>
 
   <!-- QUOTE / EXP LEVEL -->
   <div class="card" style="padding:14px 18px">
@@ -1229,7 +1228,6 @@ body.dark .raise-name{color:#d9bb98}
       <div><span class="exp-level-badge" id="expLevelBadge" style="font-size:12px;padding:2px 10px">Lv.1 🌱萌芽者</span></div>
       <div style="display:flex;gap:12px;align-items:center">
         <span style="font-size:13px;font-weight:600;color:#d4a017">🪙 <span id="coinDisplay">0</span></span>
-        <button onclick="toggleShop()" style="background:none;border:1px solid #b9a58a;border-radius:6px;padding:2px 8px;font-size:11px;font-family:inherit;color:#8a7a6a;cursor:pointer">🏪 商店</button>
       </div>
     </div>
     <div class="exp-bar-wrap" style="margin-top:8px;height:8px;border-radius:4px">
@@ -1523,19 +1521,6 @@ body.dark .raise-name{color:#d9bb98}
     <div class="level-up-title" id="levelUpTitle">升级了！</div>
     <div class="level-up-sub" id="levelUpSub">达到 Lv.2</div>
     <button class="level-up-btn" onclick="closeLevelUp()">继续加油！</button>
-  </div>
-</div>
-
-<!-- SHOP MODAL -->
-<div class="level-up-overlay" id="shopModal">
-  <div class="level-up-content" style="max-width:360px">
-    <span style="font-size:40px;display:block;margin-bottom:4px">🏪</span>
-    <div class="level-up-title" style="font-size:18px">精灵商店</div>
-    <div class="level-up-sub" style="margin-bottom:16px">🪙 <span id="shopCoinDisplay">0</span> 金币</div>
-    <div id="shopItems" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-      <!-- rendered by JS -->
-    </div>
-    <button class="level-up-btn" onclick="toggleShop()" style="width:100%">关闭</button>
   </div>
 </div>
 
@@ -2755,53 +2740,6 @@ function customExercise(){
   }
 }
 
-// ===== FOOD & SHOP =====
-const FOOD_ITEMS = [
-  { id:'berry', name:'浆果', emoji:'🫐', cost:0, desc:'每日免费互动 +1级' },
-  { id:'cake', name:'蛋糕', emoji:'🧁', cost:0, desc:'完成3个习惯解锁 +3级' },
-  { id:'milk', name:'牛奶', emoji:'🥛', cost:0, desc:'喝水3天解锁 +2级' },
-  { id:'star', name:'星星糖', emoji:'⭐', cost:0, desc:'全勤日解锁 +5级' },
-];
-
-function toggleShop(){
-  const modal=document.getElementById('shopModal');
-  if(modal.classList.contains('show')){
-    modal.classList.remove('show');
-  }else{
-    renderShop();
-    modal.classList.add('show');
-  }
-}
-
-function renderShop(){
-  renderCoins();
-  const container=document.getElementById('shopItems');
-  container.innerHTML=FOOD_ITEMS.map(f=>{
-    const owned=state.inventory[f.id]||0;
-    return `<div style="background:#d8c9b6;border-radius:10px;padding:10px;text-align:center;${document.body.classList.contains('dark')?'background:#3a322f;':''}">
-      <div style="font-size:28px;margin-bottom:2px">${f.emoji}</div>
-      <div style="font-size:12px;font-weight:600;color:#3a322f">${f.name}</div>
-      <div style="font-size:9px;color:#8a7a6a;margin:2px 0">${f.desc}</div>
-      <div style="display:flex;gap:4px;justify-content:center;margin-top:4px">
-        <button onclick="buyFood('${f.id}')" style="background:#493e38;color:#e8ddcf;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-family:inherit;cursor:pointer">🪙${f.cost}</button>
-        <span style="font-size:10px;color:#8a7a6a;display:flex;align-items:center">×${owned}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function buyFood(foodId){
-  const food=FOOD_ITEMS.find(f=>f.id===foodId);
-  if(!food) return;
-  if(state.coins<food.cost){ showToast('金币不够', '💰'); return; }
-  state.coins -= food.cost;
-  if(!state.inventory[foodId]) state.inventory[foodId]=0;
-  state.inventory[foodId]++;
-  saveState();
-  renderCoins();
-  renderShop();
-}
-
 // ===== FEEDING (now habit-linked) =====
 function feedCreature(creatureId){
   const c=CREATURES.find(cr=>cr.id===creatureId);
@@ -3467,7 +3405,6 @@ function renderRaise(){
         '<div class="raise-stat-row"><span style="font-size:11px;width:28px">💕</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-intimacy" style="width:'+intimacyPct+'%"></div></div><span style="font-size:10px;color:#d63384;width:28px;text-align:right">'+intimacyLabel+'</span></div>'+
       '</div>'+
       '<div class="raise-btns">'+
-        '<button class="tama-btn tama-btn-feed" onclick="feedPet(this.dataset.cid)">🍽️ 喂食</button>'+
         '<button class="tama-btn tama-btn-play" onclick="playPet(this.dataset.cid)">🎾 玩耍</button>'+
       '</div>'+
     '</div>';
