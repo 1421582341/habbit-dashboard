@@ -1934,6 +1934,7 @@ async function init(){
     await startAuthenticatedApp();
     // Migrate: ensure ALL creatures have personal records (after cloud sync)
     migratePersonalRecords();
+    renderGallery();
   }catch(error){
     if(error.message==='authentication_required')showLogin('');
     else showLogin(error.message||'无法读取云端数据');
@@ -2348,13 +2349,22 @@ function getRarityColor(rarity){
 function showProfile(creatureId){
   const creature=CREATURES.find(c=>c.id===creatureId);
   if(!creature)return;
-  const rec=state.personalRecords?.[creatureId];
-  if(!rec)return;
   const modal=document.getElementById('profileModal');
   document.getElementById('profileCreatureEmoji').textContent=creature.emoji||'🧚';
   document.getElementById('profileCreatureName').textContent=creature.name;
   document.getElementById('profileCreatureRarity').textContent='🧚 '+creature.rarity+'精灵';
   document.getElementById('profileCreatureRarity').style.color=getRarityColor(creature.rarity);
+
+  const rec=state.personalRecords?.[creatureId];
+  if(!rec){
+    document.getElementById('profileContent').innerHTML=
+      '<div class="profile-section" style="text-align:center;padding:20px">'+
+      '<div style="font-size:28px;margin-bottom:8px">🔒</div>'+
+      '<div style="color:#8a7a6a">尚未相遇，先去收集它吧！</div>'+
+      '</div>';
+    modal.classList.add('show');
+    return;
+  }
 
   // Build content
   var html='';
@@ -3197,8 +3207,7 @@ function renderGallery(){
       statusHtml='<div class="book-hint">'+hint+'</div>';
     }
 
-    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'"'+
-      (isCollected?' onclick="showProfile(\''+c.id+'\')"':'')+'>'+
+    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'" onclick="showProfile(\''+c.id+'\')">'+
       '<div class="deck-left'+(isCollected?'':' gray')+'">'+
         renderPetFace(c.id,64)+
         '<div class="deck-name">'+(isCollected?c.emoji+' ':'')+c.name+'</div>'+
