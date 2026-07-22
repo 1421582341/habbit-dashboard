@@ -1205,30 +1205,6 @@ body.dark .raise-name{color:#d9bb98}
     <!-- VIEW: TODAY -->
   <div class="view active" id="viewToday">
 
-    <!-- COLLECTION PROGRESS -->
-    <div class="card" onclick="switchView('viewCreatures')" style="cursor:pointer">
-      <div class="card-header">🧚 精灵收集</div>
-      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
-        <div class="gallery-stats" style="flex:1;padding:0">
-          <div class="gallery-stat">
-            <div class="gallery-stat-value" id="galleryCollected">0</div>
-            <div class="gallery-stat-label">已收集</div>
-          </div>
-          <div class="gallery-stat">
-            <div class="gallery-stat-value" id="galleryTotal">12</div>
-            <div class="gallery-stat-label">总图鉴</div>
-          </div>
-          <div class="gallery-stat">
-            <div class="gallery-stat-value" id="galleryProgress">0%</div>
-            <div class="gallery-stat-label">完成度</div>
-          </div>
-        </div>
-      </div>
-      <div id="creatureSneakPeek" style="text-align:center;padding:4px 0">
-        <!-- rendered by JS -->
-      </div>
-    </div>
-
     <!-- EXERCISE STATS -->
     <div class="card">
       <div class="card-header">🏃 今日运动</div>
@@ -1302,18 +1278,7 @@ body.dark .raise-name{color:#d9bb98}
       </div>
     </div>
 
-  </div><!-- VIEW: WEEKLY -->
-  <div class="view" id="viewWeekly">
-    <div class="card">
-      <div class="card-header">📊 本周报告</div>
-      <div id="weeklyReport"></div>
-    </div>
-  </div>
-
-  <!-- VIEW: CREATURES -->
-  <div class="view" id="viewCreatures">
-
-    <!-- WEIGHT TRACKER (for creature unlocking) -->
+    <!-- WEIGHT TRACKER -->
     <div class="card">
       <div class="card-header">⚖️ 体重记录 · 解锁精灵</div>
       <div class="weight-row">
@@ -1327,6 +1292,41 @@ body.dark .raise-name{color:#d9bb98}
         🥚 小暖暖：记录一次体重 &nbsp;·&nbsp; 🌱 豆豆芽：单日运动15分 &nbsp;·&nbsp; 🍀 三叶：连续3天运动<br>
         🍄 小蘑菇：−0.5kg &nbsp;·&nbsp; 🍃 轻飘飘：−1kg &nbsp;·&nbsp; ☁️ 云朵朵：−3kg<br>
         🦄 小独角：−5kg &nbsp;·&nbsp; 🔔 小铃铛：−8kg
+      </div>
+    </div>
+
+  </div><!-- VIEW: WEEKLY -->
+  <div class="view" id="viewWeekly">
+    <div class="card">
+      <div class="card-header">📊 本周报告</div>
+      <div id="weeklyReport"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: CREATURES -->
+  <div class="view" id="viewCreatures">
+
+    <!-- COLLECTION PROGRESS -->
+    <div class="card" style="cursor:pointer">
+      <div class="card-header">🧚 精灵收集</div>
+      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+        <div class="gallery-stats" style="flex:1;padding:0">
+          <div class="gallery-stat">
+            <div class="gallery-stat-value" id="galleryCollected">0</div>
+            <div class="gallery-stat-label">已收集</div>
+          </div>
+          <div class="gallery-stat">
+            <div class="gallery-stat-value" id="galleryTotal">12</div>
+            <div class="gallery-stat-label">总图鉴</div>
+          </div>
+          <div class="gallery-stat">
+            <div class="gallery-stat-value" id="galleryProgress">0%</div>
+            <div class="gallery-stat-label">完成度</div>
+          </div>
+        </div>
+      </div>
+      <div id="creatureSneakPeek" style="text-align:center;padding:4px 0">
+        <!-- rendered by JS -->
       </div>
     </div>
 
