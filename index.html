@@ -1331,22 +1331,30 @@ body.dark .raise-name{color:#d9bb98}
           <svg width="48" height="68" viewBox="0 0 48 68" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#b3d9ff"/>
-                <stop offset="100%" stop-color="#7ab3e6"/>
+                <stop offset="0%" stop-color="#8fc1d9"/>
+                <stop offset="100%" stop-color="#5c9ebf"/>
               </linearGradient>
               <clipPath id="waterClip">
-                <rect x="0" y="0" width="48" height="68"/>
+                <path id="glassShape" d="M9.5 14L7 56.5Q7 63 13 63H35Q41 63 41 56.5L38.5 14Z"/>
               </clipPath>
             </defs>
-            <path d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="rgba(255,255,255,0.1)" stroke="#d4c5b2" stroke-width="1.8"/>
+            <!-- Glass outline -->
+            <path d="M9.5 14L7 56.5Q7 63 13 63H35Q41 63 41 56.5L38.5 14Z" fill="rgba(255,255,255,0.08)" stroke="#c4aa8a" stroke-width="1.5" opacity=".5"/>
+            <!-- Water fill -->
             <g clip-path="url(#waterClip)">
-              <path id="waterPath" d="M8 16 L6 58 Q6 64 12 64 L36 64 Q42 64 42 58 L40 16 Z" fill="url(#waterGrad)" opacity="0"/>
+              <path id="waterPath" d="M7 56.5Q7 63 13 63H35Q41 63 41 56.5L41 30Q36 33 31 30Q26 27 21 30Q16 33 11 30L9.5 14Z" fill="url(#waterGrad)" opacity="0"/>
             </g>
-            <path d="M40 26 Q48 26 48 32 Q48 38 40 38" stroke="#d4c5b2" stroke-width="1.8" fill="none"/>
-            <rect x="4" y="12" width="40" height="5" rx="2.5" fill="#fff5e6" stroke="#d4c5b2" stroke-width="1.2"/>
-            <line id="ripple1" x1="12" y1="38" x2="36" y2="38" stroke="#fff" stroke-width=".8" opacity="0"/>
-            <line id="ripple2" x1="14" y1="42" x2="34" y2="42" stroke="#fff" stroke-width=".6" opacity="0"/>
-            <line x1="14" y1="20" x2="14" y2="52" stroke="#fff" stroke-width="1.2" opacity=".15"/>
+            <!-- Handle -->
+            <path d="M39 25Q48 25 48 33Q48 40 39 40" stroke="#c4aa8a" stroke-width="1.5" fill="none" opacity=".5"/>
+            <!-- Rim -->
+            <rect x="6" y="10" width="36" height="5.5" rx="2.8" fill="#e8ddcf" stroke="#c4aa8a" stroke-width="1.2" opacity=".7"/>
+            <!-- Water surface wave -->
+            <path id="surfaceWave" d="M0 0L48 0" stroke="#fff" stroke-width=".8" opacity="0" transform="translate(0,0)"/>
+            <!-- Ripple lines -->
+            <line id="ripple1" x1="13" y1="46" x2="35" y2="46" stroke="#fff" stroke-width=".7" opacity="0" stroke-linecap="round"/>
+            <line id="ripple2" x1="15" y1="50" x2="33" y2="50" stroke="#fff" stroke-width=".5" opacity="0" stroke-linecap="round"/>
+            <!-- Light reflection -->
+            <line x1="15" y1="22" x2="15" y2="50" stroke="#fff" stroke-width="1" opacity=".12" stroke-linecap="round"/>
           </svg>
         </div>
         <div style="flex:1">
