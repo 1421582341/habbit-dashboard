@@ -1267,7 +1267,7 @@ body.dark .raise-name{color:#d9bb98}
 <body class="auth-pending">
 
 <div class="auth-gate" id="authGate">
-  <form class="auth-card" id="loginForm" autocomplete="on" novalidate>
+  <form class="auth-card" id="loginForm" autocomplete="on" novalidate onsubmit="return false">
     <div class="auth-title">∞ INFPLife</div>
     <div class="auth-subtitle">登录后读取你的个人数据，并在设备之间安全同步。</div>
     <label class="auth-field" for="loginEmail">邮箱</label>
@@ -1912,7 +1912,7 @@ let firstWeightRecorded = false;
 const SB_URL='https://xqvhcncxnwhokhfpyyjl.supabase.co';
 const SB_KEY='sb_publishable_k4sbBFCmfn-Zk2zvucVgNA_Trm0EADc';
 const sbClient=window.supabase.createClient(SB_URL,SB_KEY,{
-  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
 });
 let cloud=null;
 let cloudReady=false;
@@ -2012,6 +2012,10 @@ async function performAuthenticatedStart(){
   document.getElementById('accountEmail').textContent=user?.email||'已登录';
   hideLogin();
   clearSyncConflict();
+  // Clear any auth fragments from URL
+  if(window.location.hash||window.location.search){
+    history.replaceState(null,'',window.location.pathname);
+  }
   if(outbox?.state){
     cloud.restorePending({state:InflifeSyncCore.serializeState(state),expectedVersion:outbox.expectedVersion});
     if(Number(outbox.expectedVersion)===loaded.version){
