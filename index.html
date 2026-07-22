@@ -1922,16 +1922,6 @@ async function startAuthenticatedApp(){
 async function init(){
   loadState();
   bindAuthUI();
-  // Migrate: ensure all collected creatures have personal records
-  if(!state.personalRecords) state.personalRecords={};
-  var migrated=false;
-  for(const c of CREATURES){
-    if(state.collectedCreatures.includes(c.id)&&!state.personalRecords[c.id]){
-      state.personalRecords[c.id]=generatePersonalRecord(c,state.personalRecords);
-      migrated=true;
-    }
-  }
-  if(migrated)saveState();
   cloud=InflifeCloud.create({client:sbClient,onStatus:setSyncStatus,onOutboxChange:writeOutbox});
   cloud.subscribeAuth((event,session)=>{
     if(!session && event==='SIGNED_OUT')showLogin('');
@@ -1942,10 +1932,24 @@ async function init(){
   });
   try{
     await startAuthenticatedApp();
+    // Migrate: ensure ALL creatures have personal records (after cloud sync)
+    migratePersonalRecords();
   }catch(error){
     if(error.message==='authentication_required')showLogin('');
     else showLogin(error.message||'无法读取云端数据');
   }
+}
+
+function migratePersonalRecords(){
+  if(!state.personalRecords) state.personalRecords={};
+  var changed=false;
+  for(const c of CREATURES){
+    if(!state.personalRecords[c.id]){
+      state.personalRecords[c.id]=generatePersonalRecord(c,state.personalRecords);
+      changed=true;
+    }
+  }
+  if(changed)saveState();
 }
 
 function initApp(){
