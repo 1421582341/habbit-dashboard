@@ -721,9 +721,20 @@ body.dark .nav-btn svg{stroke:currentColor}
   pointer-events:none;
   animation:confettiFall 1.5s ease forwards;
 }
+body.dark .filter-btn.active{background:#c4aa8a;color:#1a1512;border-color:#c4aa8a}
+
+/* ===== WEEKLY SUB-TABS ===== */
+.weekly-subtab{
+  flex:1;padding:8px 4px;border:none;border-radius:5px;font-family:inherit;font-size:12px;
+  font-weight:500;cursor:pointer;transition:.25s;color:var(--c-text-secondary);background:transparent;
+  -webkit-tap-highlight-color:transparent;
+}
+.weekly-subtab.active{background:var(--bg-surface);color:var(--c-text)}
+body.dark .weekly-subtab.active{background:var(--bg-surface-alt);color:var(--c-text)}
+.weekly-subtab:active{transform:scale(.96)}
 
 /* ===== CREATURE CSS ===== */
-
+.creature-grid{
 /* Gallery Stats Bar */
 .gallery-stats{
   display:flex;gap:8px;margin-bottom:14px;
@@ -749,8 +760,18 @@ body.dark .gallery-stat-value{color:#d3b694}
 body.dark .filter-btn{color:var(--c-text-secondary);border-color:var(--c-primary)}
 body.dark .filter-btn.active{background:#c4aa8a;color:#1a1512;border-color:#c4aa8a}
 
-/* Creature Card */
-.creature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+/* ===== WEEKLY SUB-TABS ===== */
+.weekly-subtab{
+  flex:1;padding:8px 4px;border:none;border-radius:5px;font-family:inherit;font-size:12px;
+  font-weight:500;cursor:pointer;transition:.25s;color:var(--c-text-secondary);background:transparent;
+  -webkit-tap-highlight-color:transparent;
+}
+.weekly-subtab.active{background:var(--bg-surface);color:var(--c-text)}
+body.dark .weekly-subtab.active{background:var(--bg-surface-alt);color:var(--c-text)}
+.weekly-subtab:active{transform:scale(.96)}
+
+/* ===== CREATURE CSS ===== */
+.creature-grid{
 .creature-card{
   background:var(--bg);border:1px solid transparent;
   border-radius:var(--r-lg);padding:12px 8px;
@@ -1407,15 +1428,20 @@ body.dark .raise-name{color:#d9bb98}
 
   </div><!-- VIEW: WEEKLY -->
   <div class="view" id="viewWeekly">
-    <div class="card">
+    <div style="display:flex;gap:4px;background:var(--bg-surface-alt);border-radius:var(--r-sm);padding:3px;margin-bottom:14px" id="weeklySubnav">
+      <button class="weekly-subtab active" data-weeklytab="weekly" onclick="switchWeeklyTab('weekly')">📊 本周</button>
+      <button class="weekly-subtab" data-weeklytab="monthly" onclick="switchWeeklyTab('monthly')">📅 本月</button>
+      <button class="weekly-subtab" data-weeklytab="achieve" onclick="switchWeeklyTab('achieve')">🏆 成就</button>
+    </div>
+    <div class="card" id="weeklyCard">
       <div class="card-header">📊 本周报告</div>
       <div id="weeklyReport"></div>
     </div>
-    <div class="card">
+    <div class="card" id="monthlyCard" style="display:none">
       <div class="card-header">📅 本月回顾</div>
       <div id="monthlyReport"></div>
     </div>
-    <div class="card" id="achievementCard" style="cursor:pointer" onclick="toggleAchievementView()">
+    <div class="card" id="achieveCard" style="display:none;cursor:pointer" onclick="toggleAchievementView()">
       <div class="card-header">🏆 成就 <span id="achieveCount" style="font-weight:400;font-size:12px;color:var(--c-text-secondary)"></span></div>
       <div id="achievementGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
@@ -1526,14 +1552,17 @@ body.dark .raise-name{color:#d9bb98}
       </div>
     </div>
     <div class="card" style="margin-top:12px">
-      <div class="card-header">⌚️ 自动同步 Apple Watch</div>
-      <div style="font-size:12px;color:#6a5a4a;line-height:1.7;padding:4px 0">
-        <p>快捷指令现在通过受保护的 POST 请求写入，不再把健康数据或密钥放在网页 URL 中：</p>
+      <div class="card-header" onclick="toggleWatchDocs()" style="cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center">
+        <span>⌚️ 自动同步 Apple Watch</span>
+        <span id="watchDocsArrow" style="font-size:14px;transition:transform .3s">›</span>
+      </div>
+      <div id="watchDocsContent" style="font-size:12px;color:#6a5a4a;line-height:1.7;padding:4px 0;display:none">
+        <p>快捷指令通过受保护的 POST 请求写入健康数据：</p>
         <ol style="padding-left:18px;margin:6px 0">
-          <li>添加「<b>健康</b>」→「<b>获取样本</b>」→ 选择「<b>运动分钟</b>」→ 范围「今天」</li>
-          <li>添加「<b>脚本</b>」→「<b>计算统计信息</b>」→ 对运动分钟求和</li>
-          <li>添加「<b>生成 UUID</b>」和「<b>当前日期</b>」，日期格式设为 <code>yyyy-MM-dd</code></li>
-          <li>添加「<b>获取 URL 内容</b>」，方法选 POST，按 README 配置 JSON 正文和 <code>x-shortcut-secret</code> 请求头</li>
+          <li>「<b>健康</b>」→「<b>获取样本</b>」→ 选择「<b>运动分钟</b>」→ 范围「今天」</li>
+          <li>「<b>脚本</b>」→「<b>计算统计信息</b>」→ 对运动分钟求和</li>
+          <li>「<b>生成 UUID</b>」和「<b>当前日期</b>」，日期格式 <code>yyyy-MM-dd</code></li>
+          <li>「<b>获取 URL 内容</b>」，方法 POST，按 README 配置 JSON 正文和 <code>x-shortcut-secret</code></li>
         </ol>
         <p style="color:var(--c-text-secondary);font-size:11px;margin-top:4px">💡 密钥只保存在快捷指令里；完整配置见项目 README。</p>
       </div>
@@ -3683,6 +3712,25 @@ function toggleAchievementView(){
   }else{
     renderAchievementGrid();
   }
+}
+
+function toggleWatchDocs(){
+  const el=document.getElementById('watchDocsContent');
+  const arrow=document.getElementById('watchDocsArrow');
+  if(!el||!arrow)return;
+  const open=el.style.display!='none';
+  el.style.display=open?'none':'block';
+  arrow.style.transform=open?'rotate(0deg)':'rotate(90deg)';
+}
+
+function switchWeeklyTab(tab){
+  document.querySelectorAll('.weekly-subtab').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`[data-weeklytab="${tab}"]`).classList.add('active');
+  ['weeklyCard','monthlyCard','achieveCard'].forEach(id=>{
+    const el=document.getElementById(id);
+    const show=id.replace('Card','')===tab;
+    el.style.display=show?'block':'none';
+  });
 }
 
 // ===== RENDER: GALLERY =====
