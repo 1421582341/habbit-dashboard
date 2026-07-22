@@ -15,13 +15,80 @@
 <title>INFPLife · 精灵看板</title>
 
 <style>
+/* ===== DESIGN TOKENS ===== */
+:root{
+  /* Brand */
+  --c-primary:#493e38;
+  --c-primary-hover:#3d3430;
+  --c-accent:#c4aa8a;
+  --c-accent-dark:#b2946e;
+
+  /* Backgrounds */
+  --bg:#d8c9b6;
+  --bg-surface:#e8ddcf;
+  --bg-surface-alt:#d8c9b6;
+  --bg-input:#f5ede4;
+
+  /* Text */
+  --c-text:#3a322f;
+  --c-text-secondary:#6a5a4a;  /* ↑ 从#8a7a6a加深,AA合规 */
+  --c-text-tertiary:#8a7a6a;
+  --c-text-inverse:#e8ddcf;
+
+  /* Borders */
+  --c-border:#cebda8;
+  --c-border-light:#d5c5b0;
+  --c-border-hover:#b9a58a;
+
+  /* Semantic */
+  --c-success:#4caf50;
+  --c-danger:#b04444;
+  --c-gold:#d4a017;
+  --c-purple:#7c5cbf;
+
+  /* Radius */
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-xl:20px;
+
+  /* Shadows */
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+
+  /* Spacing */
+  --space-xs:4px;
+  --space-sm:8px;
+  --space-md:14px;
+  --space-lg:20px;
+  --space-xl:24px;
+}
+body.dark{
+  --bg:#1a1512;
+  --bg-surface:#322a26;
+  --bg-surface-alt:#3a322f;
+  --bg-input:#3a322f;
+  --c-text:#d9bb98;
+  --c-text-secondary:#a0907a;  /* ↑ 从#8a7a6a提亮,AA合规 */
+  --c-text-tertiary:#8a7a6a;
+  --c-text-inverse:#1a1512;
+  --c-border:#493e38;
+  --c-border-light:#493e38;
+  --c-border-hover:#6a5a4a;
+  --c-primary-hover:#c4aa8a;
+  --c-success:#8fc75a;
+  --c-danger:#e57373;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,.4);
+}
+
 /* ===== RESET & BASE ===== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;-webkit-text-size-adjust:100%;overscroll-behavior:none}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans CJK SC','Helvetica Neue',sans-serif;
-  background:#d8c9b6;
-  color:#3a322f;
+  background:var(--bg);
+  color:var(--c-text);
   min-height:100dvh;
   padding:0 0 100px 0;
   overflow-x:hidden;
@@ -34,30 +101,30 @@ body.sync-loading>.container,body.sync-loading>.nav-bar{pointer-events:none;opac
 body.sync-loading{cursor:wait}
 .auth-gate{
   position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
-  padding:24px;background:#d8c9b6;
+  padding:24px;background:var(--bg);
 }
 .auth-gate[hidden]{display:none}
 .auth-card{
-  width:100%;max-width:380px;background:#e8ddcf;border:1px solid #d5c5b0;
-  border-radius:16px;padding:28px 22px;color:#3a322f;
+  width:100%;max-width:380px;background:var(--bg-surface);border:1px solid var(--c-border-light);
+  border-radius:var(--r-lg);padding:28px 22px;color:var(--c-text);
 }
 .auth-title{font-size:22px;font-weight:600;margin-bottom:6px;text-align:center}
-.auth-subtitle{font-size:12px;color:#8a7a6a;line-height:1.6;text-align:center;margin-bottom:20px}
+.auth-subtitle{font-size:12px;color:var(--c-text-secondary);line-height:1.6;text-align:center;margin-bottom:20px}
 .auth-field{display:block;font-size:11px;color:#6a5a4a;margin:12px 0 5px}
 .auth-input{
-  width:100%;padding:12px 13px;border:1.5px solid #cebda8;border-radius:8px;
-  background:#f5ede4;color:#3a322f;font:inherit;font-size:14px;outline:none;
+  width:100%;padding:12px 13px;border:1.5px solid var(--c-border);border-radius:var(--r-sm);
+  background:var(--bg-input);color:var(--c-text);font:inherit;font-size:14px;outline:none;
 }
-.auth-input:focus{border-color:#8a7a6a}
-.auth-submit{width:100%;margin-top:18px;padding:12px;border:0;border-radius:8px;background:#493e38;color:#fff;font:inherit;cursor:pointer}
+.auth-input:focus{border-color:var(--c-text-secondary)}
+.auth-submit{width:100%;margin-top:18px;padding:12px;border:0;border-radius:var(--r-sm);background:#493e38;color:#fff;font:inherit;cursor:pointer}
 .auth-submit:disabled{opacity:.55;cursor:wait}
 .auth-error{min-height:18px;margin-top:10px;color:#b04444;font-size:12px;text-align:center}
-.sync-status{font-size:11px;color:#8a7a6a;overflow-wrap:anywhere}
+.sync-status{font-size:11px;color:var(--c-text-secondary);overflow-wrap:anywhere}
 .sync-conflict-actions{margin-top:8px;display:flex;gap:6px}
 .sync-conflict-actions[hidden]{display:none}
 body.dark .auth-gate{background:#1a1512}
-body.dark .auth-card{background:#322a26;border-color:#493e38;color:#d9bb98}
-body.dark .auth-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+body.dark .auth-card{background:#322a26;border-color:var(--c-primary);color:#d9bb98}
+body.dark .auth-input{background:#3a322f;border-color:var(--c-primary);color:#d9bb98}
 
 /* ===== DARK MODE ===== */
 body.dark{
@@ -71,16 +138,16 @@ body.dark .card{
 }
 body.dark .card-header{color:#c4aa8a;letter-spacing:1.5px}
 body.dark .stat-value{color:#d3b694}
-body.dark .stat-label{color:#8a7a6a}
-body.dark .habit-item{background:#3a322f;border-color:#493e38}
+body.dark .stat-label{color:var(--c-text-secondary)}
+body.dark .habit-item{background:#3a322f;border-color:var(--c-primary)}
 body.dark .habit-item:active{background:#493e38}
 body.dark .check-circle{border-color:#6a5a4a;background:transparent}
 body.dark .check-circle.checked{border-color:#c4aa8a;background:#c4aa8a;box-shadow:0 2px 6px rgba(196,170,138,.2)}
 body.dark .habit-text{color:#d9bb98}
-body.dark .habit-text.done{color:#6a5a4a;text-decoration-color:#493e38}
+body.dark .habit-text.done{color:#6a5a4a;text-decoration-color:var(--c-primary)}
 body.dark .progress-bar{background:#493e38}
 body.dark .progress-fill{background:linear-gradient(90deg,#c4aa8a,#b2946e)}
-body.dark .week-day{color:#8a7a6a}
+body.dark .week-day{color:var(--c-text-secondary)}
 body.dark .week-day .week-dot{background:#493e38}
 body.dark .week-day .week-dot.done{background:#c4aa8a}
 body.dark .week-day .week-dot.partial{background:linear-gradient(135deg,#c4aa8a 50%,#493e38 50%)}
@@ -88,57 +155,57 @@ body.dark .week-day .week-dot.done{background:#c4aa8a}
 body.dark .week-day .week-dot.partial{background:linear-gradient(135deg,#c4aa8a 50%,#493e38 50%)}
 body.dark .streak-number{color:#d3b694}
 body.dark h2{color:#c4aa8a}
-body.dark .theme-toggle{color:#8a7a6a;border-color:#493e38}
-body.dark .theme-toggle:hover{color:#d9bb98;border-color:#8a7a6a}
-body.dark .quote{color:#8a7a6a;border-left-color:#493e38}
+body.dark .theme-toggle{color:var(--c-text-secondary);border-color:var(--c-primary)}
+body.dark .theme-toggle:hover{color:#d9bb98;border-color:var(--c-text-secondary)}
+body.dark .quote{color:var(--c-text-secondary);border-left-color:var(--c-primary)}
 body.dark .empty-state{color:#6a5a4a}
 body.dark .settings-panel{background:#322a26}
 body.dark .nav-bar{background:rgba(50,42,38,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid #493e38}
-body.dark .nav-btn{color:#8a7a6a}
+body.dark .nav-btn{color:var(--c-text-secondary)}
 body.dark .nav-btn.active{color:#c4aa8a}
 body.dark .nav-slider{background:#c4aa8a}
-body.dark .add-habit-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+body.dark .add-habit-input{background:#3a322f;border-color:var(--c-primary);color:#d9bb98}
 body.dark .add-habit-input::placeholder{color:#6a5a4a}
 body.dark .add-btn{background:#c4aa8a;color:#1a1512}
-body.dark .btn-cancel{background:#493e38;color:#8a7a6a}
+body.dark .btn-cancel{background:#493e38;color:var(--c-text-secondary)}
 body.dark .btn-danger{background:#493e38;color:#d9bb98}
 body.dark .modal-overlay{background:rgba(26,21,18,.7)}
 body.dark .modal-content{background:#322a26;border:1px solid #493e38}
 body.dark .modal-title{color:#d9bb98}
-body.dark .note-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+body.dark .note-input{background:#3a322f;border-color:var(--c-primary);color:#d9bb98}
 body.dark .note-input::placeholder{color:#6a5a4a}
 body.dark .save-btn{background:#c4aa8a;color:#1a1512}
 body.dark .habit-delete{color:#6a5a4a}
 body.dark .habit-delete:hover{color:#d9bb98}
 body.dark .section-title{color:#c4aa8a}
 body.dark .streak-box{background:#3a322f}
-body.dark .weekly-badge{background:#493e38;color:#8a7a6a}
+body.dark .weekly-badge{background:#493e38;color:var(--c-text-secondary)}
 body.dark .weekly-badge.done{background:#493e38;color:#c4aa8a}
-body.dark .setting-row{border-color:#493e38}
+body.dark .setting-row{border-color:var(--c-primary)}
 body.dark .toggle{background:#493e38}
 body.dark .toggle.on{background:#c4aa8a}
 body.dark .serif{font-style:italic;letter-spacing:.5px}
-body.dark .creature-card{background:#3a322f;border-color:#493e38}
+body.dark .creature-card{background:#3a322f;border-color:var(--c-primary)}
 body.dark .creature-name{color:#c4aa8a}
-body.dark .creature-rarity{color:#8a7a6a}
-body.dark .creature-desc{color:#8a7a6a}
-body.dark .creature-locked{background:rgba(50,42,38,.4);border-color:#3a322f}
+body.dark .creature-rarity{color:var(--c-text-secondary)}
+body.dark .creature-desc{color:var(--c-text-secondary)}
+body.dark .creature-locked{background:rgba(50,42,38,.4);border-color:var(--c-text)}
 body.dark .creature-locked .creature-svg-wrap{opacity:.25;filter:grayscale(1)}
 body.dark .creature-locked .creature-name{color:#6a5a4a}
 body.dark .unlock-modal-content{background:#322a26;border:2px solid #c4aa8a}
 body.dark .unlock-title{color:#d9bb98}
-body.dark .unlock-subtitle{color:#8a7a6a}
+body.dark .unlock-subtitle{color:var(--c-text-secondary)}
 body.dark .unlock-btn{background:#c4aa8a;color:#1a1512}
-body.dark .weight-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
+body.dark .weight-input{background:#3a322f;border-color:var(--c-primary);color:#d9bb98}
 body.dark .weight-input::placeholder{color:#6a5a4a}
 body.dark .weight-change-positive{color:#8fc75a}
 body.dark .weight-change-negative{color:#e57373}
 body.dark .stat-highlight{color:#d3b694}
 body.dark .progress-badge-empty{background:#3a322f;color:#6a5a4a}
-body.dark .creature-progress-text{color:#8a7a6a}
-body.dark .filter-btn{color:#8a7a6a;border-color:#493e38}
+body.dark .creature-progress-text{color:var(--c-text-secondary)}
+body.dark .filter-btn{color:var(--c-text-secondary);border-color:var(--c-primary)}
 body.dark .filter-btn.active{background:#c4aa8a;color:#1a1512;border-color:#c4aa8a}
-body.dark .gallery-stats{background:#3a322f;border-color:#493e38}
+body.dark .gallery-stats{background:#3a322f;border-color:var(--c-primary)}
 body.dark .gallery-stat-value{color:#d3b694}
 body.dark .unlock-emoji-bg{background:#2a2520}
 /* ===== CONTAINER ===== */
@@ -167,12 +234,12 @@ body.dark .unlock-emoji-bg{background:#2a2520}
   font-size:20px;
   font-weight:500;
   letter-spacing:1px;
-  color:#493e38;
+  color:var(--c-primary);
 }
 body.dark .header-left h1{color:#c4aa8a}
 .header-left .date-display{
   font-size:12px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-top:3px;
   font-weight:400;
   letter-spacing:.5px;
@@ -190,20 +257,20 @@ body.dark .header-left h1{color:#c4aa8a}
   transition:.3s;
   opacity:.6;
 }
-.theme-toggle:hover{opacity:1;border-color:#8a7a6a}
+.theme-toggle:hover{opacity:1;border-color:var(--c-text-secondary)}
 
 /* ===== GREETING + QUOTE ===== */
 .greeting{
   font-size:14px;
   font-weight:400;
   margin:4px 0 16px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   line-height:1.6;
 }
 .quote{
   font-size:13px;
   font-style:italic;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   padding:14px 18px;
   border-left:2px solid #c4aa8a;
   margin:0 0 20px;
@@ -214,18 +281,18 @@ body.dark .header-left h1{color:#c4aa8a}
 
 /* ===== CARDS ===== */
 .card{
-  background:#e8ddcf;
-  border-radius:12px;
+  background:var(--bg-surface);
+  border-radius:var(--r-lg);
   padding:20px;
   margin-bottom:14px;
   box-shadow:none;
   transition:.3s;
-  border:1px solid #d5c5b0;
+  border:1px solid var(--c-border-light);
 }
 .card-header{
   font-size:11px;
   font-weight:600;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   text-transform:uppercase;
   letter-spacing:1.5px;
   margin-bottom:16px;
@@ -242,13 +309,13 @@ body.dark .header-left h1{color:#c4aa8a}
 .stat-value{
   font-size:28px;
   font-weight:400;
-  color:#493e38;
+  color:var(--c-primary);
   line-height:1.2;
   letter-spacing:-.5px;
 }
 .stat-label{
   font-size:10px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-top:4px;
   font-weight:500;
   letter-spacing:.5px;
@@ -262,9 +329,9 @@ body.dark .header-left h1{color:#c4aa8a}
   align-items:center;
   gap:14px;
   padding:13px 14px;
-  background:#d8c9b6;
+  background:var(--bg);
   border:1px solid transparent;
-  border-radius:10px;
+  border-radius:var(--r-md);
   cursor:pointer;
   transition:all .25s;
   -webkit-tap-highlight-color:transparent;
@@ -290,7 +357,7 @@ body.dark .header-left h1{color:#c4aa8a}
   background:transparent;
 }
 .check-circle.checked{
-  border-color:#493e38;
+  border-color:var(--c-primary);
   background:#493e38;
   transform:scale(1.08);
   box-shadow:0 2px 6px rgba(73,62,56,.2);
@@ -310,17 +377,17 @@ body.dark .header-left h1{color:#c4aa8a}
   font-size:14px;
   font-weight:500;
   transition:.3s;
-  color:#3a322f;
+  color:var(--c-text);
 }
 .habit-text.done{
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   text-decoration:line-through;
   text-decoration-color:#b9a58a;
   text-decoration-thickness:1px;
 }
 .habit-time{
   font-size:11px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-top:2px;
 }
 .habit-delete{
@@ -341,7 +408,7 @@ body.dark .header-left h1{color:#c4aa8a}
 .progress-section{margin-top:16px}
 .progress-label{
   display:flex;justify-content:space-between;
-  font-size:11px;color:#8a7a6a;margin-bottom:6px;
+  font-size:11px;color:var(--c-text-secondary);margin-bottom:6px;
   letter-spacing:.3px;
 }
 .progress-bar{
@@ -359,7 +426,7 @@ body.dark .header-left h1{color:#c4aa8a}
 .week-section .section-title{
   font-size:11px;
   font-weight:600;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-bottom:14px;
   letter-spacing:1px;
   text-transform:uppercase;
@@ -373,7 +440,7 @@ body.dark .header-left h1{color:#c4aa8a}
   flex:1;
   text-align:center;
   font-size:10px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   font-weight:500;
 }
 .week-day .week-label{margin-bottom:6px;letter-spacing:.5px;font-size:9px}
@@ -401,10 +468,10 @@ body.dark .week-ring-fill.done{stroke:#8fc75a}
 .week-day .week-score{
   font-size:9px;
   margin-top:4px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   letter-spacing:.3px;
 }
-.week-day.today .week-label{font-weight:700;color:#493e38}
+.week-day.today .week-label{font-weight:700;color:var(--c-primary)}
 body.dark .week-day.today .week-label{color:#c4aa8a}
 
 /* ===== STREAK ===== */
@@ -415,20 +482,20 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 }
 .streak-box{
   flex:1;
-  background:#d8c9b6;
-  border-radius:10px;
+  background:var(--bg);
+  border-radius:var(--r-md);
   padding:14px;
   text-align:center;
 }
 .streak-number{
   font-size:22px;
   font-weight:400;
-  color:#493e38;
+  color:var(--c-primary);
   line-height:1.2;
 }
 .streak-label{
   font-size:10px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-top:3px;
   letter-spacing:.5px;
   text-transform:uppercase;
@@ -443,20 +510,20 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 .add-habit-input{
   flex:1;
   padding:11px 14px;
-  border:1.5px solid #cebda8;
-  border-radius:8px;
+  border:1.5px solid var(--c-border);
+  border-radius:var(--r-sm);
   font-size:13px;
   font-family:inherit;
-  background:#d8c9b6;
+  background:var(--bg);
   outline:none;
   transition:.3s;
-  color:#3a322f;
+  color:var(--c-text);
 }
-.add-habit-input:focus{border-color:#b9a58a}
+.add-habit-input:focus{border-color:var(--c-border-hover)}
 .add-habit-input::placeholder{color:#b9a58a;font-style:italic}
 .add-btn{
   width:42px;height:42px;
-  border:none;border-radius:8px;
+  border:none;border-radius:var(--r-sm);
   background:#493e38;
   color:#d8c9b6;
   font-size:18px;
@@ -494,7 +561,7 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
   border:none;
   background:transparent;
   font-size:10px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   cursor:pointer;
   transition:.2s;
   font-family:inherit;
@@ -503,7 +570,7 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
   letter-spacing:.3px;
 }
 .nav-btn .nav-icon{font-size:20px;line-height:1}
-.nav-btn.active{color:#493e38}
+.nav-btn.active{color:var(--c-primary)}
 .nav-slider{
   position:absolute;
   bottom:auto;
@@ -523,14 +590,14 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 
 /* ===== WEEKLY VIEW ===== */
 .weekly-card{margin-bottom:14px}
-.weekly-date{font-size:11px;color:#8a7a6a;margin-bottom:6px;letter-spacing:.3px}
+.weekly-date{font-size:11px;color:var(--c-text-secondary);margin-bottom:6px;letter-spacing:.3px}
 .weekly-items{display:flex;flex-wrap:wrap;gap:4px}
 .weekly-badge{
   padding:3px 10px;
-  border-radius:4px;
+  border-radius:var(--r-sm);
   font-size:11px;
-  background:#d8c9b6;
-  color:#8a7a6a;
+  background:var(--bg);
+  color:var(--c-text-secondary);
 }
 .weekly-badge.done{background:#493e38;color:#d8c9b6}
 
@@ -539,7 +606,7 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 .settings-section .section-title{
   font-size:11px;
   font-weight:600;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-bottom:12px;
   letter-spacing:1px;
   text-transform:uppercase;
@@ -566,13 +633,13 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
   content:'';
   width:18px;height:18px;
   border-radius:50%;
-  background:#e8ddcf;
+  background:var(--bg-surface);
   position:absolute;
   top:2px;left:2px;
   transition:.3s cubic-bezier(.34,1.56,.64,1);
   box-shadow:0 1px 2px rgba(0,0,0,.1);
 }
-.toggle.on::after{left:22px;background:#d8c9b6}
+.toggle.on::after{left:22px;background:var(--bg)}
 
 /* ===== MODAL ===== */
 .modal-overlay{
@@ -585,8 +652,8 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 }
 .modal-overlay.show{display:flex}
 .modal-content{
-  background:#e8ddcf;
-  border-radius:16px 16px 0 0;
+  background:var(--bg-surface);
+  border-radius:var(--r-lg) 16px 0 0;
   padding:24px 20px env(safe-area-inset-bottom,20px);
   width:100%;max-width:480px;
   animation:slideUp .35s ease;
@@ -597,23 +664,23 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
   font-size:17px;font-weight:500;
   margin-bottom:16px;
   text-align:center;
-  color:#3a322f;
+  color:var(--c-text);
 }
 .note-input{
   width:100%;
   padding:12px 14px;
-  border:1.5px solid #cebda8;
-  border-radius:8px;
+  border:1.5px solid var(--c-border);
+  border-radius:var(--r-sm);
   font-size:13px;
   font-family:inherit;
-  background:#d8c9b6;
+  background:var(--bg);
   resize:vertical;
   min-height:80px;
   outline:none;
   transition:.3s;
-  color:#3a322f;
+  color:var(--c-text);
 }
-.note-input:focus{border-color:#b9a58a}
+.note-input:focus{border-color:var(--c-border-hover)}
 .note-input::placeholder{color:#b9a58a;font-style:italic}
 .modal-actions{
   display:flex;gap:10px;
@@ -621,7 +688,7 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 }
 .save-btn,.btn-cancel{
   flex:1;padding:12px;
-  border:none;border-radius:8px;
+  border:none;border-radius:var(--r-sm);
   font-size:13px;
   font-weight:500;
   cursor:pointer;
@@ -630,7 +697,7 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 }
 .save-btn{background:#493e38;color:#e8ddcf}
 .save-btn:active{transform:scale(.96)}
-.btn-cancel{background:#cebda8;color:#8a7a6a}
+.btn-cancel{background:#cebda8;color:var(--c-text-secondary)}
 .btn-cancel:active{transform:scale(.96)}
 
 /* ===== EMPTY STATE ===== */
@@ -658,37 +725,37 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
 /* Gallery Stats Bar */
 .gallery-stats{
   display:flex;gap:8px;margin-bottom:14px;
-  background:#d8c9b6;border-radius:10px;padding:12px 14px;
+  background:var(--bg);border-radius:var(--r-md);padding:12px 14px;
   border:1px solid #cebda8;text-align:center;
 }
-body.dark .gallery-stats{background:#3a322f;border-color:#493e38}
+body.dark .gallery-stats{background:#3a322f;border-color:var(--c-primary)}
 .gallery-stat{flex:1}
-.gallery-stat-value{font-size:22px;font-weight:400;color:#493e38;line-height:1.2}
+.gallery-stat-value{font-size:22px;font-weight:400;color:var(--c-primary);line-height:1.2}
 body.dark .gallery-stat-value{color:#d3b694}
-.gallery-stat-label{font-size:10px;color:#8a7a6a;margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+.gallery-stat-label{font-size:10px;color:var(--c-text-secondary);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
 
 /* Filter */
 .filter-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .filter-btn{
-  padding:5px 12px;border:1.5px solid #cebda8;border-radius:16px;
+  padding:5px 12px;border:1.5px solid var(--c-border);border-radius:var(--r-lg);
   background:transparent;font-family:inherit;font-size:11px;
-  color:#8a7a6a;cursor:pointer;transition:.2s;letter-spacing:.3px;
+  color:var(--c-text-secondary);cursor:pointer;transition:.2s;letter-spacing:.3px;
   -webkit-tap-highlight-color:transparent;
 }
-.filter-btn.active{background:#493e38;color:#e8ddcf;border-color:#493e38}
+.filter-btn.active{background:#493e38;color:#e8ddcf;border-color:var(--c-primary)}
 .filter-btn:active{transform:scale(.95)}
-body.dark .filter-btn{color:#8a7a6a;border-color:#493e38}
+body.dark .filter-btn{color:var(--c-text-secondary);border-color:var(--c-primary)}
 body.dark .filter-btn.active{background:#c4aa8a;color:#1a1512;border-color:#c4aa8a}
 
 /* Creature Card */
 .creature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .creature-card{
-  background:#d8c9b6;border:1px solid transparent;
-  border-radius:12px;padding:12px 8px;
+  background:var(--bg);border:1px solid transparent;
+  border-radius:var(--r-lg);padding:12px 8px;
   text-align:center;cursor:default;transition:.3s;
   position:relative;overflow:hidden;
 }
-body.dark .creature-card{background:#3a322f;border-color:#493e38}
+body.dark .creature-card{background:#3a322f;border-color:var(--c-primary)}
 .creature-card.newly-unlocked{
   animation:newCreaturePulse .8s ease 3;
   border-color:#c4aa8a;
@@ -704,13 +771,13 @@ body.dark .creature-card{background:#3a322f;border-color:#493e38}
 
 /* ===== TAMAGOTCHI CARD ===== */
 .tama-card{
-  background:#e8ddcf;border-radius:14px;padding:12px 10px;
+  background:var(--bg-surface);border-radius:var(--r-lg);padding:12px 10px;
   text-align:center;position:relative;overflow:hidden;
-  transition:.3s;border:2px solid #d5c5b0;
+  transition:.3s;border:2px solid var(--c-border-light);
 }
-body.dark .tama-card{background:#322a26;border-color:#493e38}
+body.dark .tama-card{background:#322a26;border-color:var(--c-primary)}
 .tama-screen{
-  background:#d8c9b6;border-radius:10px;padding:8px;
+  background:var(--bg);border-radius:var(--r-md);padding:8px;
   margin:0 auto 6px;border:2px solid #b9a58a;position:relative;
   width:96px;height:96px;display:flex;align-items:center;justify-content:center;
   box-shadow:inset 0 2px 6px rgba(0,0,0,.1);
@@ -720,15 +787,15 @@ body.dark .tama-screen{background:#2a2520;border-color:#6a5a4a}
   background:rgba(255,255,255,.05);border-radius:6px;
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
 }
-.tama-name{font-size:11px;font-weight:600;color:#3a322f;margin-bottom:2px}
+.tama-name{font-size:11px;font-weight:600;color:var(--c-text);margin-bottom:2px}
 body.dark .tama-name{color:#d9bb98}
 .tama-level{font-size:9px;color:#d4a017;font-weight:600;margin-bottom:4px}
 .tama-stats{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
-.tama-stat{font-size:9px;color:#8a7a6a;background:#cebda8;border-radius:4px;padding:1px 6px;display:flex;align-items:center;gap:2px}
-body.dark .tama-stat{background:#493e38;color:#8a7a6a}
+.tama-stat{font-size:9px;color:var(--c-text-secondary);background:#cebda8;border-radius:var(--r-sm);padding:1px 6px;display:flex;align-items:center;gap:2px}
+body.dark .tama-stat{background:#493e38;color:var(--c-text-secondary)}
 .tama-hunger-fill{display:inline-block;width:4px;height:4px;border-radius:50%;margin:0 1px}
 .tama-btns{display:flex;gap:4px;justify-content:center}
-.tama-btn{padding:3px 10px;border:none;border-radius:5px;font-size:9px;font-family:inherit;
+.tama-btn{padding:3px 10px;border:none;border-radius:var(--r-sm);font-size:9px;font-family:inherit;
   cursor:pointer;transition:.2s;font-weight:500;letter-spacing:.3px}
 .tama-btn:active{transform:scale(.9)}
 .tama-btn-feed{background:#d4a017;color:#fff}
@@ -737,20 +804,20 @@ body.dark .tama-btn-feed{background:#b8942e}
 body.dark .tama-btn-play{background:#5a8a2e}
 
 /* Locked Tama */
-.tama-locked{background:rgba(216,201,182,.3);border-color:#cebda8;border-style:dashed}
-body.dark .tama-locked{background:rgba(50,42,38,.2);border-color:#3a322f}
+.tama-locked{background:rgba(216,201,182,.3);border-color:var(--c-border);border-style:dashed}
+body.dark .tama-locked{background:rgba(50,42,38,.2);border-color:var(--c-text)}
 .tama-locked .tama-screen{opacity:.3;filter:grayscale(1)}
 .creature-svg-wrap svg{width:100%;height:100%}
-.creature-name{font-size:12px;font-weight:600;color:#3a322f;margin-bottom:2px}
+.creature-name{font-size:12px;font-weight:600;color:var(--c-text);margin-bottom:2px}
 body.dark .creature-name{color:#d9bb98}
 .creature-rarity{
   font-size:9px;letter-spacing:.3px;margin-bottom:2px;
 }
-.rarity-普通{color:#8a7a6a}
+.rarity-普通{color:var(--c-text-secondary)}
 .rarity-稀有{color:#5c9e5c}
 .rarity-史诗{color:#7c5cbf}
 .rarity-传说{color:#d4a017}
-.creature-desc{font-size:9px;color:#8a7a6a;line-height:1.4}
+.creature-desc{font-size:9px;color:var(--c-text-secondary);line-height:1.4}
 
 /* Locked Creature */
 .creature-locked{
@@ -758,7 +825,7 @@ body.dark .creature-name{color:#d9bb98}
   background:rgba(216,201,182,.4);
   border:1px dashed #cebda8;
 }
-body.dark .creature-locked{background:rgba(50,42,38,.4);border-color:#3a322f}
+body.dark .creature-locked{background:rgba(50,42,38,.4);border-color:var(--c-text)}
 body.dark .creature-locked .creature-svg-wrap{opacity:.25;filter:grayscale(1)}
 body.dark .creature-locked .creature-name{color:#6a5a4a}
 .creature-locked .creature-name::after{content:'  ?';opacity:.4}
@@ -766,7 +833,7 @@ body.dark .creature-locked .creature-name{color:#6a5a4a}
 .creature-locked .creature-rarity{opacity:.4}
 .progress-badge-empty{
   display:inline-block;padding:2px 6px;border-radius:3px;
-  background:#cebda8;font-size:8px;color:#8a7a6a;margin-top:2px;
+  background:#cebda8;font-size:8px;color:var(--c-text-secondary);margin-top:2px;
 }
 body.dark .progress-badge-empty{background:#3a322f;color:#6a5a4a}
 
@@ -793,7 +860,7 @@ body.dark .progress-badge-empty{background:#3a322f;color:#6a5a4a}
 }
 .profile-overlay.show{display:flex}
 .profile-content{
-  background:#e8ddcf;border-radius:16px;padding:20px;width:100%;
+  background:var(--bg-surface);border-radius:var(--r-lg);padding:20px;width:100%;
   max-width:360px;max-height:80vh;overflow-y:auto;text-align:center;
 }
 body.dark .profile-content{background:#322a26;color:#d9bb98}
@@ -803,16 +870,16 @@ body.dark .profile-content{background:#322a26;color:#d9bb98}
 @keyframes sparkleSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 .profile-tag{
   display:inline-block;padding:2px 8px;margin:2px;
-  border-radius:8px;background:rgba(124,92,191,.12);color:#7c5cbf;font-size:10px;
+  border-radius:var(--r-sm);background:rgba(124,92,191,.12);color:#7c5cbf;font-size:10px;
   border:1px solid rgba(124,92,191,.2);
 }
 body.dark .profile-tag{background:rgba(124,92,191,.18);color:#b694e6}
-.profile-section{margin:8px 0;padding:8px 10px;background:rgba(255,255,255,.3);border-radius:8px;text-align:left}
+.profile-section{margin:8px 0;padding:8px 10px;background:rgba(255,255,255,.3);border-radius:var(--r-sm);text-align:left}
 body.dark .profile-section{background:rgba(0,0,0,.15)}
-.profile-label{font-size:10px;color:#8a7a6a;font-weight:600;margin-bottom:2px}
+.profile-label{font-size:10px;color:var(--c-text-secondary);font-weight:600;margin-bottom:2px}
 .unlock-modal-content{
-  background:#e8ddcf;
-  border-radius:20px;
+  background:var(--bg-surface);
+  border-radius:var(--r-xl);
   padding:32px 24px;
   max-width:340px;
   width:100%;
@@ -839,16 +906,16 @@ body.dark .unlock-modal-content{background:#322a26;border-color:#c4aa8a}
   50%{transform:scale(1.2) rotate(5deg)}
   100%{transform:scale(1) rotate(0deg);opacity:1}
 }
-.unlock-title{font-size:20px;font-weight:600;color:#3a322f;margin-bottom:4px}
+.unlock-title{font-size:20px;font-weight:600;color:var(--c-text);margin-bottom:4px}
 body.dark .unlock-title{color:#d9bb98}
-.unlock-subtitle{font-size:13px;color:#8a7a6a;margin-bottom:4px}
-body.dark .unlock-subtitle{color:#8a7a6a}
+.unlock-subtitle{font-size:13px;color:var(--c-text-secondary);margin-bottom:4px}
+body.dark .unlock-subtitle{color:var(--c-text-secondary)}
 .unlock-rarity{font-size:12px;margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;font-weight:600}
 .unlock-svg-wrap{width:120px;height:120px;margin:0 auto 12px}
 .unlock-svg-wrap svg{width:100%;height:100%}
-.unlock-desc{font-size:13px;color:#8a7a6a;margin-bottom:16px;line-height:1.5}
+.unlock-desc{font-size:13px;color:var(--c-text-secondary);margin-bottom:16px;line-height:1.5}
 .unlock-btn{
-  padding:10px 32px;border:none;border-radius:10px;
+  padding:10px 32px;border:none;border-radius:var(--r-md);
   background:#493e38;color:#e8ddcf;
   font-family:inherit;font-size:14px;font-weight:500;
   cursor:pointer;transition:.2s;
@@ -870,15 +937,15 @@ body.dark .unlock-btn{background:#c4aa8a;color:#1a1512}
 .weight-row{display:flex;gap:10px;align-items:center;margin-bottom:8px}
 .weight-input{
   flex:1;padding:12px 14px;
-  border:1.5px solid #cebda8;border-radius:8px;
+  border:1.5px solid var(--c-border);border-radius:var(--r-sm);
   font-size:16px;font-family:inherit;outline:none;
-  background:#d8c9b6;color:#3a322f;transition:.3s;
+  background:var(--bg);color:var(--c-text);transition:.3s;
   -moz-appearance:textfield;
 }
 .weight-input::-webkit-outer-spin-button,.weight-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.weight-input:focus{border-color:#b9a58a}
-body.dark .weight-input{background:#3a322f;border-color:#493e38;color:#d9bb98}
-.weight-unit{font-size:14px;color:#8a7a6a;flex-shrink:0;font-weight:500}
+.weight-input:focus{border-color:var(--c-border-hover)}
+body.dark .weight-input{background:#3a322f;border-color:var(--c-primary);color:#d9bb98}
+.weight-unit{font-size:14px;color:var(--c-text-secondary);flex-shrink:0;font-weight:500}
 .weight-change{
   font-size:13px;margin-top:4px;font-weight:500;
 }
@@ -890,11 +957,11 @@ body.dark .weight-change-negative{color:#e57373}
 .weight-history-item{
   display:flex;justify-content:space-between;align-items:center;
   padding:6px 8px;border-radius:6px;font-size:12px;
-  background:#d8c9b6;color:#8a7a6a;
+  background:var(--bg);color:var(--c-text-secondary);
 }
-body.dark .weight-history-item{background:#3a322f;color:#8a7a6a}
-.weight-history-date{font-size:11px;font-weight:500;color:#8a7a6a}
-.weight-history-value{font-weight:600;color:#493e38}
+body.dark .weight-history-item{background:#3a322f;color:var(--c-text-secondary)}
+.weight-history-date{font-size:11px;font-weight:500;color:var(--c-text-secondary)}
+.weight-history-value{font-weight:600;color:var(--c-primary)}
 body.dark .weight-history-value{color:#d9bb98}
 .weight-trend{
   display:flex;gap:4px;margin-top:8px;
@@ -908,11 +975,11 @@ body.dark .weight-history-value{color:#d9bb98}
 body.dark .weight-trend-bar{background:#6a5a4a}
 .weight-trend-bar.today{background:#493e38}
 body.dark .weight-trend-bar.today{background:#c4aa8a}
-.weight-trend-label{font-size:7px;color:#8a7a6a;text-align:center;margin-top:2px}
-.weight-start-note{font-size:11px;color:#8a7a6a;font-style:italic;margin-top:6px;text-align:center}
-.stat-highlight{font-weight:600;color:#493e38}
+.weight-trend-label{font-size:7px;color:var(--c-text-secondary);text-align:center;margin-top:2px}
+.weight-start-note{font-size:11px;color:var(--c-text-secondary);font-style:italic;margin-top:6px;text-align:center}
+.stat-highlight{font-weight:600;color:var(--c-primary)}
 body.dark .stat-highlight{color:#d3b694}
-.creature-progress-text{font-size:9px;color:#8a7a6a;margin-top:2px;line-height:1.3}
+.creature-progress-text{font-size:9px;color:var(--c-text-secondary);margin-top:2px;line-height:1.3}
 
 /* ===== MOBILE TOUCH ===== */
 @media(hover:none){
@@ -933,13 +1000,13 @@ body.dark .stat-highlight{color:#d3b694}
 .coffee-hero-count{
   font-size:48px;
   font-weight:400;
-  color:#493e38;
+  color:var(--c-primary);
   line-height:1.1;
 }
 body.dark .coffee-hero-count{color:#d3b694}
 .coffee-hero-label{
   font-size:12px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-top:4px;
   letter-spacing:1px;
   text-transform:uppercase;
@@ -949,11 +1016,11 @@ body.dark .coffee-hero-count{color:#d3b694}
   width:100%;
   padding:16px;
   border:2px dashed #b9a58a;
-  border-radius:12px;
+  border-radius:var(--r-lg);
   background:transparent;
   font-family:inherit;
   font-size:16px;
-  color:#493e38;
+  color:var(--c-primary);
   cursor:pointer;
   transition:.25s;
   margin:12px 0 8px;
@@ -972,26 +1039,26 @@ body.dark .coffee-log-btn:active{background:#493e38}
 .coffee-item{
   display:flex;align-items:center;gap:10px;
   padding:10px 12px;
-  background:#d8c9b6;
-  border-radius:8px;
+  background:var(--bg);
+  border-radius:var(--r-sm);
   font-size:13px;
   animation:fadeIn .3s ease;
 }
 body.dark .coffee-item{background:#3a322f}
 .coffee-item-icon{font-size:18px;flex-shrink:0}
-.coffee-item-label{flex:1;font-weight:500;color:#3a322f}
+.coffee-item-label{flex:1;font-weight:500;color:var(--c-text)}
 body.dark .coffee-item-label{color:#d9bb98}
-.coffee-item-time{font-size:11px;color:#8a7a6a;flex-shrink:0}
+.coffee-item-time{font-size:11px;color:var(--c-text-secondary);flex-shrink:0}
 .coffee-item-delete{
   width:24px;height:24px;
   border:none;background:transparent;
   color:#b9a58a;font-size:12px;
-  cursor:pointer;border-radius:4px;
+  cursor:pointer;border-radius:var(--r-sm);
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;transition:.2s;
   opacity:.4;
 }
-.coffee-item-delete:active{opacity:1;color:#493e38}
+.coffee-item-delete:active{opacity:1;color:var(--c-primary)}
 body.dark .coffee-item-delete:active{color:#d9bb98}
 .coffee-types{
   display:flex;flex-wrap:wrap;gap:6px;
@@ -1000,21 +1067,21 @@ body.dark .coffee-item-delete:active{color:#d9bb98}
 .coffee-type-btn{
   padding:6px 14px;
   border:1.5px solid #b9a58a;
-  border-radius:20px;
+  border-radius:var(--r-xl);
   background:transparent;
   font-family:inherit;
   font-size:12px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   cursor:pointer;
   transition:.2s;
   -webkit-tap-highlight-color:transparent;
 }
 .coffee-type-btn:active,.coffee-type-btn.selected{
   background:#493e38;
-  border-color:#493e38;
+  border-color:var(--c-primary);
   color:#e8ddcf;
 }
-body.dark .coffee-type-btn{border-color:#6a5a4a;color:#8a7a6a}
+body.dark .coffee-type-btn{border-color:#6a5a4a;color:var(--c-text-secondary)}
 body.dark .coffee-type-btn:active,
 body.dark .coffee-type-btn.selected{
   background:#c4aa8a;border-color:#c4aa8a;color:#1a1512;
@@ -1048,14 +1115,14 @@ body.dark .coffee-bar{background:#493e38}
 body.dark .coffee-bar-fill{background:#c4aa8a}
 .coffee-bar-label{
   font-size:9px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   margin-top:4px;
   text-transform:uppercase;
 }
 .coffee-bar-count{
   font-size:10px;
   font-weight:600;
-  color:#493e38;
+  color:var(--c-primary);
   margin-top:2px;
 }
 body.dark .coffee-bar-count{color:#c4aa8a}
@@ -1068,7 +1135,7 @@ body.dark .coffee-bar-count{color:#c4aa8a}
   flex:1;
   padding:10px;
   border:1.5px solid #b9a58a;
-  border-radius:10px;
+  border-radius:var(--r-md);
   background:transparent;
   font-family:inherit;
   font-size:18px;
@@ -1086,37 +1153,37 @@ body.dark .coffee-quick-btn:active{background:#493e38}
 .coffee-quick-btn .coffee-quick-label{
   display:block;
   font-size:10px;
-  color:#8a7a6a;
+  color:var(--c-text-secondary);
   font-weight:500;
   margin-top:2px;
   letter-spacing:.3px;
 }
-body.dark .coffee-quick-btn .coffee-quick-label{color:#8a7a6a}
+body.dark .coffee-quick-btn .coffee-quick-label{color:var(--c-text-secondary)}
 
 /* ===== WATER TRACKER ===== */
 .water-card{display:flex;align-items:center;gap:12px;padding:4px 0}
 .water-icon{font-size:28px;flex-shrink:0;line-height:1}
-.water-count{font-size:24px;font-weight:400;color:#493e38;min-width:28px;text-align:center}
+.water-count{font-size:24px;font-weight:400;color:var(--c-primary);min-width:28px;text-align:center}
 body.dark .water-count{color:#d3b694}
-.water-label{font-size:12px;color:#8a7a6a;flex:1;letter-spacing:.3px}
+.water-label{font-size:12px;color:var(--c-text-secondary);flex:1;letter-spacing:.3px}
 .water-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid #b9a58a;
   background:transparent;font-size:18px;cursor:pointer;display:flex;
   align-items:center;justify-content:center;transition:.2s;flex-shrink:0;
-  -webkit-tap-highlight-color:transparent;font-family:inherit;color:#493e38}
+  -webkit-tap-highlight-color:transparent;font-family:inherit;color:var(--c-primary)}
 body.dark .water-btn{color:#c4aa8a;border-color:#6a5a4a}
 .water-btn:active{transform:scale(.9);background:#cebda8}
 body.dark .water-btn:active{background:#493e38}
-.water-goal{font-size:10px;color:#8a7a6a;margin-top:2px;letter-spacing:.3px}
+.water-goal{font-size:10px;color:var(--c-text-secondary);margin-top:2px;letter-spacing:.3px}
 
 /* ===== EXP BAR ===== */
 .exp-section{margin-top:14px;padding-top:14px;border-top:1px solid #cebda8}
-body.dark .exp-section{border-color:#493e38}
+body.dark .exp-section{border-color:var(--c-primary)}
 .exp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.exp-level{font-size:13px;font-weight:600;color:#493e38}
+.exp-level{font-size:13px;font-weight:600;color:var(--c-primary)}
 body.dark .exp-level{color:#c4aa8a}
 .exp-level-badge{display:inline-block;background:#c4aa8a;color:#1a1512;
   border-radius:6px;padding:1px 8px;font-size:11px;font-weight:600;margin-right:4px}
-.exp-numbers{font-size:10px;color:#8a7a6a;letter-spacing:.3px}
+.exp-numbers{font-size:10px;color:var(--c-text-secondary);letter-spacing:.3px}
 .exp-bar-wrap{height:6px;border-radius:3px;background:#cebda8;overflow:hidden;position:relative}
 body.dark .exp-bar-wrap{background:#493e38}
 .exp-bar-fill{height:100%;border-radius:3px;
@@ -1126,7 +1193,7 @@ body.dark .exp-bar-wrap{background:#493e38}
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
   animation:expShimmer 2s ease infinite}
 @keyframes expShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.exp-gain{font-size:10px;color:#8a7a6a;margin-top:3px;text-align:right;opacity:0;transition:.3s}
+.exp-gain{font-size:10px;color:var(--c-text-secondary);margin-top:3px;text-align:right;opacity:0;transition:.3s}
 .exp-gain.show{opacity:1}
 
 /* ===== LEVEL UP ANIMATION ===== */
@@ -1138,23 +1205,23 @@ body.dark .exp-bar-wrap{background:#493e38}
 
 .toast{
   position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:500;
-  background:rgba(73,62,56,.9);color:#e8ddcf;padding:10px 20px;border-radius:10px;
+  background:rgba(73,62,56,.9);color:#e8ddcf;padding:10px 20px;border-radius:var(--r-md);
   font-size:13px;font-family:inherit;
   opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
   white-space:nowrap;backdrop-filter:blur(6px);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-body.dark .toast{background:rgba(232,221,207,.92);color:#3a322f}
-.level-up-content{background:#e8ddcf;border-radius:20px;padding:32px 24px;
+body.dark .toast{background:rgba(232,221,207,.92);color:var(--c-text)}
+.level-up-content{background:var(--bg-surface);border-radius:var(--r-xl);padding:32px 24px;
   max-width:300px;width:100%;text-align:center;
   animation:levelUpPop .5s cubic-bezier(.34,1.56,.64,1);
   border:2px solid #c4aa8a;position:relative;overflow:hidden}
 body.dark .level-up-content{background:#322a26;border-color:#c4aa8a}
 .level-up-emoji{font-size:56px;display:block;margin-bottom:8px}
-.level-up-title{font-size:22px;font-weight:600;color:#493e38;margin-bottom:4px}
+.level-up-title{font-size:22px;font-weight:600;color:var(--c-primary);margin-bottom:4px}
 body.dark .level-up-title{color:#d9bb98}
-.level-up-sub{font-size:13px;color:#8a7a6a;margin-bottom:12px}
-.level-up-btn{padding:10px 32px;border:none;border-radius:10px;
+.level-up-sub{font-size:13px;color:var(--c-text-secondary);margin-bottom:12px}
+.level-up-btn{padding:10px 32px;border:none;border-radius:var(--r-md);
   background:#493e38;color:#e8ddcf;font-family:inherit;font-size:14px;
   font-weight:500;cursor:pointer;transition:.2s}
 body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
@@ -1164,25 +1231,25 @@ body.dark .level-up-btn{background:#c4aa8a;color:#1a1512}
 .pet-bar-happy{background:linear-gradient(90deg,#ef5350,#e91e63)}
 .pet-bar-intimacy{background:linear-gradient(90deg,#e91e63,#d63384)}
 .level-up-btn:active{transform:scale(.95)}
-.gallery-card{background:#f5ede4;border-radius:10px;padding:10px 8px;text-align:center;position:relative}
+.gallery-card{background:var(--bg-input);border-radius:var(--r-md);padding:10px 8px;text-align:center;position:relative}
 .gallery-card.locked{opacity:.85}
-.gallery-name{font-size:12px;font-weight:600;color:#493e38;margin:2px 0}
+.gallery-name{font-size:12px;font-weight:600;color:var(--c-primary);margin:2px 0}
 .gallery-lvl{font-size:10px;color:#5c9e5c;font-weight:500}
 .gallery-hint{font-size:9px;color:#b9a58a;margin-top:2px;line-height:1.3}
 .raise-card{min-width:100%;box-sizing:border-box;padding:0 4px;text-align:center}
 .raise-header{text-align:center;padding:8px 0 4px}
-.raise-name{font-size:16px;font-weight:600;color:#493e38}
+.raise-name{font-size:16px;font-weight:600;color:var(--c-primary)}
 .raise-stat-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;max-width:220px;margin-left:auto;margin-right:auto}
 .raise-btns{display:flex;gap:10px;justify-content:center;padding:10px 0 8px}
 .raise-dot{width:8px;height:8px;border-radius:50%;background:#d4c5b2;cursor:pointer;transition:.2s;display:inline-block}
-.raise-dot.active{background:#d63384;width:20px;border-radius:4px}
-.deck-entry{display:flex;gap:10px;padding:12px;margin-bottom:8px;background:#f5ede4;border-radius:12px;align-items:center;transition:.2s}
+.raise-dot.active{background:#d63384;width:20px;border-radius:var(--r-sm)}
+.deck-entry{display:flex;gap:10px;padding:12px;margin-bottom:8px;background:var(--bg-input);border-radius:var(--r-lg);align-items:center;transition:.2s}
 .deck-entry.locked{opacity:.75;background:#ede5d8}
 .deck-entry.collected{background:linear-gradient(135deg,#f5ede4,#f0e6d8)}
 .deck-left{flex-shrink:0;width:76px;text-align:center}
 .deck-left.gray{opacity:.4;filter:grayscale(1)}
-.deck-name{font-size:12px;font-weight:700;color:#493e38;margin:1px 0}
-.deck-tag{font-size:8px;color:#8a7a6a;margin-bottom:1px}
+.deck-name{font-size:12px;font-weight:700;color:var(--c-primary);margin:1px 0}
+.deck-tag{font-size:8px;color:var(--c-text-secondary);margin-bottom:1px}
 .deck-lvl{font-size:10px;color:#5c9e5c;font-weight:600}
 .deck-hint{font-size:8px;color:#b9a58a;line-height:1.3}
 .deck-right{flex:1;min-width:0}
@@ -1231,12 +1298,12 @@ body.dark .raise-name{color:#d9bb98}
         <span style="font-size:13px;font-weight:600;color:#d4a017">🪙 <span id="coinDisplay">0</span></span>
       </div>
     </div>
-    <div class="exp-bar-wrap" style="margin-top:8px;height:8px;border-radius:4px">
+    <div class="exp-bar-wrap" style="margin-top:8px;height:8px;border-radius:var(--r-sm)">
       <div class="exp-bar-fill" id="expBarFill" style="width:0%"></div>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:4px">
       <div class="exp-gain" id="expGain" style="text-align:left;margin:0">✨ 习惯、喝水、体重、咖啡</div>
-      <div style="font-size:10px;color:#8a7a6a"><span id="expCurrent">0</span>/<span id="expNext">100</span> EXP</div>
+      <div style="font-size:10px;color:var(--c-text-secondary)"><span id="expCurrent">0</span>/<span id="expNext">100</span> EXP</div>
     </div>
   </div>
 
@@ -1247,7 +1314,7 @@ body.dark .raise-name{color:#d9bb98}
     <div class="card">
       <div class="card-header">☑️ 今日任务<span id="taskStreakTag" style="display:none"></span></div>
       <div class="habit-list" id="taskList">
-        <div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">📭 今天没有任务，休息一天吧</div>
+        <div style="padding:20px;text-align:center;color:var(--c-text-secondary);font-size:13px">📭 今天没有任务，休息一天吧</div>
       </div>
     </div>
 
@@ -1255,7 +1322,7 @@ body.dark .raise-name{color:#d9bb98}
     <div class="card">
       <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
         <span>💧 喝水 <span id="waterCount" style="font-weight:400">0</span> 杯<span id="waterStreak" style="display:none"></span></span>
-        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">阶梯 1·1·1·1·1·3·5·7</span>
+        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--c-text-secondary)">阶梯 1·1·1·1·1·3·5·7</span>
       </div>
       <div style="display:flex;align-items:center;gap:16px">
         <div style="position:relative;width:48px;height:68px;flex-shrink:0">
@@ -1284,7 +1351,7 @@ body.dark .raise-name{color:#d9bb98}
           <div style="display:flex;flex-wrap:wrap;gap:4px" id="waterDots">
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="water-btn" id="waterPhotoBtn" style="width:auto;padding:0 16px;border-radius:8px;font-size:13px;font-weight:500">📸 拍照认证喝水</button>
+            <button class="water-btn" id="waterPhotoBtn" style="width:auto;padding:0 16px;border-radius:var(--r-sm);font-size:13px;font-weight:500">📸 拍照认证喝水</button>
             <input type="file" accept="image/*" capture="environment" id="waterPhotoInput" style="display:none">
           </div>
         </div>
@@ -1297,23 +1364,23 @@ body.dark .raise-name{color:#d9bb98}
       <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
         <div style="flex:1;text-align:center">
           <div id="exerciseMinutes" style="font-size:28px;font-weight:700;color:#5c9e5c">0</div>
-          <div style="font-size:11px;color:#8a7a6a">分钟</div>
+          <div style="font-size:11px;color:var(--c-text-secondary)">分钟</div>
         </div>
         <div style="flex:1;text-align:center">
           <div id="exerciseCoins" style="font-size:28px;font-weight:700;color:#d4a017">0</div>
-          <div style="font-size:11px;color:#8a7a6a">💰 金币</div>
+          <div style="font-size:11px;color:var(--c-text-secondary)">💰 金币</div>
         </div>
         <div style="flex:1;text-align:center">
           <div id="exerciseStreak" style="font-size:28px;font-weight:700;color:#7c5cbf">0</div>
-          <div style="font-size:11px;color:#8a7a6a">连续天数</div>
+          <div style="font-size:11px;color:var(--c-text-secondary)">连续天数</div>
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px">
-        <button onclick="addExercise(15)" style="flex:1;padding:8px;border:1.5px solid #5c9e5c;border-radius:8px;background:rgba(92,158,92,.1);color:#5c9e5c;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+15 分钟</button>
-        <button onclick="addExercise(30)" style="flex:1;padding:8px;border:1.5px solid #d4a017;border-radius:8px;background:rgba(212,160,23,.1);color:#d4a017;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+30 分钟</button>
-        <button onclick="customExercise()" style="flex:1;padding:8px;border:1.5px solid #7c5cbf;border-radius:8px;background:rgba(124,92,191,.1);color:#7c5cbf;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">✏️ 手动</button>
+        <button onclick="addExercise(15)" style="flex:1;padding:8px;border:1.5px solid #5c9e5c;border-radius:var(--r-sm);background:rgba(92,158,92,.1);color:#5c9e5c;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+15 分钟</button>
+        <button onclick="addExercise(30)" style="flex:1;padding:8px;border:1.5px solid #d4a017;border-radius:var(--r-sm);background:rgba(212,160,23,.1);color:#d4a017;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+30 分钟</button>
+        <button onclick="customExercise()" style="flex:1;padding:8px;border:1.5px solid #7c5cbf;border-radius:var(--r-sm);background:rgba(124,92,191,.1);color:#7c5cbf;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">✏️ 手动</button>
       </div>
-      <div style="font-size:10px;color:#8a7a6a;text-align:center;padding-top:6px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
+      <div style="font-size:10px;color:var(--c-text-secondary);text-align:center;padding-top:6px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
     </div>
 
     <!-- WEIGHT TRACKER -->
@@ -1339,7 +1406,7 @@ body.dark .raise-name{color:#d9bb98}
       <div id="monthlyReport"></div>
     </div>
     <div class="card" id="achievementCard" style="cursor:pointer" onclick="toggleAchievementView()">
-      <div class="card-header">🏆 成就 <span id="achieveCount" style="font-weight:400;font-size:12px;color:#8a7a6a"></span></div>
+      <div class="card-header">🏆 成就 <span id="achieveCount" style="font-weight:400;font-size:12px;color:var(--c-text-secondary)"></span></div>
       <div id="achievementGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
   </div>
@@ -1395,9 +1462,9 @@ body.dark .raise-name{color:#d9bb98}
       </div>
       <div id="raiseDots" style="display:flex;justify-content:center;gap:6px;padding:8px 0 4px"></div>
       <div style="display:flex;justify-content:center;gap:20px;margin-top:2px">
-        <button onclick="slideRaise(-1)" style="background:none;border:none;font-size:18px;color:#8a7a6a;padding:4px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent">‹</button>
-        <span id="raiseCounter" style="font-size:12px;color:#8a7a6a;padding:4px 0">0 / 0</span>
-        <button onclick="slideRaise(1)" style="background:none;border:none;font-size:18px;color:#8a7a6a;padding:4px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent">›</button>
+        <button onclick="slideRaise(-1)" style="background:none;border:none;font-size:18px;color:var(--c-text-secondary);padding:4px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent">‹</button>
+        <span id="raiseCounter" style="font-size:12px;color:var(--c-text-secondary);padding:4px 0">0 / 0</span>
+        <button onclick="slideRaise(1)" style="background:none;border:none;font-size:18px;color:var(--c-text-secondary);padding:4px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent">›</button>
       </div>
     </div>
   </div>
@@ -1425,7 +1492,7 @@ body.dark .raise-name{color:#d9bb98}
           <button class="save-btn" id="exportDataBtn" style="padding:5px 12px;font-size:11px;flex:0">导出</button>
         </div>
         <div class="setting-row" style="border:none">
-          <span class="setting-label" style="color:#8a7a6a">重置所有数据</span>
+          <span class="setting-label" style="color:var(--c-text-secondary)">重置所有数据</span>
           <button class="btn-cancel" id="resetDataBtn" style="padding:5px 12px;font-size:11px;flex:0;background:#cebda8;color:#6a5a4a">重置</button>
         </div>
         <div class="setting-row">
@@ -1458,7 +1525,7 @@ body.dark .raise-name{color:#d9bb98}
           <li>添加「<b>生成 UUID</b>」和「<b>当前日期</b>」，日期格式设为 <code>yyyy-MM-dd</code></li>
           <li>添加「<b>获取 URL 内容</b>」，方法选 POST，按 README 配置 JSON 正文和 <code>x-shortcut-secret</code> 请求头</li>
         </ol>
-        <p style="color:#8a7a6a;font-size:11px;margin-top:4px">💡 密钥只保存在快捷指令里；完整配置见项目 README。</p>
+        <p style="color:var(--c-text-secondary);font-size:11px;margin-top:4px">💡 密钥只保存在快捷指令里；完整配置见项目 README。</p>
       </div>
     </div>
   </div>
@@ -2343,7 +2410,7 @@ function renderWeight(){
 
   if(historyHtml){
     historyEl.innerHTML=`
-      <div style="font-size:11px;color:#8a7a6a;margin:8px 0 4px;letter-spacing:.5px;text-transform:uppercase">最近记录</div>
+      <div style="font-size:11px;color:var(--c-text-secondary);margin:8px 0 4px;letter-spacing:.5px;text-transform:uppercase">最近记录</div>
       ${historyHtml}
     `;
   }else{
@@ -2566,7 +2633,7 @@ function showProfile(creatureId){
     document.getElementById('profileContent').innerHTML=
       '<div class="profile-section" style="text-align:center;padding:20px">'+
       '<div style="font-size:28px;margin-bottom:8px">🔒</div>'+
-      '<div style="color:#8a7a6a">尚未相遇，先去收集它吧！</div>'+
+      '<div style="color:var(--c-text-secondary)">尚未相遇，先去收集它吧！</div>'+
       '</div>';
     modal.classList.add('show');
     return;
@@ -2591,7 +2658,7 @@ function showProfile(creatureId){
     '<div class="profile-label">🧬 性格</div>'+
     '<div>'+per.mbti+' · '+per.trait+'</div>'+
     '<div>倾向：'+per.tendency+'</div>'+
-    '<div style="font-style:italic;color:#8a7a6a;font-size:11px">"'+per.greeting+'"</div>'+
+    '<div style="font-style:italic;color:var(--c-text-secondary);font-size:11px">"'+per.greeting+'"</div>'+
   '</div>';
 
   // Likes
@@ -3050,7 +3117,7 @@ function renderPetFace(id, size, level){
   }
   var badge='';
   if(stage>0)badge='<span style="position:absolute;bottom:-4px;right:-4px;font-size:'+(size<60?'9':'12')+'px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))">'+(stage===1?'🌟':'👑')+'</span>';
-  return '<div style="position:relative;display:inline-block;border-radius:8px;'+(extra||'')+'">'+
+  return '<div style="position:relative;display:inline-block;border-radius:var(--r-sm);'+(extra||'')+'">'+
     '<img src="./sprites_web/'+id+'.png" style="width:'+size+'px;height:'+size+'px;object-fit:cover;image-rendering:auto;border-radius:6px;background:transparent" alt="" onerror="this.style.display=\'none\'">'+
     badge+'</div>';
 }
@@ -3210,7 +3277,7 @@ function renderToday(){
   fetch('./tasks/tasks.json?'+Date.now()).then(r=>r.json()).then(data=>{
     const tasks=data[key]||[];
     if(tasks.length===0){
-      list.innerHTML='<div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">📭 今天没有任务，休息一天吧</div>';
+      list.innerHTML='<div style="padding:20px;text-align:center;color:var(--c-text-secondary);font-size:13px">📭 今天没有任务，休息一天吧</div>';
     } else {
       list.innerHTML=tasks.map((t,i)=>{
         const isDone=done.includes(i);
@@ -3221,12 +3288,12 @@ function renderToday(){
             '</svg>'+
           '</div>'+
           '<span class="habit-text'+(isDone?' done':'')+'">'+t+'</span>'+
-          '<span style="font-size:10px;font-weight:500;color:#8a7a6a;flex-shrink:0'+(isDone?';opacity:.5':'')+'">'+(isDone?'✓ 完成':'▶ 待办')+'</span>'+
+          '<span style="font-size:10px;font-weight:500;color:var(--c-text-secondary);flex-shrink:0'+(isDone?';opacity:.5':'')+'">'+(isDone?'✓ 完成':'▶ 待办')+'</span>'+
         '</div>';
       }).join('');
     }
   }).catch(()=>{
-    list.innerHTML='<div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">⚠️ 加载任务失败</div>';
+    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--c-text-secondary);font-size:13px">⚠️ 加载任务失败</div>';
   });
   // Task streak
   const ts=document.getElementById('taskStreakTag');
@@ -3257,7 +3324,7 @@ function renderSneakPeek(){
   const el=document.getElementById('creatureSneakPeek');
   const collected=state.collectedCreatures||[];
   if(collected.length===0){
-    el.innerHTML='<div style="font-size:24px;opacity:.5">🧚</div><div style="font-size:11px;color:#8a7a6a;margin-top:4px">记录体重和运动来收集精灵吧！</div>';
+    el.innerHTML='<div style="font-size:24px;opacity:.5">🧚</div><div style="font-size:11px;color:var(--c-text-secondary);margin-top:4px">记录体重和运动来收集精灵吧！</div>';
     return;
   }
   const lastFew=collected.slice(-3).map(id=>CREATURES.find(c=>c.id===id)).filter(Boolean);
@@ -3265,10 +3332,10 @@ function renderSneakPeek(){
     <div style="display:flex;gap:4px;justify-content:center;align-items:flex-end">
       ${lastFew.map(c=>'<div style="text-align:center;width:56px">'+
         renderCreatureSVG(c,48)+
-        '<div style="font-size:9px;color:#8a7a6a;margin-top:2px">'+c.name+'</div>'+
+        '<div style="font-size:9px;color:var(--c-text-secondary);margin-top:2px">'+c.name+'</div>'+
       '</div>').join('')}
     </div>
-    <div style="font-size:11px;color:#8a7a6a;margin-top:6px">
+    <div style="font-size:11px;color:var(--c-text-secondary);margin-top:6px">
       已收集 ${collected.length} / ${CREATURES.length}
     </div>`;
 }
@@ -3371,7 +3438,7 @@ function renderRaise(){
   if(!track) return;
 
   if(collected.length===0){
-    track.innerHTML='<div style="min-width:100%;padding:40px 0;text-align:center;color:#8a7a6a;font-size:14px">🧚 还没有解锁任何精灵<br><span style="font-size:12px">去图鉴页完成解锁条件吧！</span></div>';
+    track.innerHTML='<div style="min-width:100%;padding:40px 0;text-align:center;color:var(--c-text-secondary);font-size:14px">🧚 还没有解锁任何精灵<br><span style="font-size:12px">去图鉴页完成解锁条件吧！</span></div>';
     dots.innerHTML='';
     if(counter) counter.textContent='0 / 0';
     return;
@@ -3395,14 +3462,14 @@ function renderRaise(){
     return '<div class="raise-card">'+
       '<div class="raise-header">'+
         '<div class="raise-name">'+c.emoji+' '+c.name+'</div>'+
-        '<div style="font-size:10px;color:#8a7a6a;margin-top:2px">'+mbtiTag+' · '+traitTag+'</div>'+
+        '<div style="font-size:10px;color:var(--c-text-secondary);margin-top:2px">'+mbtiTag+' · '+traitTag+'</div>'+
       '</div>'+
       '<div style="text-align:center;padding:8px 0;min-height:100px" onclick="petTapReaction(\''+c.id+'\')" style="cursor:pointer">'+renderPetFace(c.id,100,lvl)+'</div>'+
-      '<div style="text-align:center;font-size:14px;font-weight:500;color:#8a7a6a;margin-bottom:6px">Lv.'+lvl+' '+moodEmoji+'</div>'+
-      '<div style="text-align:center;font-size:10px;color:#8a7a6a;margin-bottom:6px" id="petGreeting_'+c.id+'"></div>'+
+      '<div style="text-align:center;font-size:14px;font-weight:500;color:var(--c-text-secondary);margin-bottom:6px">Lv.'+lvl+' '+moodEmoji+'</div>'+
+      '<div style="text-align:center;font-size:10px;color:var(--c-text-secondary);margin-bottom:6px" id="petGreeting_'+c.id+'"></div>'+
       '<div style="max-width:220px;margin:0 auto">'+
-        '<div class="raise-stat-row"><span style="font-size:11px;width:28px">🍽️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-hunger" style="width:'+hungerPct+'%"></div></div><span style="font-size:10px;color:#8a7a6a;width:28px;text-align:right">'+hungerPct+'%</span></div>'+
-        '<div class="raise-stat-row"><span style="font-size:11px;width:28px">❤️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-happy" style="width:'+happyPct+'%"></div></div><span style="font-size:10px;color:#8a7a6a;width:28px;text-align:right">'+happyPct+'%</span></div>'+
+        '<div class="raise-stat-row"><span style="font-size:11px;width:28px">🍽️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-hunger" style="width:'+hungerPct+'%"></div></div><span style="font-size:10px;color:var(--c-text-secondary);width:28px;text-align:right">'+hungerPct+'%</span></div>'+
+        '<div class="raise-stat-row"><span style="font-size:11px;width:28px">❤️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-happy" style="width:'+happyPct+'%"></div></div><span style="font-size:10px;color:var(--c-text-secondary);width:28px;text-align:right">'+happyPct+'%</span></div>'+
         '<div class="raise-stat-row"><span style="font-size:11px;width:28px">💕</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-intimacy" style="width:'+intimacyPct+'%"></div></div><span style="font-size:10px;color:#d63384;width:28px;text-align:right">'+intimacyLabel+'</span></div>'+
       '</div>'+
       '<div class="raise-btns">'+
@@ -3479,7 +3546,7 @@ function renderWeeklyView(){
 
   const html=`
     <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:13px;color:#8a7a6a;margin-top:2px">本周 vs 上周</div>
+      <div style="font-size:13px;color:var(--c-text-secondary);margin-top:2px">本周 vs 上周</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
       <div class="streak-box">
@@ -3499,23 +3566,23 @@ function renderWeeklyView(){
       <div class="streak-box">
         <div class="streak-number" style="color:#d4a017">${tw.taskDone}</div>
         <div class="streak-label">☑️ 任务完成</div>
-        <div style="font-size:10px;color:#8a7a6a;margin-top:2px">上周 ${lw.taskDone}</div>
+        <div style="font-size:10px;color:var(--c-text-secondary);margin-top:2px">上周 ${lw.taskDone}</div>
       </div>
       <div class="streak-box">
         <div class="streak-number" style="color:#ab47bc">${(state.collectedCreatures||[]).length}</div>
         <div class="streak-label">🧚 精灵收集</div>
-        <div style="font-size:10px;color:#8a7a6a;margin-top:2px">连续 ${calcStreak(state.exerciseLogs)} 天运动</div>
+        <div style="font-size:10px;color:var(--c-text-secondary);margin-top:2px">连续 ${calcStreak(state.exerciseLogs)} 天运动</div>
       </div>
     </div>
     ${weightChange!==null?`
-      <div style="text-align:center;padding:10px;background:rgba(92,158,92,.08);border-radius:8px;margin-bottom:12px">
-        <span style="font-size:13px;color:#8a7a6a">⚖️ 体重变化 </span>
+      <div style="text-align:center;padding:10px;background:rgba(92,158,92,.08);border-radius:var(--r-sm);margin-bottom:12px">
+        <span style="font-size:13px;color:var(--c-text-secondary)">⚖️ 体重变化 </span>
         <span style="font-size:16px;font-weight:700;color:${weightChange<=0?'#5c9e5c':'#e57373'}">
           ${weightChange<=0?'−'+Math.abs(weightChange).toFixed(1)+'kg ✓':'+'+weightChange.toFixed(1)+'kg'}
         </span>
       </div>
     `:''}
-    <div style="font-size:11px;color:#8a7a6a;text-align:center;padding:6px 0">
+    <div style="font-size:11px;color:var(--c-text-secondary);text-align:center;padding:6px 0">
       ${tw.weightDays>=7?'📝 坚持每天记录体重！':tw.weightDays>0?'📝 本周记录体重 '+tw.weightDays+' 天':''}
       ${tw.weightDays===0&&lw.weightDays>0?'⚠️ 本周还没记录过体重':''}
     </div>
@@ -3551,7 +3618,7 @@ function renderMonthlyView(){
   // Calendar grid
   var cal='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:12px">';
   const weekDays='日一二三四五六';
-  for(let i=0;i<7;i++)cal+='<div style="font-size:9px;text-align:center;color:#8a7a6a;padding:2px 0">'+weekDays[i]+'</div>';
+  for(let i=0;i<7;i++)cal+='<div style="font-size:9px;text-align:center;color:var(--c-text-secondary);padding:2px 0">'+weekDays[i]+'</div>';
   const firstDow=new Date(thisY,thisM,1).getDay();
   const daysInM=new Date(thisY,thisM+1,0).getDate();
   for(let i=0;i<firstDow;i++)cal+='<div></div>';
@@ -3559,15 +3626,15 @@ function renderMonthlyView(){
     const key=thisY+'-'+String(thisM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const has=(state.waterLogs?.[key]||0)>0||state.weightLogs?.[key]!==undefined||(state.exerciseLogs?.[key]||0)>0||(Array.isArray(state.taskLogs?.[key])&&state.taskLogs[key].length>0);
     const isToday=d===now.getDate();
-    cal+='<div style="text-align:center;font-size:11px;padding:4px 0;border-radius:4px;background:'+
+    cal+='<div style="text-align:center;font-size:11px;padding:4px 0;border-radius:var(--r-sm);background:'+
       (isToday?'#c4aa8a':has?'rgba(92,158,92,.15)':'transparent')+';color:'+
       (isToday?'#1a1512':'#3a322f')+'">'+d+'</div>';
   }
   cal+='</div>';
   el.innerHTML=cal+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-      '<div class="streak-box"><div class="streak-number" style="color:#5c9e5c">'+tm.exercise+'</div><div class="streak-label">🏃运动</div><div style="font-size:9px;color:#8a7a6a">vs上月'+(eDiff>0?'↑'+eDiff:eDiff<0?'↓'+Math.abs(eDiff):'持平')+'</div></div>'+
-      '<div class="streak-box"><div class="streak-number" style="color:#4fc3f7">'+tm.water+'</div><div class="streak-label">💧喝水</div><div style="font-size:9px;color:#8a7a6a">vs上月'+(wDiff>0?'↑'+wDiff:wDiff<0?'↓'+Math.abs(wDiff):'持平')+'</div></div>'+
+      '<div class="streak-box"><div class="streak-number" style="color:#5c9e5c">'+tm.exercise+'</div><div class="streak-label">🏃运动</div><div style="font-size:9px;color:var(--c-text-secondary)">vs上月'+(eDiff>0?'↑'+eDiff:eDiff<0?'↓'+Math.abs(eDiff):'持平')+'</div></div>'+
+      '<div class="streak-box"><div class="streak-number" style="color:#4fc3f7">'+tm.water+'</div><div class="streak-label">💧喝水</div><div style="font-size:9px;color:var(--c-text-secondary)">vs上月'+(wDiff>0?'↑'+wDiff:wDiff<0?'↓'+Math.abs(wDiff):'持平')+'</div></div>'+
     '</div>';
 }
 
@@ -3595,7 +3662,7 @@ function toggleAchievementView(){
       return '<div style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05)">'+
         '<span style="font-size:16px">'+(got?a.icon:'🔒')+'</span>'+
         '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:'+(got?'#5c9e5c':'#8a7a6a')+'">'+a.name+'</div>'+
-        '<div style="font-size:10px;color:#8a7a6a">'+a.desc+'</div></div>'+
+        '<div style="font-size:10px;color:var(--c-text-secondary)">'+a.desc+'</div></div>'+
         (got?'<span style="font-size:11px;color:#5c9e5c">✅</span>':'<span style="font-size:10px;color:#b9a58a">进行中</span>')+
         '</div>';
     }).join('');
@@ -3783,8 +3850,8 @@ function bindUI(){
         const preview=document.getElementById('waterPhotoPreview')||document.createElement('div');
         preview.id='waterPhotoPreview';
         preview.style.cssText='margin-top:8px;text-align:center';
-        preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;max-height:120px;border-radius:8px;border:2px solid #b9a58a">
-          <div style="font-size:10px;color:#8a7a6a;margin-top:4px">📤 把这张照片发给我，我确认后帮你加经验</div>`;
+        preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;max-height:120px;border-radius:var(--r-sm);border:2px solid #b9a58a">
+          <div style="font-size:10px;color:var(--c-text-secondary);margin-top:4px">📤 把这张照片发给我，我确认后帮你加经验</div>`;
         document.getElementById('waterPhotoBtn').parentElement.appendChild(preview);
       };
       reader.readAsDataURL(this.files[0]);
