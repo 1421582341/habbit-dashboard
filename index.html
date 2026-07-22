@@ -2055,14 +2055,10 @@ function saveWeight(){
   if(!val||val<20||val>400){ alert('请输入合理的体重（20-400 kg）'); return; }
   const key=todayKey();
   if(!state.weightLogs) state.weightLogs={};
-  const isNew=!state.weightLogs[key];
   state.weightLogs[key]={weight:val,ts:Date.now()};
   input.value='';
   saveState();
   renderWeight();
-  checkMilestones();
-  if(isNew) addExp(EXP_RATES.weight, '⚖️');
-  if(isNew) addCoins(COIN_RATES.weight, '⚖️');
 }
 
 function renderWeight(){
