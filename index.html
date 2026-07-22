@@ -708,8 +708,17 @@ body.dark .nav-btn svg{stroke:currentColor}
   padding:32px 16px;
   color:#b9a58a;
   font-size:13px;
+  animation:emptyFloat 3s ease-in-out infinite;
 }
-.empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
+.empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5;display:block;animation:emptyPulse 2s ease-in-out infinite}
+@keyframes emptyFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-4px)}
+}
+@keyframes emptyPulse{
+  0%,100%{transform:scale(1);opacity:.5}
+  50%{transform:scale(1.08);opacity:.7}
+}
 
 /* ===== CONFETTI ===== */
 @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100px) rotate(720deg);opacity:0}}
@@ -1337,7 +1346,7 @@ body.dark .raise-name{color:#d9bb98}
     <div class="card">
       <div class="card-header">☑️ 今日任务<span id="taskStreakTag" style="display:none"></span></div>
       <div class="habit-list" id="taskList">
-        <div style="padding:20px;text-align:center;color:var(--c-text-secondary);font-size:13px">📭 今天没有任务，休息一天吧</div>
+        <div class="empty-state" style="padding:20px;font-size:13px"><span class="empty-icon">📭</span>今天没有任务，休息一天吧</div>
       </div>
     </div>
 
@@ -3320,7 +3329,8 @@ function renderToday(){
   fetch('./tasks/tasks.json?'+Date.now()).then(r=>r.json()).then(data=>{
     const tasks=data[key]||[];
     if(tasks.length===0){
-      list.innerHTML='<div style="padding:20px;text-align:center;color:var(--c-text-secondary);font-size:13px">📭 今天没有任务，休息一天吧</div>';
+      list.innerHTML='<div class="empty-state" style="padding:20px 16px"><span class="empty-icon">📭</span>今天没有任务</div>';
+      return;
     } else {
       list.innerHTML=tasks.map((t,i)=>{
         const isDone=done.includes(i);
