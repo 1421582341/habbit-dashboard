@@ -743,7 +743,8 @@ body.dark .weekly-subtab.active{background:var(--bg-surface-alt);color:var(--c-t
 .weekly-subtab:active{transform:scale(.96)}
 
 /* ===== CREATURE CSS ===== */
-.creature-grid{
+.creature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
 /* Gallery Stats Bar */
 .gallery-stats{
   display:flex;gap:8px;margin-bottom:14px;
@@ -769,18 +770,8 @@ body.dark .gallery-stat-value{color:#d3b694}
 body.dark .filter-btn{color:var(--c-text-secondary);border-color:var(--c-primary)}
 body.dark .filter-btn.active{background:#c4aa8a;color:#1a1512;border-color:#c4aa8a}
 
-/* ===== WEEKLY SUB-TABS ===== */
-.weekly-subtab{
-  flex:1;padding:8px 4px;border:none;border-radius:5px;font-family:inherit;font-size:12px;
-  font-weight:500;cursor:pointer;transition:.25s;color:var(--c-text-secondary);background:transparent;
-  -webkit-tap-highlight-color:transparent;
-}
-.weekly-subtab.active{background:var(--bg-surface);color:var(--c-text)}
-body.dark .weekly-subtab.active{background:var(--bg-surface-alt);color:var(--c-text)}
-.weekly-subtab:active{transform:scale(.96)}
-
 /* ===== CREATURE CSS ===== */
-.creature-grid{
+.creature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .creature-card{
   background:var(--bg);border:1px solid transparent;
   border-radius:var(--r-lg);padding:12px 8px;
