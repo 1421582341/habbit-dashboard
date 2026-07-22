@@ -42,9 +42,10 @@ test('serializeState keeps every durable field and drops session-only unlocks', 
   assert.equal(serialized.newUnlocks, undefined);
   assert.equal(serialized.transient, undefined);
   assert.deepEqual(Object.keys(serialized).sort(), [
-    'coffeeLogs', 'coins', 'collectedCreatures', 'creatureLevels', 'exerciseLogs',
-    'exp', 'habits', 'inventory', 'level', 'petState', 'records', 'settings',
-    'taskLogs', 'waterLogs', 'weightLogs'
+    '_perfectDays', 'achievements', 'coffeeLogs', 'coins', 'collectedCreatures',
+    'creatureLevels', 'exerciseLogs', 'exp', 'habits', 'inventory', 'level',
+    'mealLogs', 'personalRecords', 'petState', 'records', 'settings', 'taskLogs',
+    'waterLogs', 'weightLogs'
   ].sort());
   assert.deepEqual(serialized.taskLogs, { '2026-07-22': [0, 2] });
 });
@@ -66,11 +67,29 @@ test('normalizeState strips executable markup from legacy nested values', () => 
   assert.match(normalized.habits[0].label, /img src=x/);
 });
 
-test('isVersionConflict recognizes database serialization failures', () => {
+test('isVersionConflict recognizes business conflicts and legacy serialization failures', () => {
+  assert.equal(core.isVersionConflict({ code: 'P0001', message: 'stale_version' }), true);
   assert.equal(core.isVersionConflict({ code: '40001' }), true);
   assert.equal(core.isVersionConflict({ message: 'stale_version' }), true);
   assert.equal(core.isVersionConflict({ code: '23505' }), false);
   assert.equal(core.isVersionConflict(null), false);
+});
+
+test('withConflictRetry waits once and then surfaces a repeated conflict', async () => {
+  let attempts = 0;
+  const delays = [];
+  const conflict = Object.assign(new Error('stale_version'), { code: 'P0001' });
+
+  await assert.rejects(
+    () => core.withConflictRetry(async () => {
+      attempts += 1;
+      throw conflict;
+    }, async delay => { delays.push(delay); }),
+    /stale_version/
+  );
+
+  assert.equal(attempts, 2);
+  assert.deepEqual(delays, [250]);
 });
 
 test('validateShortcutEvent accepts a normalized exercise event', () => {

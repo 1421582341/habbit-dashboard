@@ -2114,12 +2114,7 @@ async function startAuthenticatedApp(){
   setAppInteractionLocked(true);
   cloudLoadPromise=(async()=>{
     try{
-      while(true){
-        try{return await performAuthenticatedStart()}
-        catch(error){
-          if(!InflifeSyncCore.isVersionConflict(error))throw error;
-        }
-      }
+      return await InflifeSyncCore.withConflictRetry(performAuthenticatedStart);
     }catch(error){
       cloudReady=wasCloudReady;
       throw error;

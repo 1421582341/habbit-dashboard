@@ -37,3 +37,10 @@ test('the browser SDK is pinned and protected by subresource integrity', () => {
   assert.match(html, /src="src\/sync-core\.js"/);
   assert.match(html, /src="src\/supabase-sync\.js"/);
 });
+
+test('authenticated startup uses the bounded conflict retry helper', () => {
+  const startFunction = html.match(/async function startAuthenticatedApp\(\)\{([\s\S]*?)\n\}\n\n\/\/ ===== INIT/);
+  assert.ok(startFunction, 'startAuthenticatedApp should be present');
+  assert.match(startFunction[1], /InflifeSyncCore\.withConflictRetry\(performAuthenticatedStart\)/);
+  assert.doesNotMatch(startFunction[1], /while\s*\(true\)/);
+});

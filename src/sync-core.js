@@ -162,6 +162,17 @@
     return error.code === '40001' || String(error.message || '').includes('stale_version');
   }
 
+  async function withConflictRetry(operation, waitFn) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!isVersionConflict(error)) throw error;
+      const wait = waitFn || (delay => new Promise(resolve => setTimeout(resolve, delay)));
+      await wait(250);
+      return operation();
+    }
+  }
+
   function parseDay(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return null;
     const millis = Date.parse(`${value}T00:00:00Z`);
@@ -204,5 +215,5 @@
     };
   }
 
-  return { normalizeState, serializeState, isVersionConflict, validateShortcutEvent };
+  return { normalizeState, serializeState, isVersionConflict, withConflictRetry, validateShortcutEvent };
 });

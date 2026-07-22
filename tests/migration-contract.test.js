@@ -6,6 +6,7 @@ const path = require('node:path');
 const migrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260722010000_secure_user_state.sql');
 const shortcutMigrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260722020000_shortcut_events.sql');
 const legacyLockMigrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260722030000_lock_legacy_user_data.sql');
+const conflictFixMigrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260722233000_stop_stale_version_retry_storm.sql');
 
 function migrationSql() {
   return fs.readFileSync(migrationPath, 'utf8').replace(/\s+/g, ' ').toLowerCase();
@@ -17,6 +18,11 @@ function shortcutMigrationSql() {
 
 function legacyLockMigrationSql() {
   return fs.readFileSync(legacyLockMigrationPath, 'utf8').replace(/\s+/g, ' ').toLowerCase();
+}
+
+function conflictFixMigrationSql() {
+  if (!fs.existsSync(conflictFixMigrationPath)) return '';
+  return fs.readFileSync(conflictFixMigrationPath, 'utf8').replace(/\s+/g, ' ').toLowerCase();
 }
 
 test('migration enables and forces RLS while removing anonymous privileges', () => {
@@ -42,9 +48,16 @@ test('save_user_state is the only authenticated update path and rejects stale ve
   assert.match(sql, /security definer/);
   assert.match(sql, /us\.user_id = \(select auth\.uid\(\)\)/);
   assert.match(sql, /us\.version = expected_version/);
-  assert.match(sql, /errcode = '40001'/);
+  assert.match(sql, /raise exception 'stale_version'/);
   assert.match(sql, /revoke all on function public\.save_user_state\(bigint, jsonb\) from public, anon/);
   assert.match(sql, /grant execute on function public\.save_user_state\(bigint, jsonb\) to authenticated/);
+});
+
+test('stale version conflicts use a non-retryable business SQLSTATE', () => {
+  const sql = conflictFixMigrationSql();
+  assert.match(sql, /create or replace function public\.save_user_state/);
+  assert.match(sql, /raise exception 'stale_version' using errcode = 'p0001'/);
+  assert.doesNotMatch(sql, /errcode = '40001'/);
 });
 
 test('shortcut migration keeps its event ledger private and idempotent', () => {

@@ -37,7 +37,7 @@ begin
 
   begin
     perform public.save_user_state(1, '{"coins":2}'::jsonb);
-  exception when serialization_failure then
+  exception when sqlstate 'P0001' then
     stale_rejected := true;
   end;
   if not stale_rejected then
