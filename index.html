@@ -1205,31 +1205,6 @@ body.dark .raise-name{color:#d9bb98}
     <!-- VIEW: TODAY -->
   <div class="view active" id="viewToday">
 
-    <!-- EXERCISE STATS -->
-    <div class="card">
-      <div class="card-header">🏃 今日运动</div>
-      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
-        <div style="flex:1;text-align:center">
-          <div id="exerciseMinutes" style="font-size:28px;font-weight:700;color:#5c9e5c">0</div>
-          <div style="font-size:11px;color:#8a7a6a">分钟</div>
-        </div>
-        <div style="flex:1;text-align:center">
-          <div id="exerciseCoins" style="font-size:28px;font-weight:700;color:#d4a017">0</div>
-          <div style="font-size:11px;color:#8a7a6a">💰 金币</div>
-        </div>
-        <div style="flex:1;text-align:center">
-          <div id="exerciseStreak" style="font-size:28px;font-weight:700;color:#7c5cbf">0</div>
-          <div style="font-size:11px;color:#8a7a6a">连续天数</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button onclick="addExercise(15)" style="flex:1;padding:8px;border:1.5px solid #5c9e5c;border-radius:8px;background:rgba(92,158,92,.1);color:#5c9e5c;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+15 分钟</button>
-        <button onclick="addExercise(30)" style="flex:1;padding:8px;border:1.5px solid #d4a017;border-radius:8px;background:rgba(212,160,23,.1);color:#d4a017;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+30 分钟</button>
-        <button onclick="customExercise()" style="flex:1;padding:8px;border:1.5px solid #7c5cbf;border-radius:8px;background:rgba(124,92,191,.1);color:#7c5cbf;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">✏️ 手动</button>
-      </div>
-      <div style="font-size:10px;color:#8a7a6a;text-align:center;padding-top:6px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
-    </div>
-
     <!-- TODAY'S TASKS -->
     <div class="card">
       <div class="card-header">☑️ 今日任务</div>
@@ -1276,6 +1251,31 @@ body.dark .raise-name{color:#d9bb98}
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- EXERCISE STATS -->
+    <div class="card">
+      <div class="card-header">🏃 今日运动</div>
+      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+        <div style="flex:1;text-align:center">
+          <div id="exerciseMinutes" style="font-size:28px;font-weight:700;color:#5c9e5c">0</div>
+          <div style="font-size:11px;color:#8a7a6a">分钟</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div id="exerciseCoins" style="font-size:28px;font-weight:700;color:#d4a017">0</div>
+          <div style="font-size:11px;color:#8a7a6a">💰 金币</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div id="exerciseStreak" style="font-size:28px;font-weight:700;color:#7c5cbf">0</div>
+          <div style="font-size:11px;color:#8a7a6a">连续天数</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button onclick="addExercise(15)" style="flex:1;padding:8px;border:1.5px solid #5c9e5c;border-radius:8px;background:rgba(92,158,92,.1);color:#5c9e5c;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+15 分钟</button>
+        <button onclick="addExercise(30)" style="flex:1;padding:8px;border:1.5px solid #d4a017;border-radius:8px;background:rgba(212,160,23,.1);color:#d4a017;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">+30 分钟</button>
+        <button onclick="customExercise()" style="flex:1;padding:8px;border:1.5px solid #7c5cbf;border-radius:8px;background:rgba(124,92,191,.1);color:#7c5cbf;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent">✏️ 手动</button>
+      </div>
+      <div style="font-size:10px;color:#8a7a6a;text-align:center;padding-top:6px">🏃 每30分钟 = 10金币 · 15分钟以上算连续</div>
     </div>
 
     <!-- WEIGHT TRACKER -->
