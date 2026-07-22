@@ -1790,6 +1790,7 @@ let state = {
   newUnlocks: [],         // creature IDs unlocked this session (for animation)
   petState: {},           // creatureId -> { hunger, happiness, lastFeed, lastPlay }
   personalRecords: {},    // creatureId -> personal record object
+  _perfectDays: [],       // track full-attendance days
   settings: { darkMode: false, reminder: true }
 };
 let firstWeightRecorded = false;
@@ -2006,6 +2007,7 @@ function loadState(){
       state.collectedCreatures = parsed.collectedCreatures || [];
       state.petState = parsed.petState || {};
       state.personalRecords = parsed.personalRecords || {};
+      state._perfectDays = parsed._perfectDays || [];
       state.newUnlocks = [];
       state.settings = parsed.settings || { darkMode: false, reminder: true };
     }
@@ -2251,6 +2253,7 @@ function saveWeight(){
   state.weightLogs[key]={weight:val,ts:Date.now()};
   input.value='';
   checkMilestones();
+  tryPerfectDay();
   saveState();
   renderWeight();
 }
@@ -2324,6 +2327,34 @@ function checkAllDone(){
 }
 
 // ===== MILESTONE ENGINE =====
+function checkPerfectDay(){
+  const key=todayKey();
+  const tasksDone=Array.isArray(state.taskLogs?.[key])?state.taskLogs[key].length:0;
+  // Consider "perfect" if: has water + has weight + has exercise + completed all available tasks
+  const hasWater=(state.waterLogs?.[key]||0)>0;
+  const hasWeight=state.weightLogs?.[key]!==undefined;
+  const hasExercise=(state.exerciseLogs?.[key]||0)>=15;
+  const hasTasks=tasksDone>0;
+  if(hasWater&&hasWeight&&hasExercise&&hasTasks){
+    // Already awarded today?
+    const perfectKey='perfect_'+key;
+    if(state._perfectDays&&state._perfectDays.includes(key))return;
+    if(!state._perfectDays)state._perfectDays=[];
+    state._perfectDays.push(key);
+    addExp(50,'🌟全勤');
+    showToast('🏆 完美一天！全勤 +50EXP','🌟');
+    state._perfectDaysSave=true;
+    saveState();
+  }
+}
+
+// Called after every record
+function tryPerfectDay(){
+  // Debounce: only check once per second
+  clearTimeout(window._pdt);
+  window._pdt=setTimeout(checkPerfectDay,500);
+}
+
 function checkMilestones(){
   if(!state.collectedCreatures) state.collectedCreatures=[];
   if(!state.newUnlocks) state.newUnlocks=[];
@@ -2565,6 +2596,7 @@ function addExercise(mins){
   renderToday();
   renderGallery();
   checkMilestones();
+  tryPerfectDay();
   showToast('🏃 +'+mins+'分钟'+(earn>0?' +'+earn+'💰':''));
 }
 
@@ -2960,6 +2992,7 @@ function logWater(n){
   const was=cur;
   state.waterLogs[key]=next;
   saveState();
+  tryPerfectDay();
   renderWater();
   // Staircase EXP: cup 1-5→1, 6→3, 7→5, 8→7
   const waterRewards=[0,1,1,1,1,1,3,5,7];
@@ -3087,6 +3120,7 @@ function toggleTask(idx){
   }
   state.taskLogs[key]=done;
   saveState();
+  tryPerfectDay();
   renderToday();
   checkMilestones();
 }
@@ -3142,83 +3176,6 @@ function renderSneakPeek(){
 // }
 // 
 // ===== RENDER: WEEKLY VIEW =====
-function renderWeeklyView(){
-  const container=document.getElementById('weeklyReport');
-  const now=new Date();
-  const weekStart=new Date(now);
-  weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-
-  // Calculate weekly stats
-  let totalExercise=0, totalWater=0, totalWeightDays=0, taskDone=0, collectedThisWeek=0;
-  const allCollected=state.collectedCreatures||[];
-  const weekDates=[];
-  for(let i=0;i<7;i++){
-    const d=new Date(weekStart);
-    d.setDate(d.getDate()+i);
-    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    weekDates.push(key);
-    totalExercise+=state.exerciseLogs?.[key]||0;
-    totalWater+=state.waterLogs?.[key]||0;
-    if(state.weightLogs?.[key]) totalWeightDays++;
-  }
-
-  const firstWeight=Object.values(state.weightLogs||{})[0]?.weight;
-  const lastWeight=Object.values(state.weightLogs||{}).pop()?.weight;
-  const weightChange=firstWeight&&lastWeight?lastWeight-firstWeight:null;
-
-  const weekStartStr=weekDates[0];
-  const weekEndStr=weekDates[6];
-  collectedThisWeek=allCollected.filter(cid=>{
-    // Estimate: check if creature was unlocked recently (simplified)
-    return allCollected.indexOf(cid)>=(allCollected.length-3);
-  }).length;
-
-  // Calculate task completion for this week
-  let totalTasks=0, doneTasks=0;
-  for(const d of weekDates){
-    const t=state.taskLogs?.[d]||[];
-    if(t.length>0) totalTasks++;
-    doneTasks+=t.length;
-  }
-
-  const html=`
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:13px;color:#8a7a6a;margin-top:2px">${weekStartStr} ~ ${weekEndStr}</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#5c9e5c">${totalExercise}</div>
-        <div class="streak-label">🏃 运动分钟</div>
-      </div>
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#4fc3f7">${totalWater}</div>
-        <div class="streak-label">💧 喝水杯数</div>
-      </div>
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#d4a017">${doneTasks}</div>
-        <div class="streak-label">☑️ 任务完成</div>
-      </div>
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#ab47bc">${allCollected.length}</div>
-        <div class="streak-label">🧚 精灵收集</div>
-      </div>
-    </div>
-    ${weightChange!==null?`
-      <div style="text-align:center;padding:10px;background:rgba(92,158,92,.08);border-radius:8px;margin-bottom:12px">
-        <span style="font-size:13px;color:#8a7a6a">⚖️ 体重变化 </span>
-        <span style="font-size:16px;font-weight:700;color:${weightChange<=0?'#5c9e5c':'#e57373'}">
-          ${weightChange<=0?''+Math.abs(weightChange).toFixed(1)+'kg ✓':'+'+weightChange.toFixed(1)+'kg'}
-        </span>
-      </div>
-    `:''}
-    <div style="font-size:11px;color:#8a7a6a;text-align:center;padding:6px 0">
-      ${totalWeightDays>=7?'📝 坚持每天记录体重！':totalWeightDays>0?'📝 本周记录体重 '+totalWeightDays+' 天':''}
-    </div>
-  `;
-
-  container.innerHTML=html;
-}
-
 // ===== RENDER: GALLERY =====
 let galleryFilter='all';
 
@@ -3366,71 +3323,74 @@ function renderWeeklyView(){
   const weekStart=new Date(now);
   weekStart.setDate(weekStart.getDate()-weekStart.getDay());
 
-  // Calculate weekly stats
-  let totalExercise=0, totalWater=0, totalWeightDays=0, taskDone=0, collectedThisWeek=0;
-  const allCollected=state.collectedCreatures||[];
-  const weekDates=[];
-  for(let i=0;i<7;i++){
-    const d=new Date(weekStart);
-    d.setDate(d.getDate()+i);
-    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    weekDates.push(key);
-    totalExercise+=state.exerciseLogs?.[key]||0;
-    totalWater+=state.waterLogs?.[key]||0;
-    if(state.weightLogs?.[key]) totalWeightDays++;
+  function weekStats(offset){
+    var exercise=0,water=0,weightDays=0,taskDays=0,taskDone=0;
+    const start=new Date(weekStart);
+    start.setDate(start.getDate()-offset*7);
+    for(let i=0;i<7;i++){
+      const d=new Date(start);
+      d.setDate(d.getDate()+i);
+      const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      exercise+=state.exerciseLogs?.[key]||0;
+      water+=state.waterLogs?.[key]||0;
+      if(state.weightLogs?.[key]) weightDays++;
+      const t=state.taskLogs?.[key]||[];
+      if(t.length>0) taskDays++;
+      taskDone+=t.length;
+    }
+    return {exercise,water,weightDays,taskDays,taskDone};
   }
 
-  const firstWeight=Object.values(state.weightLogs||{})[0]?.weight;
-  const lastWeight=Object.values(state.weightLogs||{}).pop()?.weight;
+  const tw=weekStats(0), lw=weekStats(1);
+  const diff=tw.exercise-lw.exercise;
+  const wDiff=tw.water-lw.water;
+
+  const wValues=Object.entries(state.weightLogs||{}).sort((a,b)=>a[0].localeCompare(b[0]));
+  const firstWeight=wValues[0]?.[1]?.weight;
+  const lastWeight=wValues[wValues.length-1]?.[1]?.weight;
   const weightChange=firstWeight&&lastWeight?lastWeight-firstWeight:null;
-
-  const weekStartStr=weekDates[0];
-  const weekEndStr=weekDates[6];
-  collectedThisWeek=allCollected.filter(cid=>{
-    // Estimate: check if creature was unlocked recently (simplified)
-    return allCollected.indexOf(cid)>=(allCollected.length-3);
-  }).length;
-
-  // Calculate task completion for this week
-  let totalTasks=0, doneTasks=0;
-  for(const d of weekDates){
-    const t=state.taskLogs?.[d]||[];
-    if(t.length>0) totalTasks++;
-    doneTasks+=t.length;
-  }
 
   const html=`
     <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:13px;color:#8a7a6a;margin-top:2px">${weekStartStr} ~ ${weekEndStr}</div>
+      <div style="font-size:13px;color:#8a7a6a;margin-top:2px">本周 vs 上周</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#5c9e5c">${totalExercise}</div>
+      <div class="streak-box">
+        <div class="streak-number" style="color:#5c9e5c">${tw.exercise}</div>
         <div class="streak-label">🏃 运动分钟</div>
+        <div style="font-size:10px;color:${diff>0?'#5c9e5c':diff<0?'#e57373':'#8a7a6a'};margin-top:2px">
+          ${diff>0?'↑ +'+diff:diff<0?'↓ '+diff:'— 持平'} vs 上周${lw.exercise}
+        </div>
       </div>
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#4fc3f7">${totalWater}</div>
+      <div class="streak-box">
+        <div class="streak-number" style="color:#4fc3f7">${tw.water}</div>
         <div class="streak-label">💧 喝水杯数</div>
+        <div style="font-size:10px;color:${wDiff>0?'#5c9e5c':wDiff<0?'#e57373':'#8a7a6a'};margin-top:2px">
+          ${wDiff>0?'↑ +'+wDiff:wDiff<0?'↓ '+wDiff:'— 持平'} vs 上周${lw.water}
+        </div>
       </div>
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#d4a017">${doneTasks}</div>
+      <div class="streak-box">
+        <div class="streak-number" style="color:#d4a017">${tw.taskDone}</div>
         <div class="streak-label">☑️ 任务完成</div>
+        <div style="font-size:10px;color:#8a7a6a;margin-top:2px">上周 ${lw.taskDone}</div>
       </div>
-      <div class="streak-box" style="flex:1;min-width:0">
-        <div class="streak-number" style="color:#ab47bc">${allCollected.length}</div>
+      <div class="streak-box">
+        <div class="streak-number" style="color:#ab47bc">${(state.collectedCreatures||[]).length}</div>
         <div class="streak-label">🧚 精灵收集</div>
+        <div style="font-size:10px;color:#8a7a6a;margin-top:2px">连续 ${calcStreak(state.exerciseLogs)} 天运动</div>
       </div>
     </div>
     ${weightChange!==null?`
       <div style="text-align:center;padding:10px;background:rgba(92,158,92,.08);border-radius:8px;margin-bottom:12px">
         <span style="font-size:13px;color:#8a7a6a">⚖️ 体重变化 </span>
         <span style="font-size:16px;font-weight:700;color:${weightChange<=0?'#5c9e5c':'#e57373'}">
-          ${weightChange<=0?''+Math.abs(weightChange).toFixed(1)+'kg ✓':'+'+weightChange.toFixed(1)+'kg'}
+          ${weightChange<=0?'−'+Math.abs(weightChange).toFixed(1)+'kg ✓':'+'+weightChange.toFixed(1)+'kg'}
         </span>
       </div>
     `:''}
     <div style="font-size:11px;color:#8a7a6a;text-align:center;padding:6px 0">
-      ${totalWeightDays>=7?'📝 坚持每天记录体重！':totalWeightDays>0?'📝 本周记录体重 '+totalWeightDays+' 天':''}
+      ${tw.weightDays>=7?'📝 坚持每天记录体重！':tw.weightDays>0?'📝 本周记录体重 '+tw.weightDays+' 天':''}
+      ${tw.weightDays===0&&lw.weightDays>0?'⚠️ 本周还没记录过体重':''}
     </div>
   `;
 
