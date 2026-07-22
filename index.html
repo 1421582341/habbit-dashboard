@@ -2419,9 +2419,7 @@ function showPerfectDayCelebration(){
   if(!el)return;
   el.classList.add('show');
   // Auto-hide after 3s
-  if(window._pdc)clearTimeout(window._pdc);
   window._pdc=setTimeout(function(){el.classList.remove('show');},3000);
-}
 }
 
 // Called after every record
