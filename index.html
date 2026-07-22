@@ -1562,6 +1562,27 @@ const ACHIEVEMENTS=[
   {id:'evolve',name:'见证进化',desc:'有一只精灵进化',icon:'🌟',check:s=>Object.values(s.creatureLevels||{}).some(v=>v>=30)},
 ];
 
+const CREATURE_REACTIONS = {
+  warmegg:{water:'温暖地孵化了☕',exer:'慢慢滚了一圈🏃',weight:'称了称自己⚖️',task:'认真点了点头📋'},
+  sprout:{water:'喝饱水叶子更绿了🌿',exer:'迎着风伸展了一下🌱',weight:'扎根更稳了🌳',task:'长出一个小花苞🌸'},
+  clover3:{water:'三叶草沾着水珠🍀',exer:'随风摇摆做运动🍃',weight:'测量自己的尺寸📏',task:'叶子变得更茂盛了🌿'},
+  sevastar:{water:'星光在水面闪烁✨',exer:'划过一道星轨🌟',weight:'调整了星位🌌',task:'记录在星图里📝'},
+  lightfloat:{water:'像云一样飘了起来☁️',exer:'轻盈地转了个圈💫',weight:'浮在空中称重🪶',task:'飘到高处看风景🏔️'},
+  cloudpuff:{water:'吸水后膨胀了一圈☁️',exer:'云朵弹了弹☁️',weight:'变轻了一点🪶',task:'飘出了一行小字📝'},
+  littlehorn:{water:'独角喷出一道小彩虹🌈',exer:'蹄子刨了刨地🐾',weight:'骄傲地挺起胸膛🦄',task:'用角轻轻碰了碰你💕'},
+  flamephoenix:{water:'火焰微微颤动🔥',exer:'翅膀燃起斗志🔥',weight:'蜕下一根火焰羽毛🪶',task:'在火光中点了点头✨'},
+  fourleaf:{water:'四叶草沾满露水🍀',exer:'随风轻轻舞动🌿',weight:'测量春天的长度📏',task:'带来幸运的好消息🍀'},
+  moonpie:{water:'月光凝结成水珠🌙',exer:'在月光下慢跑💫',weight:'对月亮许了个愿🌠',task:'在夜空画了个勾✓🌟'},
+  coffeebean:{water:'咖啡香飘了出来☕',exer:'精力充沛地跳了跳⚡',weight:'浓缩了一下自己🎯',task:'在计划本上打勾✓📋'},
+  snowball:{water:'雪花融化在手心❄️',exer:'堆了个小雪人☃️',weight:'在雪地上踩脚印👣',task:'霜花结成一行字❄️'},
+  candy:{water:'糖纸上的水珠闪闪发光🍬',exer:'糖果蹦蹦跳跳🍭',weight:'又甜了一点🧁',task:'包装纸上写满笔记📝'},
+  mushroom:{water:'伞盖上滚落水珠🍄',exer:'轻轻抖了抖菌褶🍄',weight:'在泥土里又扎深了一点🌱',task:'菌褶上浮现微光✨'},
+  bell:{water:'铃铛沾着水珠叮当响🔔',exer:'铃铛声欢快地响着🎵',weight:'秤杆上的铃铛摇了摇⚖️',task:'铃声提醒你完成了✅'},
+  shell:{water:'贝壳里收集了海水🌊',exer:'在沙滩上画了道痕迹🐚',weight:'珍珠又长大了一圈✨',task:'贝壳上刻下一行记录📜'},
+  rainbow:{water:'彩虹的弧度更鲜艳了🌈',exer:'在云端奔跑🏃',weight:'把体重藏进云里☁️',task:'在彩虹上画了一笔🎨'},
+  butterfly:{water:'翅膀上的露珠折射光芒🦋',exer:'快乐地飞舞打转🦋',weight:'停在花朵上称重🌸',task:'翅膀的图案更清晰了✨'},
+};
+
 const DEFAULT_HABITS = [
   { id:'h1', label:'起床 ≤ 目标时间', desc:'' },
   { id:'h2', label:'出门走了 5 分钟', desc:'' },
@@ -2296,6 +2317,7 @@ function saveWeight(){
   input.value='';
   checkMilestones();
   tryPerfectDay();
+  showCreatureReaction('weight');
   saveState();
   renderWeight();
 }
@@ -2405,6 +2427,18 @@ function tryPerfectDay(){
   // Debounce: only check once per second
   clearTimeout(window._pdt);
   window._pdt=setTimeout(checkPerfectDay,500);
+}
+
+function showCreatureReaction(actionType){
+  const collected=state.collectedCreatures||[];
+  if(collected.length===0)return;
+  const id=collected[Math.floor(Math.random()*collected.length)];
+  const reactions=CREATURE_REACTIONS[id];
+  if(!reactions||!reactions[actionType])return;
+  const c=CREATURES.find(x=>x.id===id);
+  if(!c)return;
+  const msg=c.emoji+' '+c.name+'：'+reactions[actionType];
+  showToast(msg,'💬');
 }
 
 function checkMilestones(){
@@ -2657,6 +2691,7 @@ function addExercise(mins){
   renderGallery();
   checkMilestones();
   tryPerfectDay();
+  showCreatureReaction('task');
   showToast('🏃 +'+mins+'分钟'+(earn>0?' +'+earn+'💰':''));
 }
 
@@ -3091,6 +3126,7 @@ function logWater(n){
   state.waterLogs[key]=next;
   saveState();
   tryPerfectDay();
+  showCreatureReaction('water');
   renderWater();
   // Staircase EXP: cup 1-5→1, 6→3, 7→5, 8→7
   const waterRewards=[0,1,1,1,1,1,3,5,7];
@@ -3219,6 +3255,7 @@ function toggleTask(idx){
   state.taskLogs[key]=done;
   saveState();
   tryPerfectDay();
+  showCreatureReaction('task');
   renderToday();
   checkMilestones();
 }
