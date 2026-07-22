@@ -797,6 +797,10 @@ body.dark .progress-badge-empty{background:#3a322f;color:#6a5a4a}
   max-width:360px;max-height:80vh;overflow-y:auto;text-align:center;
 }
 body.dark .profile-content{background:#322a26;color:#d9bb98}
+.perfect-celebration{animation:perfectPop .4s cubic-bezier(.18,.89,.32,1.28)}
+.perfect-sparkles{font-size:28px;animation:sparkleSpin 1s linear infinite;letter-spacing:6px}
+@keyframes perfectPop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes sparkleSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 .profile-tag{
   display:inline-block;padding:2px 8px;margin:2px;
   border-radius:8px;background:rgba(124,92,191,.12);color:#7c5cbf;font-size:10px;
@@ -1499,6 +1503,16 @@ body.dark .raise-name{color:#d9bb98}
       <div id="profileContent"></div>
     </div>
     <button class="unlock-btn" onclick="closeProfile()">关闭</button>
+  </div>
+</div>
+
+<div class="level-up-overlay" id="perfectDayCelebration" style="z-index:400">
+  <div class="level-up-content perfect-celebration">
+    <div class="perfect-sparkles">✨🎉🌟🏆✨🎉🌟</div>
+    <span class="level-up-emoji" style="font-size:48px">🏆</span>
+    <div class="level-up-title" style="font-size:20px">完美一天！</div>
+    <div class="level-up-sub" style="font-size:14px">喝水+运动+体重+任务全勤<br>+50 EXP</div>
+    <button class="level-up-btn" onclick="document.getElementById('perfectDayCelebration').classList.remove('show')">继续加油！</button>
   </div>
 </div>
 
@@ -2364,16 +2378,26 @@ function checkPerfectDay(){
   const hasExercise=(state.exerciseLogs?.[key]||0)>=15;
   const hasTasks=tasksDone>0;
   if(hasWater&&hasWeight&&hasExercise&&hasTasks){
-    // Already awarded today?
     const perfectKey='perfect_'+key;
     if(state._perfectDays&&state._perfectDays.includes(key))return;
     if(!state._perfectDays)state._perfectDays=[];
     state._perfectDays.push(key);
     addExp(50,'🌟全勤');
-    showToast('🏆 完美一天！全勤 +50EXP','🌟');
+    // Show celebration
+    showPerfectDayCelebration();
     state._perfectDaysSave=true;
     saveState();
   }
+}
+
+function showPerfectDayCelebration(){
+  const el=document.getElementById('perfectDayCelebration');
+  if(!el)return;
+  el.classList.add('show');
+  // Auto-hide after 3s
+  if(window._pdc)clearTimeout(window._pdc);
+  window._pdc=setTimeout(function(){el.classList.remove('show');},3000);
+}
 }
 
 // Called after every record
