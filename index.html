@@ -1403,9 +1403,10 @@ body.dark .raise-name{color:#d9bb98}
         <div style="flex:1">
           <div style="display:flex;flex-wrap:wrap;gap:4px" id="waterDots">
           </div>
-          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="water-btn" id="waterPhotoBtn" style="width:auto;padding:0 16px;border-radius:var(--r-sm);font-size:13px;font-weight:500">📸 拍照认证喝水</button>
-            <input type="file" accept="image/*" capture="environment" id="waterPhotoInput" style="display:none">
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+            <button onclick="logWater(1)" style="padding:6px 14px;border:1.5px solid #64b5f6;border-radius:var(--r-sm);background:rgba(100,181,246,.1);color:#64b5f6;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent;cursor:pointer">+1 💧</button>
+            <button onclick="logWater(5)" style="padding:6px 14px;border:1.5px solid #64b5f6;border-radius:var(--r-sm);background:rgba(100,181,246,.1);color:#64b5f6;font-family:inherit;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent;cursor:pointer">+5 💧</button>
+            <span style="font-size:11px;color:var(--c-text-tertiary)">或发喝水照片给我确认</span>
           </div>
         </div>
       </div>
@@ -4025,26 +4026,6 @@ function bindUI(){
   // Theme
   document.getElementById('themeToggle').addEventListener('click',toggleDarkMode);
   document.getElementById('darkModeToggle').addEventListener('click',toggleDarkMode);
-
-  // Water photo verification
-  document.getElementById('waterPhotoBtn').addEventListener('click',()=>{
-    document.getElementById('waterPhotoInput').click();
-  });
-  document.getElementById('waterPhotoInput').addEventListener('change',function(e){
-    if(this.files && this.files[0]){
-      const reader=new FileReader();
-      reader.onload=function(ev){
-        // Show a preview + instruction
-        const preview=document.getElementById('waterPhotoPreview')||document.createElement('div');
-        preview.id='waterPhotoPreview';
-        preview.style.cssText='margin-top:8px;text-align:center';
-        preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;max-height:120px;border-radius:var(--r-sm);border:2px solid #b9a58a">
-          <div style="font-size:10px;color:var(--c-text-secondary);margin-top:4px">📤 把这张照片发给我，我确认后帮你加经验</div>`;
-        document.getElementById('waterPhotoBtn').parentElement.appendChild(preview);
-      };
-      reader.readAsDataURL(this.files[0]);
-    }
-  });
 
   // Reminder toggle
   const remToggle=document.getElementById('reminderToggle');
