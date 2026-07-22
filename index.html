@@ -1875,6 +1875,7 @@ async function performAuthenticatedStart(){
   const outbox=readOutbox();
   const sourceState=outbox?.state||loaded.state;
   replaceState(sourceState);
+  ensurePersonalRecords();
   const beforeInit=JSON.stringify(InflifeSyncCore.serializeState(state));
   initApp();
   const afterInit=JSON.stringify(InflifeSyncCore.serializeState(state));
@@ -1932,25 +1933,11 @@ async function init(){
   });
   try{
     await startAuthenticatedApp();
-    // Migrate: ensure ALL creatures have personal records (after cloud sync)
-    migratePersonalRecords();
     renderGallery();
   }catch(error){
     if(error.message==='authentication_required')showLogin('');
     else showLogin(error.message||'无法读取云端数据');
   }
-}
-
-function migratePersonalRecords(){
-  if(!state.personalRecords) state.personalRecords={};
-  var changed=false;
-  for(const c of CREATURES){
-    if(!state.personalRecords[c.id]){
-      state.personalRecords[c.id]=generatePersonalRecord(c,state.personalRecords);
-      changed=true;
-    }
-  }
-  if(changed)saveState();
 }
 
 function initApp(){
@@ -2011,6 +1998,18 @@ function loadState(){
       state.settings = parsed.settings || { darkMode: false, reminder: true };
     }
   }catch(e){console.warn('loadState',e)}
+}
+
+function ensurePersonalRecords(){
+  if(!state.personalRecords) state.personalRecords={};
+  var changed=false;
+  for(const c of CREATURES){
+    if(!state.personalRecords[c.id]){
+      state.personalRecords[c.id]=generatePersonalRecord(c,state.personalRecords);
+      changed=true;
+    }
+  }
+  if(changed)saveState();
 }
 
 function saveState(){
@@ -2208,8 +2207,10 @@ function saveWeight(){
   if(!val||val<20||val>400){ alert('请输入合理的体重（20-400 kg）'); return; }
   const key=todayKey();
   if(!state.weightLogs) state.weightLogs={};
+  const isNew=!state.weightLogs[key];
   state.weightLogs[key]={weight:val,ts:Date.now()};
   input.value='';
+  checkMilestones();
   saveState();
   renderWeight();
 }
