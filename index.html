@@ -570,6 +570,8 @@ body.dark .week-day.today .week-label{color:#c4aa8a}
   letter-spacing:.3px;
 }
 .nav-btn .nav-icon{font-size:20px;line-height:1}
+.nav-btn svg{width:22px;height:22px;display:block;margin:0 auto 2px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+body.dark .nav-btn svg{stroke:currentColor}
 .nav-btn.active{color:var(--c-primary)}
 .nav-slider{
   position:absolute;
@@ -1537,11 +1539,11 @@ body.dark .raise-name{color:#d9bb98}
 <!-- NAV -->
 <div class="nav-bar" id="navBar">
   <div class="nav-slider" id="navSlider" style="left:0"></div>
-  <button class="nav-btn active" data-view="viewToday">🌱<span>今日</span></button>
-  <button class="nav-btn" data-view="viewCreatures">🧚<span>图鉴</span></button>
-  <button class="nav-btn" data-view="viewRaise">💕<span>养成</span></button>
-  <button class="nav-btn" data-view="viewWeekly">📊<span>周报</span></button>
-  <button class="nav-btn" data-view="viewSettings">⚙️<span>设置</span></button>
+  <button class="nav-btn active" data-view="viewToday"><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="7.5"/><circle cx="11" cy="11" r="2.5" fill="currentColor"/></svg><span>今日</span></button>
+  <button class="nav-btn" data-view="viewCreatures"><svg viewBox="0 0 22 22"><rect x="3" y="3" width="6.5" height="6.5" rx="1.2"/><rect x="12.5" y="3" width="6.5" height="6.5" rx="1.2"/><rect x="3" y="12.5" width="6.5" height="6.5" rx="1.2"/><rect x="12.5" y="12.5" width="6.5" height="6.5" rx="1.2"/></svg><span>图鉴</span></button>
+  <button class="nav-btn" data-view="viewRaise"><svg viewBox="0 0 22 22"><path d="M11 18l-6.7-6.7a5 5 0 0 1 6.7-7.1 5 5 0 0 1 6.7 7.1z"/></svg><span>养成</span></button>
+  <button class="nav-btn" data-view="viewWeekly"><svg viewBox="0 0 22 22"><rect x="3.5" y="14" width="4" height="4.5" rx=".8"/><rect x="9" y="9.5" width="4" height="9" rx=".8"/><rect x="14.5" y="5" width="4" height="13.5" rx=".8"/></svg><span>周报</span></button>
+  <button class="nav-btn" data-view="viewSettings"><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="3.5"/><path d="M11 2v3.5m0 11V20M20 11h-3.5m-11 0H2M4.9 4.9l2.5 2.5m7.2 7.2l2.5 2.5M17.1 4.9l-2.5 2.5m-7.2 7.2l-2.5 2.5"/></svg><span>设置</span></button>
 </div>
 
 <!-- UNLOCK MODAL -->
