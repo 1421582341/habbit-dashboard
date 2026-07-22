@@ -2037,6 +2037,7 @@ function initApp(){
   renderWeeklyView();renderMonthlyView();renderAchievementGrid();
   renderGallery();
   renderRaise();
+  updatePetGreetings();
   updateRaiseSlide();
   setupTheme();
   if(!appUiBound){bindUI();appUiBound=true;}
@@ -2318,6 +2319,7 @@ function saveWeight(){
   checkMilestones();
   tryPerfectDay();
   showCreatureReaction('weight');
+  updatePetGreetings();
   saveState();
   renderWeight();
 }
@@ -2439,6 +2441,56 @@ function showCreatureReaction(actionType){
   if(!c)return;
   const msg=c.emoji+' '+c.name+'：'+reactions[actionType];
   showToast(msg,'💬');
+}
+
+// Click pet in raise view
+function petTapReaction(id){
+  if(!id)return;
+  const c=CREATURES.find(x=>x.id===id);
+  if(!c)return;
+  const lvl=state.creatureLevels[id]||1;
+  const actions=['water','exer','task'];
+  const actionType=actions[Math.floor(Math.random()*actions.length)];
+  const reactions=CREATURE_REACTIONS[id];
+  var msg='';
+  if(reactions&&reactions[actionType]){
+    msg=c.emoji+' '+c.name+'：'+reactions[actionType];
+  }else{
+    const greetings=['蹭了蹭你🥰','开心地跳了跳✨','对你眨了眨眼😉','轻声叫了一声💕'];
+    msg=c.emoji+' '+c.name+'：'+greetings[Math.floor(Math.random()*greetings.length)];
+  }
+  // Small intimacy boost on tap
+  if(state.petState&&state.petState[id]){
+    state.petState[id].intimacy=Math.min(100,(state.petState[id].intimacy||0)+1);
+    saveState();
+    setTimeout(renderRaise,100);
+  }
+  showToast(msg,'💬');
+}
+
+// Update daily greeting for each pet
+function updatePetGreetings(){
+  const collected=state.collectedCreatures||[];
+  const key=todayKey();
+  const hasWater=(state.waterLogs?.[key]||0)>0;
+  const hasWeight=state.weightLogs?.[key]!==undefined;
+  const hasExercise=(state.exerciseLogs?.[key]||0)>=15;
+  const tasksDone=Array.isArray(state.taskLogs?.[key])?state.taskLogs[key].length:0;
+  const total=hasWater+hasWeight+hasExercise+(tasksDone>0?1:0);
+  for(const id of collected){
+    const el=document.getElementById('petGreeting_'+id);
+    if(!el)continue;
+    const lvl=state.creatureLevels[id]||1;
+    if(total===0){
+      el.textContent='💤 今天还没记录…';
+    }else if(total>=4){
+      el.textContent='🌟 全勤日！太棒了！';
+    }else if(tasksDone>0){
+      el.textContent='✅ 已记录 '+total+' 项';
+    }else{
+      el.textContent='▶️ 继续加油！';
+    }
+  }
 }
 
 function checkMilestones(){
@@ -2692,6 +2744,7 @@ function addExercise(mins){
   checkMilestones();
   tryPerfectDay();
   showCreatureReaction('task');
+  updatePetGreetings();
   showToast('🏃 +'+mins+'分钟'+(earn>0?' +'+earn+'💰':''));
 }
 
@@ -3127,6 +3180,7 @@ function logWater(n){
   saveState();
   tryPerfectDay();
   showCreatureReaction('water');
+  updatePetGreetings();
   renderWater();
   // Staircase EXP: cup 1-5→1, 6→3, 7→5, 8→7
   const waterRewards=[0,1,1,1,1,1,3,5,7];
@@ -3256,6 +3310,7 @@ function toggleTask(idx){
   saveState();
   tryPerfectDay();
   showCreatureReaction('task');
+  updatePetGreetings();
   renderToday();
   checkMilestones();
 }
@@ -3405,8 +3460,9 @@ function renderRaise(){
         '<div class="raise-name">'+c.emoji+' '+c.name+'</div>'+
         '<div style="font-size:10px;color:#8a7a6a;margin-top:2px">'+mbtiTag+' · '+traitTag+'</div>'+
       '</div>'+
-      '<div style="text-align:center;padding:8px 0;min-height:100px">'+renderPetFace(c.id,100,lvl)+'</div>'+
-      '<div style="text-align:center;font-size:14px;font-weight:500;color:#8a7a6a;margin-bottom:8px">Lv.'+lvl+' '+moodEmoji+'</div>'+
+      '<div style="text-align:center;padding:8px 0;min-height:100px" onclick="petTapReaction(\\''+c.id+'\\')" style="cursor:pointer">'+renderPetFace(c.id,100,lvl)+'</div>'+
+      '<div style="text-align:center;font-size:14px;font-weight:500;color:#8a7a6a;margin-bottom:6px">Lv.'+lvl+' '+moodEmoji+'</div>'+
+      '<div style="text-align:center;font-size:10px;color:#8a7a6a;margin-bottom:6px" id="petGreeting_'+c.id+'"></div>'+
       '<div style="max-width:220px;margin:0 auto">'+
         '<div class="raise-stat-row"><span style="font-size:11px;width:28px">🍽️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-hunger" style="width:'+hungerPct+'%"></div></div><span style="font-size:10px;color:#8a7a6a;width:28px;text-align:right">'+hungerPct+'%</span></div>'+
         '<div class="raise-stat-row"><span style="font-size:11px;width:28px">❤️</span><div class="pet-bar-bg"><div class="pet-bar-fill pet-bar-happy" style="width:'+happyPct+'%"></div></div><span style="font-size:10px;color:#8a7a6a;width:28px;text-align:right">'+happyPct+'%</span></div>'+
@@ -3424,6 +3480,7 @@ function renderRaise(){
   }).join('');
 
   if(counter) counter.textContent='1 / '+collected.length;
+  updatePetGreetings();
 }
 
 var raiseSlideIdx=0;
