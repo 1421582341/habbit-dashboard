@@ -198,6 +198,28 @@ body.dark .unlock-subtitle{color:var(--c-text-secondary)}
 body.dark .unlock-btn{background:#c4aa8a;color:#1a1512}
 body.dark .weight-input{background:#3a322f;border-color:var(--c-primary);color:#d9bb98}
 body.dark .weight-input::placeholder{color:#6a5a4a}
+
+/* ===== MEALS ===== */
+.meal-section{margin-bottom:18px}
+.meal-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.meal-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;color:#fff}
+.meal-badge.breakfast{background:#dc8a4a}
+.meal-badge.lunch{background:#7cad7a}
+.meal-badge.dinner{background:#9a7db5}
+.meal-time{font-size:11px;color:var(--c-text-secondary)}
+.meal-card{background:var(--bg-surface);border-radius:var(--r-md);padding:12px 14px;margin-bottom:8px;border:1px solid var(--c-border-light)}
+.meal-food{font-size:15px;font-weight:500;margin-bottom:2px}
+.meal-notes{font-size:11px;color:var(--c-text-tertiary)}
+.meal-photo-placeholder{width:100%;height:100px;background:var(--bg-input);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--c-text-tertiary);margin-bottom:8px}
+.meal-empty{padding:30px 16px;text-align:center;color:var(--c-text-tertiary);font-size:13px}
+.meal-empty-icon{font-size:36px;margin-bottom:8px}
+.meal-add-bar{display:flex;gap:8px;margin-top:10px}
+.meal-add-bar select,.meal-add-bar input{padding:8px 10px;border:1.5px solid var(--c-border);border-radius:var(--r-sm);background:var(--bg-input);color:var(--c-text);font-size:12px;outline:none}
+.meal-add-bar select{flex:0 0 65px}
+.meal-add-bar input{flex:1}
+.meal-add-bar button{flex:0 0 48px;background:var(--c-accent);color:#fff;border:0;border-radius:var(--r-sm);cursor:pointer;font-size:18px}
+body.dark .meal-card{background:var(--bg-surface-alt);border-color:var(--c-primary)}
+body.dark .meal-photo-placeholder{background:#3a322f}
 body.dark .weight-change-positive{color:#8fc75a}
 body.dark .weight-change-negative{color:#e57373}
 body.dark .stat-highlight{color:#d3b694}
@@ -1569,6 +1591,23 @@ body.dark .raise-name{color:#d9bb98}
     </div>
   </div>
 
+  <!-- VIEW: MEALS -->
+  <div class="view" id="viewMeals">
+    <div class="card">
+      <div class="card-header">🍽️ 饮食记录</div>
+      <div id="mealsList"></div>
+      <div class="meal-add-bar">
+        <select id="mealTypeSelect">
+          <option value="breakfast">早餐</option>
+          <option value="lunch">午餐</option>
+          <option value="dinner">晚餐</option>
+        </select>
+        <input id="mealFoodInput" placeholder="吃了什么？如：番茄牛腩饭" maxlength="60">
+        <button onclick="addManualMeal()">＋</button>
+      </div>
+    </div>
+  </div>
+
   <!-- VIEW: CREATURES -->
 
 </div>
@@ -1580,6 +1619,7 @@ body.dark .raise-name{color:#d9bb98}
   <button class="nav-btn" data-view="viewCreatures"><svg viewBox="0 0 22 22"><rect x="3" y="3" width="6.5" height="6.5" rx="1.2"/><rect x="12.5" y="3" width="6.5" height="6.5" rx="1.2"/><rect x="3" y="12.5" width="6.5" height="6.5" rx="1.2"/><rect x="12.5" y="12.5" width="6.5" height="6.5" rx="1.2"/></svg><span>图鉴</span></button>
   <button class="nav-btn" data-view="viewRaise"><svg viewBox="0 0 22 22"><path d="M11 18l-6.7-6.7a5 5 0 0 1 6.7-7.1 5 5 0 0 1 6.7 7.1z"/></svg><span>养成</span></button>
   <button class="nav-btn" data-view="viewWeekly"><svg viewBox="0 0 22 22"><rect x="3.5" y="14" width="4" height="4.5" rx=".8"/><rect x="9" y="9.5" width="4" height="9" rx=".8"/><rect x="14.5" y="5" width="4" height="13.5" rx=".8"/></svg><span>周报</span></button>
+  <button class="nav-btn" data-view="viewMeals"><svg viewBox="0 0 22 22"><circle cx="7" cy="11" r="4.5"/><circle cx="15" cy="11" r="4.5"/><path d="M11 3v16M7 19h8"/></svg><span>饮食</span></button>
   <button class="nav-btn" data-view="viewSettings"><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="3.5"/><path d="M11 2v3.5m0 11V20M20 11h-3.5m-11 0H2M4.9 4.9l2.5 2.5m7.2 7.2l2.5 2.5M17.1 4.9l-2.5 2.5m-7.2 7.2l-2.5 2.5"/></svg><span>设置</span></button>
 </div>
 
@@ -1931,6 +1971,7 @@ let state = {
   weightLogs: {},    // "YYYY-MM-DD": { weight: 68.5, ts: 123456 }
   waterLogs: {},     // "YYYY-MM-DD": number of cups
   exerciseLogs: {},  // "YYYY-MM-DD": minutes
+  mealLogs: {},      // "YYYY-MM-DD": [{ id, meal_type, meal_type_cn, food, notes, time, ts }]
   taskLogs: {},      // "YYYY-MM-DD": completed task indexes
   exp: 0,            // total experience points
   level: 1,          // current level
@@ -3879,9 +3920,66 @@ function renderCoffeeWeekChart(){
   }).join('');
 }
 
+// ===== MEALS =====
+function getTodayMeals(){
+  const key=todayKey();
+  if(!state.mealLogs[key]) state.mealLogs[key]=[];
+  return state.mealLogs[key];
+}
+function getMealLabel(mt){
+  return {breakfast:'早餐',lunch:'午餐',dinner:'晚餐'}[mt]||mt;
+}
+function renderMeals(){
+  const el=document.getElementById('mealsList');
+  if(!el)return;
+  const key=todayKey();
+  const meals=(state.mealLogs[key]||[]).slice().sort((a,b)=>
+    ['breakfast','lunch','dinner'].indexOf(a.meal_type)-['breakfast','lunch','dinner'].indexOf(b.meal_type)
+  );
+  if(meals.length===0){
+    el.innerHTML='<div class="meal-empty"><div class="meal-empty-icon">🍽️</div><div>今天还没有饮食记录</div><div style="font-size:11px;margin-top:4px">拍照发给我，或者在这里手动记录</div></div>';
+    return;
+  }
+  el.innerHTML=meals.map(m=>
+    `<div class="meal-section">
+      <div class="meal-header">
+        <span class="meal-badge ${m.meal_type}">${m.meal_type_cn||getMealLabel(m.meal_type)}</span>
+        <span class="meal-time">${m.time||''}</span>
+      </div>
+      <div class="meal-card">
+        <div class="meal-photo-placeholder">📸 照片</div>
+        <div class="meal-food">${m.food||''}</div>
+        ${m.notes?`<div class="meal-notes">${m.notes}</div>`:''}
+      </div>
+    </div>`
+  ).join('');
+}
+function addManualMeal(){
+  const mt=document.getElementById('mealTypeSelect').value;
+  const food=document.getElementById('mealFoodInput').value.trim();
+  if(!food)return;
+  const now=new Date();
+  const t=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const logs=getTodayMeals();
+  logs.push({
+    id:'m'+Date.now(),
+    meal_type: mt,
+    meal_type_cn: getMealLabel(mt),
+    food: food,
+    notes: '',
+    time: t,
+    ts: now.getTime()
+  });
+  document.getElementById('mealFoodInput').value='';
+  saveState();
+  renderMeals();
+  addExp(EXP_RATES.coffee,'🍽️');
+  addCoins(COIN_RATES.coffee,'🍽️');
+}
+
 // ===== NAV =====
 function switchView(viewId){
-  const views=['viewToday','viewCreatures','viewRaise','viewWeekly','viewSettings'];
+  const views=['viewToday','viewCreatures','viewRaise','viewWeekly','viewMeals','viewSettings'];
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(viewId).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach((b,i)=>{
@@ -3889,10 +3987,11 @@ function switchView(viewId){
   });
   const idx=views.indexOf(viewId);
   const slider=document.getElementById('navSlider');
-  slider.style.left=`${idx*20}%`;
+  slider.style.left=`${idx*(100/6)}%`;
   if(viewId==='viewWeekly'){renderWeeklyView();renderMonthlyView();renderAchievementGrid();}
   if(viewId==='viewCreatures') renderGallery();
   if(viewId==='viewRaise'){raiseSlideIdx=0;renderRaise();updateRaiseSlide();}
+  if(viewId==='viewMeals') renderMeals();
 }
 
 // ===== BIND UI =====

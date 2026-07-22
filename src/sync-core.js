@@ -87,6 +87,26 @@
     return result;
   }
 
+  function sanitizeMealLogs(value) {
+    const result = {};
+    for (const [date, logs] of dateEntries(value)) {
+      if (!Array.isArray(logs)) continue;
+      result[date] = logs.slice(0, 5).map((log, index) => {
+        const source = log && typeof log === 'object' ? log : {};
+        return {
+          id: safeText(source.id || `m${index}`, 50),
+          meal_type: ['breakfast','lunch','dinner'].includes(source.meal_type) ? source.meal_type : 'breakfast',
+          meal_type_cn: safeText(source.meal_type_cn || '', 10),
+          food: safeText(source.food || '', 100),
+          notes: safeText(source.notes || '', 100),
+          time: /^\d{2}:\d{2}$/.test(String(source.time || '')) ? String(source.time) : '',
+          ts: Math.max(0, safeNumber(source.ts, 0))
+        };
+      });
+    }
+    return result;
+  }
+
   function sanitizeTaskLogs(value) {
     const result = {};
     for (const [date, indexes] of dateEntries(value)) {
@@ -108,6 +128,7 @@
       weightLogs: sanitizeWeightLogs(source.weightLogs),
       waterLogs: sanitizeNumberLog(source.waterLogs, 20),
       exerciseLogs: sanitizeNumberLog(source.exerciseLogs, 600),
+      mealLogs: sanitizeMealLogs(source.mealLogs),
       taskLogs: sanitizeTaskLogs(source.taskLogs),
       exp: Math.max(0, safeNumber(source.exp, 0)),
       level: Math.max(1, Math.floor(safeNumber(source.level, 1))),
