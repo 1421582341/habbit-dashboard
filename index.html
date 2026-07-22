@@ -1922,6 +1922,16 @@ async function startAuthenticatedApp(){
 async function init(){
   loadState();
   bindAuthUI();
+  // Migrate: ensure all collected creatures have personal records
+  if(!state.personalRecords) state.personalRecords={};
+  var migrated=false;
+  for(const c of CREATURES){
+    if(state.collectedCreatures.includes(c.id)&&!state.personalRecords[c.id]){
+      state.personalRecords[c.id]=generatePersonalRecord(c,state.personalRecords);
+      migrated=true;
+    }
+  }
+  if(migrated)saveState();
   cloud=InflifeCloud.create({client:sbClient,onStatus:setSyncStatus,onOutboxChange:writeOutbox});
   cloud.subscribeAuth((event,session)=>{
     if(!session && event==='SIGNED_OUT')showLogin('');
