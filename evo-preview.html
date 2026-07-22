@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>精灵进化预览</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:#d8c9b6;color:#3a322f;padding:24px;text-align:center}
+h1{font-size:20px;margin-bottom:20px;color:#493e38}
+.evo-row{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:24px}
+.evo-card{background:#e8ddcf;border-radius:12px;padding:16px;width:140px;text-align:center}
+.evo-card h3{font-size:13px;margin:8px 0 4px;color:#493e38}
+.evo-card p{font-size:11px;color:#8a7a6a}
+.sprite-wrap{display:inline-block;border-radius:8px;padding:4px}
+.base{border:1px solid #cebda8}
+.evo{box-shadow:0 0 12px #c4aa8a,0 0 24px rgba(196,170,138,.4);border:1px solid #c4aa8a}
+.ult{box-shadow:0 0 8px #ffd700,0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.2);border:1px solid #ffd700}
+.badge{display:inline-block;font-size:16px;margin-top:4px}
+img{width:80px;height:80px;object-fit:cover;image-rendering:auto;border-radius:6px}
+.legend{margin-top:24px;background:#e8ddcf;border-radius:10px;padding:16px;max-width:480px;margin-left:auto;margin-right:auto}
+.legend h2{font-size:15px;margin-bottom:8px}
+.legend p{font-size:12px;color:#8a7a6a;line-height:1.8}
+</style>
+</head>
+<body>
+<h1>🐉 精灵进化预览</h1>
+<div id="preview"></div>
+<div class="legend">
+  <h2>进化触发条件</h2>
+  <p>🌟 <strong>进化形态</strong> — 精灵达到 Lv.30<br>
+    金色光晕 + 星星徽章<br><br>
+  👑 <strong>终极形态</strong> — 精灵达到 Lv.100<br>
+    闪耀金光 + 皇冠徽章</p>
+</div>
+
+<script>
+// Evolution CSS effects from the app
+function evoStage(level) {
+  if (!level||level<30) return 0;
+  if (level<100) return 1;
+  return 2;
+}
+
+const creatureList = [
+  {id:'warmegg', name:'小暖暖',emoji:'🥚'},
+  {id:'sprout', name:'豆豆芽',emoji:'🌱'},
+  {id:'littlehorn', name:'小独角',emoji:'🦄'},
+  {id:'flamephoenix', name:'小火凤',emoji:'🔥'},
+  {id:'mushroom', name:'小蘑菇',emoji:'🍄'},
+  {id:'candy', name:'糖果精灵',emoji:'🍬'},
+];
+
+function renderPreview() {
+  const p = document.getElementById('preview');
+  p.innerHTML = creatureList.map(c => {
+    const stages = [
+      { label:'基础', level:1, cls:'base', badge:'' },
+      { label:'进化🌟', level:30, cls:'evo', badge:'🌟' },
+      { label:'终极👑', level:100, cls:'ult', badge:'👑' },
+    ];
+    const cards = stages.map(s => {
+      return '<div class="evo-card">' +
+        '<div class="sprite-wrap '+s.cls+'">' +
+          '<img src="./sprites_web/'+c.id+'.png" alt="">' +
+        '</div>' +
+        '<div class="badge">'+s.badge+'</div>' +
+        '<h3>'+c.emoji+' '+c.name+'</h3>' +
+        '<p>Lv.'+s.level+' · '+s.label+'</p>' +
+      '</div>';
+    }).join('');
+    return '<div class="evo-row">'+cards+'</div>';
+  }).join('');
+}
+renderPreview();
+</script>
+</body>
+</html>
