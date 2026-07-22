@@ -1960,6 +1960,9 @@ async function startAuthenticatedApp(){
 // ===== INIT =====
 async function init(){
   loadState();
+  // TEMP: Demo evolution - set 小暖暖 to Lv.30
+  if(!state.creatureLevels) state.creatureLevels={};
+  if((state.creatureLevels.warmegg||0)<30)state.creatureLevels.warmegg=30;
   bindAuthUI();
   cloud=InflifeCloud.create({client:sbClient,onStatus:setSyncStatus,onOutboxChange:writeOutbox});
   cloud.subscribeAuth((event,session)=>{
@@ -3705,7 +3708,7 @@ function switchView(viewId){
   const idx=views.indexOf(viewId);
   const slider=document.getElementById('navSlider');
   slider.style.left=`${idx*20}%`;
-  if(viewId==='viewWeekly') renderWeeklyView();renderMonthlyView();renderAchievementGrid();
+  if(viewId==='viewWeekly'){renderWeeklyView();renderMonthlyView();renderAchievementGrid();}
   if(viewId==='viewCreatures') renderGallery();
   if(viewId==='viewRaise'){raiseSlideIdx=0;renderRaise();updateRaiseSlide();}
 }
