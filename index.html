@@ -2009,7 +2009,7 @@ function ensurePersonalRecords(){
       changed=true;
     }
   }
-  if(changed)saveState();
+  if(changed){console.log('档案已生成:',Object.keys(state.personalRecords).length);saveState();}
 }
 
 function saveState(){
@@ -2348,8 +2348,9 @@ function getRarityColor(rarity){
 
 // ===== PROFILE VIEWER =====
 function showProfile(creatureId){
+  console.log('showProfile:',creatureId);
   const creature=CREATURES.find(c=>c.id===creatureId);
-  if(!creature)return;
+  if(!creature){console.warn('creature not found');return;}
   const modal=document.getElementById('profileModal');
   document.getElementById('profileCreatureEmoji').textContent=creature.emoji||'🧚';
   document.getElementById('profileCreatureName').textContent=creature.name;
@@ -3208,7 +3209,7 @@ function renderGallery(){
       statusHtml='<div class="book-hint">'+hint+'</div>';
     }
 
-    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'" onclick="showProfile(\''+c.id+'\')">'+
+    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'">'+
       '<div class="deck-left'+(isCollected?'':' gray')+'">'+
         renderPetFace(c.id,64)+
         '<div class="deck-name">'+(isCollected?c.emoji+' ':'')+c.name+'</div>'+
@@ -3217,6 +3218,7 @@ function renderGallery(){
       '</div>'+
       '<div class="deck-right">'+
         '<div class="deck-bio">'+bio+'</div>'+
+        '<div style="margin-top:6px"><button class="add-btn" style="width:auto;padding:2px 10px;font-size:11px" onclick="showProfile(\''+c.id+'\')">📋 档案</button></div>'+
       '</div>'+
     '</div>';
   }).join('');
