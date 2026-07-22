@@ -115,6 +115,7 @@
       creatureLevels: safeObject(source.creatureLevels),
       inventory: safeObject(source.inventory),
       petState: safeObject(source.petState),
+      personalRecords: safeObject(source.personalRecords),
       collectedCreatures: Array.isArray(source.collectedCreatures)
         ? sanitizeJson(source.collectedCreatures).filter(value => typeof value === 'string').slice(0, 200)
         : [],

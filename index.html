@@ -781,6 +781,31 @@ body.dark .progress-badge-empty{background:#3a322f;color:#6a5a4a}
   padding:24px;
 }
 .unlock-modal-overlay.show{display:flex}
+
+.profile-overlay{
+  position:fixed;inset:0;
+  background:rgba(26,21,18,.7);
+  z-index:300;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.profile-overlay.show{display:flex}
+.profile-content{
+  background:#e8ddcf;border-radius:16px;padding:20px;width:100%;
+  max-width:360px;max-height:80vh;overflow-y:auto;text-align:center;
+}
+body.dark .profile-content{background:#322a26;color:#d9bb98}
+.profile-tag{
+  display:inline-block;padding:2px 8px;margin:2px;
+  border-radius:8px;background:rgba(124,92,191,.12);color:#7c5cbf;font-size:10px;
+  border:1px solid rgba(124,92,191,.2);
+}
+body.dark .profile-tag{background:rgba(124,92,191,.18);color:#b694e6}
+.profile-section{margin:8px 0;padding:8px 10px;background:rgba(255,255,255,.3);border-radius:8px;text-align:left}
+body.dark .profile-section{background:rgba(0,0,0,.15)}
+.profile-label{font-size:10px;color:#8a7a6a;font-weight:600;margin-bottom:2px}
 .unlock-modal-content{
   background:#e8ddcf;
   border-radius:20px;
@@ -1444,6 +1469,21 @@ body.dark .raise-name{color:#d9bb98}
   </div>
 </div>
 
+<!-- PROFILE MODAL -->
+<div class="profile-overlay" id="profileModal">
+  <div class="profile-content">
+    <div class="profile-header">
+      <span id="profileCreatureEmoji" style="font-size:40px"></span>
+      <div id="profileCreatureName" style="font-size:18px;font-weight:600;margin:4px 0"></div>
+      <div id="profileCreatureRarity" style="font-size:11px;margin-bottom:4px"></div>
+    </div>
+    <div class="profile-body" style="font-size:12px;line-height:1.8;padding:0 8px;max-height:55vh;overflow-y:auto">
+      <div id="profileContent"></div>
+    </div>
+    <button class="unlock-btn" onclick="closeProfile()">关闭</button>
+  </div>
+</div>
+
 <!-- LEVEL UP MODAL -->
 <div class="level-up-overlay" id="levelUpModal">
   <div class="level-up-content">
@@ -1624,6 +1664,102 @@ const CREATURES = [
   },
 ];
 
+// ===== PERSONAL RECORDS =====
+const WEATHERS=['☀️晴','🌤️多云','🌧️小雨','⛈️暴雨','🌬️大风','❄️雪','🌫️雾','✨星空','🌈雨后','🌅晨光'];
+const LOCATIONS=['🌲森林','🏖️海边','⛰️山顶','🌳公园','🌅晨光里','🌙月光下','🌧️雨后','🪟窗台','💭梦里','🌊溪边','🍃树荫下','🏡阳台'];
+const METHODS=['📝坚持记录','🏃运动达标','💪连续打卡','⚖️减重成功','🎯累计达成','🌟日常养成'];
+const PERSONALITY_LIKES={
+  'INFJ':['📖安静读书','🌿照顾植物','🌅看日落','🎵听轻音乐'],
+  'ENFP':['🎉尝试新事物','💬和人聊天','🎨画画','🌳户外冒险'],
+  'ISFJ':['🍵泡一杯茶','🧹整理房间','🍪烤饼干','👪陪伴朋友'],
+  'INTJ':['💡思考问题','♟️下棋','📊制定计划','🔬研究事物'],
+  'INFP':['✍️写日记','🌙看星星','🎭听故事','🌸赏花'],
+  'ENFJ':['🤗鼓励他人','🎤带活动','📚分享知识','☕聊天谈心'],
+  'ENTJ':['🎯设定目标','🏆挑战自己','📈改进方法','🚀推动改变'],
+  'ISFP':['🎶听音乐','🎨欣赏艺术','🏞️亲近自然','🧘独处时光'],
+  'ENTP':['💡头脑风暴','♟️辩论','🧩解谜','🛠️捣鼓新东西'],
+  'ESFJ':['🎉组织聚会','🍰分享美食','💝帮助他人','📸记录生活'],
+  'INTP':['🧐思考哲学','🔧拆解东西','📝写代码','♟️策略游戏'],
+  'ESTJ':['📋列清单','🏋️锻炼','📅规划日程','🎯完成目标'],
+  'ISTJ':['📚保持秩序','🍳按计划做饭','🏠整理收藏','🚶规律散步'],
+  'ESFP':['🎭表演','🕺跳舞','🎪尝试新活动','🍿看电影'],
+  'ESTP':['🏄‍♀️极限运动','🗣️社交活动','🔍探索未知','🎲玩桌游'],
+  'ISTP':['🔧修理东西','🏕️露营','🎸弹乐器','🚴骑车探索'],
+};
+const FEAR_POOL=['🦅大型飞行生物','💥巨响','🌊深水','🔥火焰','🌑黑暗','👻孤独','🗣️被误解','📉失败','🕷️小虫子','⏰匆忙'];
+const TAG_POOL=[
+  {text:'在暴雨中相遇',effect:{happiness:1.2,fear:'暴雨'}},
+  {text:'曾以1点生命获胜',effect:{tenacity:1.3}},
+  {text:'喜欢在水边睡觉',effect:{happiness:'water',rest:'water'}},
+  {text:'害怕大型飞行生物',effect:{fear:'large_fly'}},
+  {text:'与阳光有不解之缘',effect:{happiness:'sun'}},
+  {text:'喜欢夜晚活动',effect:{happiness:'night',energy:'night'}},
+  {text:'曾独自度过暴风雨',effect:{bravery:1.4}},
+  {text:'被晨光唤醒的',effect:{energy:'morning'}},
+  {text:'喜欢收集闪光的东西',effect:{happiness:'shiny'}},
+  {text:'害怕突然的响声',effect:{fear:'loud'}},
+  {text:'性格慢热但忠诚',effect:{intimacy:'slow_high'}},
+  {text:'是个小吃货',effect:{happiness:'food'}},
+  {text:'喜欢冒险和探索',effect:{happiness:'explore'}},
+  {text:'害怕黑暗',effect:{fear:'dark'}},
+  {text:'喜欢被人夸奖',effect:{happiness:'praise'}},
+  {text:'曾以一己之力保护同伴',effect:{bravery:1.5}},
+  {text:'喜欢在雨中玩耍',effect:{happiness:'rain'}},
+  {text:'对陌生事物好奇',effect:{curiosity:1.2}},
+  {text:'害怕被抛弃',effect:{loyalty:1.5}},
+  {text:'喜欢安静的角落',effect:{energy:'quiet'}},
+];
+
+function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function generatePersonalRecord(creature,existingRecords){
+  const mbti=creature.personality?.mbti||'INFJ';
+  const likes=PERSONALITY_LIKES[mbti]||['🌿安静时光','🌸欣赏风景'];
+  const shuffledLikes=shuffleArray(likes);
+  const shuffledFears=shuffleArray(FEAR_POOL);
+  const shuffledTags=shuffleArray(TAG_POOL);
+
+  // Relationship with other collected creatures (random initial)
+  const petRels={};
+  if(existingRecords){
+    const others=Object.keys(existingRecords).filter(id=>id!==creature.id);
+    for(const otherId of shuffleArray(others).slice(0,3)){
+      const rels=['友好','陌生','亲近','偶尔互动','好奇'];
+      petRels[otherId]=pickRandom(rels);
+    }
+  }
+
+  const tags=shuffledTags.slice(0,1+Math.floor(Math.random()*2)).map(t=>t.text);
+  const today=new Date();
+  const dateStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+
+  return {
+    encounter:{
+      date:dateStr,
+      weather:pickRandom(WEATHERS),
+      location:pickRandom(LOCATIONS),
+      method:pickRandom(METHODS),
+    },
+    personality:{
+      mbti:creature.personality?.mbti||'未知',
+      trait:creature.personality?.trait||'普通',
+      greeting:creature.personality?.greeting||'你好',
+      tendency:pickRandom(['内向','外向','温和','活泼','沉稳','敏感','乐观','谨慎']),
+    },
+    likes:shuffledLikes.slice(0,2+Math.floor(Math.random()*2)),
+    fears:shuffledFears.slice(0,1+Math.floor(Math.random()*2)),
+    relationships:{
+      player:{status:'初次相遇',intimacy:1},
+      pets:petRels,
+    },
+    events:[{date:dateStr,type:'相遇',description:'初次相遇 '+pickRandom(['在'+pickRandom(LOCATIONS)+'，'+pickRandom(WEATHERS)])}],
+    tags:tags,
+    stats:{feedCount:0,playCount:0,events:1},
+  };
+}
+
 // ===== STATE =====
 let state = {
   habits: [],
@@ -1641,6 +1777,7 @@ let state = {
   collectedCreatures: [], // creature IDs
   newUnlocks: [],         // creature IDs unlocked this session (for animation)
   petState: {},           // creatureId -> { hunger, happiness, lastFeed, lastPlay }
+  personalRecords: {},    // creatureId -> personal record object
   settings: { darkMode: false, reminder: true }
 };
 let firstWeightRecorded = false;
@@ -1854,6 +1991,7 @@ function loadState(){
       state.inventory = parsed.inventory || {};
       state.collectedCreatures = parsed.collectedCreatures || [];
       state.petState = parsed.petState || {};
+      state.personalRecords = parsed.personalRecords || {};
       state.newUnlocks = [];
       state.settings = parsed.settings || { darkMode: false, reminder: true };
     }
@@ -2137,6 +2275,9 @@ function checkMilestones(){
     if(c.check(state)){
       state.collectedCreatures.push(c.id);
       state.newUnlocks.push(c.id);
+      // Generate personal record
+      if(!state.personalRecords) state.personalRecords={};
+      state.personalRecords[c.id]=generatePersonalRecord(c,state.personalRecords);
       newFound=true;
     }
   }
@@ -2187,6 +2328,101 @@ function closeUnlockModal(){
 function getRarityColor(rarity){
   const map={'普通':'#8a7a6a','稀有':'#5c9e5c','史诗':'#7c5cbf','传说':'#d4a017'};
   return map[rarity]||'#8a7a6a';
+}
+
+// ===== PROFILE VIEWER =====
+function showProfile(creatureId){
+  const creature=CREATURES.find(c=>c.id===creatureId);
+  if(!creature)return;
+  const rec=state.personalRecords?.[creatureId];
+  if(!rec)return;
+  const modal=document.getElementById('profileModal');
+  document.getElementById('profileCreatureEmoji').textContent=creature.emoji||'🧚';
+  document.getElementById('profileCreatureName').textContent=creature.name;
+  document.getElementById('profileCreatureRarity').textContent='🧚 '+creature.rarity+'精灵';
+  document.getElementById('profileCreatureRarity').style.color=getRarityColor(creature.rarity);
+
+  // Build content
+  var html='';
+
+  // Encounter
+  const enc=rec.encounter||{};
+  html+='<div class="profile-section">'+
+    '<div class="profile-label">📖 相遇</div>'+
+    '<div>日期：'+enc.date+'</div>'+
+    '<div>天气：'+enc.weather+'</div>'+
+    '<div>地点：'+enc.location+'</div>'+
+    '<div>方式：'+enc.method+'</div>'+
+  '</div>';
+
+  // Personality
+  const per=rec.personality||{};
+  html+='<div class="profile-section">'+
+    '<div class="profile-label">🧬 性格</div>'+
+    '<div>'+per.mbti+' · '+per.trait+'</div>'+
+    '<div>倾向：'+per.tendency+'</div>'+
+    '<div style="font-style:italic;color:#8a7a6a;font-size:11px">"'+per.greeting+'"</div>'+
+  '</div>';
+
+  // Likes
+  html+='<div class="profile-section">'+
+    '<div class="profile-label">❤️ 喜欢</div>'+
+    '<div>'+(rec.likes||[]).map(l=>'<span class="profile-tag">'+l+'</span>').join(' ')+'</div>'+
+  '</div>';
+
+  // Fears
+  if(rec.fears&&rec.fears.length){
+    html+='<div class="profile-section">'+
+      '<div class="profile-label">😰 害怕</div>'+
+      '<div>'+(rec.fears||[]).map(f=>'<span class="profile-tag" style="background:rgba(180,68,68,.1);color:#b04444;border-color:rgba(180,68,68,.2)">'+f+'</span>').join(' ')+'</div>'+
+    '</div>';
+  }
+
+  // Tags
+  if(rec.tags&&rec.tags.length){
+    html+='<div class="profile-section">'+
+      '<div class="profile-label">🏷️ 特殊标签</div>'+
+      '<div>'+(rec.tags||[]).map(t=>'<span class="profile-tag" style="background:rgba(212,160,23,.12);color:#b8860b;border-color:rgba(212,160,23,.25)">'+t+'</span>').join(' ')+'</div>'+
+    '</div>';
+  }
+
+  // Relationships
+  const rels=rec.relationships||{};
+  html+='<div class="profile-section">'+
+    '<div class="profile-label">💞 关系</div>'+
+    '<div>与玩家：'+rels.player?.status+'（亲密度 Lv.'+(rels.player?.intimacy||1)+'）</div>';
+  if(rels.pets&&Object.keys(rels.pets).length){
+    html+='<div style="margin-top:4px">与同伴：</div>';
+    for(const [pid,rel] of Object.entries(rels.pets)){
+      const p=CREATURES.find(c=>c.id===pid);
+      html+='<div style="font-size:11px;padding-left:8px">'+(p?.emoji||'🧚')+' '+(p?.name||pid)+'：'+rel+'</div>';
+    }
+  }
+  html+='</div>';
+
+  // Events
+  if(rec.events&&rec.events.length){
+    html+='<div class="profile-section">'+
+      '<div class="profile-label">📜 大事记</div>';
+    for(const ev of rec.events.slice(-5).reverse()){
+      html+='<div style="font-size:11px;margin:2px 0">['+ev.date+'] '+ev.type+'：'+ev.description+'</div>';
+    }
+    html+='</div>';
+  }
+
+  // Stats
+  const st=rec.stats||{};
+  html+='<div class="profile-section">'+
+    '<div class="profile-label">📊 统计</div>'+
+    '<div>喂食 '+(st.feedCount||0)+' 次 · 互动 '+(st.playCount||0)+' 次</div>'+
+  '</div>';
+
+  document.getElementById('profileContent').innerHTML=html;
+  modal.classList.add('show');
+}
+
+function closeProfile(){
+  document.getElementById('profileModal').classList.remove('show');
 }
 
 // ===== EXP / LEVEL SYSTEM =====
@@ -2318,19 +2554,21 @@ function buyFood(foodId){
 
 // ===== FEEDING =====
 function feedCreature(creatureId){
-  // Check if we have any food
   const items=Object.keys(state.inventory).filter(k=>state.inventory[k]>0);
   if(items.length===0){ alert('没有食物，去商店买点吧！'); return; }
-  // Use the first available food
   const foodId=items[0];
   state.inventory[foodId]--;
   if(!state.creatureLevels[creatureId]) state.creatureLevels[creatureId]=1;
   const food=FOOD_ITEMS.find(f=>f.id===foodId);
-  const lvGain=food?{berry:1,cake:3,milk:2,star:5}[foodId]||1:1;
+  var lvGain=food?{berry:1,cake:3,milk:2,star:5}[foodId]||1:1;
+  // Tag effect: 小吃货 gets bonus
+  const rec=state.personalRecords?.[creatureId];
+  if(rec&&rec.tags&&rec.tags.some(t=>t.includes('小吃货'))){lvGain+=1}
   state.creatureLevels[creatureId] += lvGain;
+  // Update stats
+  if(rec&&rec.stats)rec.stats.feedCount=(rec.stats.feedCount||0)+1;
   saveState();
   renderGallery();
-  // Show feedback
   alert(`🍽️ ${CREATURES.find(c=>c.id===creatureId)?.name} 吃了${food?.name||'食物'}！等级 +${lvGain}`);
 }
 
@@ -2338,9 +2576,13 @@ function playWithCreature(creatureId){
   const c=CREATURES.find(c=>c.id===creatureId);
   if(!c) return;
   const lvl=state.creatureLevels[creatureId]||1;
-  // Playing gives a little exp to the creature and some coins back
-  const coinBonus=Math.min(5, Math.floor(lvl/2)+1);
+  var coinBonus=Math.min(5, Math.floor(lvl/2)+1);
+  const rec=state.personalRecords?.[creatureId];
+  // Tag effect: 喜欢冒险和探索 plays better
+  if(rec&&rec.tags&&rec.tags.some(t=>t.includes('冒险')||t.includes('探索'))){coinBonus+=2}
   state.coins += coinBonus;
+  // Update stats
+  if(rec&&rec.stats)rec.stats.playCount=(rec.stats.playCount||0)+1;
   saveState();
   renderCoins();
   renderGallery();
@@ -2941,7 +3183,8 @@ function renderGallery(){
       statusHtml='<div class="book-hint">'+hint+'</div>';
     }
 
-    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'">'+
+    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'"'+
+      (isCollected?' onclick="showProfile(\''+c.id+'\')"':'')+'>'+
       '<div class="deck-left'+(isCollected?'':' gray')+'">'+
         renderPetFace(c.id,64)+
         '<div class="deck-name">'+(isCollected?c.emoji+' ':'')+c.name+'</div>'+
