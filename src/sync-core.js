@@ -117,6 +117,7 @@
       petState: safeObject(source.petState),
       personalRecords: safeObject(source.personalRecords),
       _perfectDays: Array.isArray(source._perfectDays) ? sanitizeJson(source._perfectDays).slice(0, 365) : [],
+      achievements: Array.isArray(source.achievements) ? sanitizeJson(source.achievements).filter(v=>typeof v==='string').slice(0, 200) : [],
       collectedCreatures: Array.isArray(source.collectedCreatures)
         ? sanitizeJson(source.collectedCreatures).filter(value => typeof value === 'string').slice(0, 200)
         : [],

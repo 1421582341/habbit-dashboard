@@ -1331,6 +1331,14 @@ body.dark .raise-name{color:#d9bb98}
       <div class="card-header">📊 本周报告</div>
       <div id="weeklyReport"></div>
     </div>
+    <div class="card">
+      <div class="card-header">📅 本月回顾</div>
+      <div id="monthlyReport"></div>
+    </div>
+    <div class="card" id="achievementCard" style="cursor:pointer" onclick="toggleAchievementView()">
+      <div class="card-header">🏆 成就 <span id="achieveCount" style="font-weight:400;font-size:12px;color:#8a7a6a"></span></div>
+      <div id="achievementGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
   </div>
 
   <!-- VIEW: CREATURES -->
@@ -1524,6 +1532,22 @@ body.dark .raise-name{color:#d9bb98}
 <script src="src/supabase-sync.js"></script>
 <script>
 // ===== CONFIG =====
+const ACHIEVEMENTS=[
+  {id:'coll5',name:'收集新星',desc:'收集 5 只精灵',icon:'🧚',check:s=>(s.collectedCreatures||[]).length>=5},
+  {id:'coll10',name:'收集大师',desc:'收集 10 只精灵',icon:'🧚',check:s=>(s.collectedCreatures||[]).length>=10},
+  {id:'coll15',name:'收藏家',desc:'收集 15 只精灵',icon:'🧚',check:s=>(s.collectedCreatures||[]).length>=15},
+  {id:'collAll',name:'精灵博士',desc:'收集全部 17 只精灵',icon:'🏆',check:s=>(s.collectedCreatures||[]).length>=17},
+  {id:'water100',name:'水之子',desc:'累计喝水 100 杯',icon:'💧',check:s=>{let t=0;for(const v of Object.values(s.waterLogs||{}))t+=v;return t>=100}},
+  {id:'exer300',name:'运动达人',desc:'累计运动 5 小时',icon:'🏃',check:s=>{let t=0;for(const v of Object.values(s.exerciseLogs||{}))t+=v;return t>=300}},
+  {id:'exer600',name:'铁人',desc:'累计运动 10 小时',icon:'🏃',check:s=>{let t=0;for(const v of Object.values(s.exerciseLogs||{}))t+=v;return t>=600}},
+  {id:'weight30',name:'坚持记录',desc:'累计记录体重 30 天',icon:'⚖️',check:s=>Object.keys(s.weightLogs||{}).length>=30},
+  {id:'perfect7',name:'自律前锋',desc:'完成 7 个完美一天',icon:'🌟',check:s=>(s._perfectDays||[]).length>=7},
+  {id:'perfect30',name:'自律王者',desc:'完成 30 个完美一天',icon:'🌟',check:s=>(s._perfectDays||[]).length>=30},
+  {id:'task500',name:'任务机器',desc:'累计完成 500 个任务',icon:'☑️',check:s=>{let t=0;for(const v of Object.values(s.taskLogs||{}))if(Array.isArray(v))t+=v.length;return t>=500}},
+  {id:'level50',name:'培养大师',desc:'有一只精灵达到 Lv.50',icon:'⭐',check:s=>Object.values(s.creatureLevels||{}).some(v=>v>=50)},
+  {id:'evolve',name:'见证进化',desc:'有一只精灵进化',icon:'🌟',check:s=>Object.values(s.creatureLevels||{}).some(v=>v>=30)},
+];
+
 const DEFAULT_HABITS = [
   { id:'h1', label:'起床 ≤ 目标时间', desc:'' },
   { id:'h2', label:'出门走了 5 分钟', desc:'' },
@@ -1791,6 +1815,7 @@ let state = {
   petState: {},           // creatureId -> { hunger, happiness, lastFeed, lastPlay }
   personalRecords: {},    // creatureId -> personal record object
   _perfectDays: [],       // track full-attendance days
+  achievements: [],        // unlocked achievement ids
   settings: { darkMode: false, reminder: true }
 };
 let firstWeightRecorded = false;
@@ -1972,7 +1997,7 @@ function initApp(){
   if(!state.newUnlocks) state.newUnlocks = [];
   calcPetDecay(state);
   renderToday();
-  renderWeeklyView();
+  renderWeeklyView();renderMonthlyView();renderAchievementGrid();
   renderGallery();
   renderRaise();
   updateRaiseSlide();
@@ -2008,6 +2033,7 @@ function loadState(){
       state.petState = parsed.petState || {};
       state.personalRecords = parsed.personalRecords || {};
       state._perfectDays = parsed._perfectDays || [];
+      state.achievements = parsed.achievements || [];
       state.newUnlocks = [];
       state.settings = parsed.settings || { darkMode: false, reminder: true };
     }
@@ -2066,7 +2092,7 @@ function toggleHabit(habitId){
   saveState();
   renderToday();
   
-  renderWeeklyView();
+  renderWeeklyView();renderMonthlyView();renderAchievementGrid();
   renderSneakPeek();
   checkAllDone();
   checkMilestones();
@@ -2356,6 +2382,14 @@ function tryPerfectDay(){
 }
 
 function checkMilestones(){
+  if(!state.achievements) state.achievements=[];
+  // Check achievements
+  for(const a of ACHIEVEMENTS){
+    if(!state.achievements.includes(a.id)&&a.check(state)){
+      state.achievements.push(a.id);
+      showToast('🏆 成就解锁：'+a.name+' '+a.icon, '🎉');
+    }
+  }
   if(!state.collectedCreatures) state.collectedCreatures=[];
   if(!state.newUnlocks) state.newUnlocks=[];
   let newFound=false;
@@ -3435,6 +3469,86 @@ function renderWeeklyView(){
   container.innerHTML=html;
 }
 
+function renderMonthlyView(){
+  const el=document.getElementById('monthlyReport');
+  if(!el)return;
+  const now=new Date();
+  const thisY=now.getFullYear(), thisM=now.getMonth();
+  // Calc stats for current month
+  function monthStats(y,m){
+    var exercise=0,water=0,weightDays=0,taskDone=0;
+    const days=new Date(y,m+1,0).getDate();
+    for(let d=1;d<=days;d++){
+      const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      exercise+=state.exerciseLogs?.[key]||0;
+      water+=state.waterLogs?.[key]||0;
+      if(state.weightLogs?.[key]) weightDays++;
+      const t=state.taskLogs?.[key]||[];
+      taskDone+=t.length;
+    }
+    return {exercise,water,weightDays,taskDone};
+  }
+  const tm=monthStats(thisY,thisM);
+  const lastM=new Date(now);
+  lastM.setMonth(lastM.getMonth()-1);
+  const lm=monthStats(lastM.getFullYear(),lastM.getMonth());
+  const eDiff=tm.exercise-lm.exercise, wDiff=tm.water-lm.water;
+  // Calendar grid
+  var cal='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:12px">';
+  const weekDays='日一二三四五六';
+  for(let i=0;i<7;i++)cal+='<div style="font-size:9px;text-align:center;color:#8a7a6a;padding:2px 0">'+weekDays[i]+'</div>';
+  const firstDow=new Date(thisY,thisM,1).getDay();
+  const daysInM=new Date(thisY,thisM+1,0).getDate();
+  for(let i=0;i<firstDow;i++)cal+='<div></div>';
+  for(let d=1;d<=daysInM;d++){
+    const key=thisY+'-'+String(thisM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const has=(state.waterLogs?.[key]||0)>0||state.weightLogs?.[key]!==undefined||(state.exerciseLogs?.[key]||0)>0||(Array.isArray(state.taskLogs?.[key])&&state.taskLogs[key].length>0);
+    const isToday=d===now.getDate();
+    cal+='<div style="text-align:center;font-size:11px;padding:4px 0;border-radius:4px;background:'+
+      (isToday?'#c4aa8a':has?'rgba(92,158,92,.15)':'transparent')+';color:'+
+      (isToday?'#1a1512':'#3a322f')+'">'+d+'</div>';
+  }
+  cal+='</div>';
+  el.innerHTML=cal+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+      '<div class="streak-box"><div class="streak-number" style="color:#5c9e5c">'+tm.exercise+'</div><div class="streak-label">🏃运动</div><div style="font-size:9px;color:#8a7a6a">vs上月'+(eDiff>0?'↑'+eDiff:eDiff<0?'↓'+Math.abs(eDiff):'持平')+'</div></div>'+
+      '<div class="streak-box"><div class="streak-number" style="color:#4fc3f7">'+tm.water+'</div><div class="streak-label">💧喝水</div><div style="font-size:9px;color:#8a7a6a">vs上月'+(wDiff>0?'↑'+wDiff:wDiff<0?'↓'+Math.abs(wDiff):'持平')+'</div></div>'+
+    '</div>';
+}
+
+function renderAchievementGrid(){
+  const grid=document.getElementById('achievementGrid');
+  const count=document.getElementById('achieveCount');
+  if(!grid)return;
+  const unlocked=state.achievements||[];
+  if(count)count.textContent=unlocked.length+'/'+ACHIEVEMENTS.length;
+  grid.innerHTML=ACHIEVEMENTS.map(a=>{
+    const got=unlocked.includes(a.id);
+    return '<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;font-size:11px;background:'+(got?'rgba(92,158,92,.15)':'rgba(0,0,0,.04)')+';color:'+(got?'#5c9e5c':'#8a7a6a')+'">'+
+      (got?a.icon:'🔒')+' '+a.name+'</span>';
+  }).join('');
+}
+var achieveExpanded=false;
+function toggleAchievementView(){
+  const grid=document.getElementById('achievementGrid');
+  if(!grid)return;
+  achieveExpanded=!achieveExpanded;
+  if(achieveExpanded){
+    const unlocked=state.achievements||[];
+    grid.innerHTML=ACHIEVEMENTS.map(a=>{
+      const got=unlocked.includes(a.id);
+      return '<div style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05)">'+
+        '<span style="font-size:16px">'+(got?a.icon:'🔒')+'</span>'+
+        '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:'+(got?'#5c9e5c':'#8a7a6a')+'">'+a.name+'</div>'+
+        '<div style="font-size:10px;color:#8a7a6a">'+a.desc+'</div></div>'+
+        (got?'<span style="font-size:11px;color:#5c9e5c">✅</span>':'<span style="font-size:10px;color:#b9a58a">进行中</span>')+
+        '</div>';
+    }).join('');
+  }else{
+    renderAchievementGrid();
+  }
+}
+
 // ===== RENDER: GALLERY =====
 galleryFilter='all';
 
@@ -3489,7 +3603,7 @@ function addHabit(){
   saveState();
   renderToday();
   
-  renderWeeklyView();
+  renderWeeklyView();renderMonthlyView();renderAchievementGrid();
 }
 
 function deleteHabit(id){
@@ -3501,7 +3615,7 @@ function deleteHabit(id){
   saveState();
   renderToday();
   
-  renderWeeklyView();
+  renderWeeklyView();renderMonthlyView();renderAchievementGrid();
 }
 
 // ===== COFFEE TRACKER =====
@@ -3591,7 +3705,7 @@ function switchView(viewId){
   const idx=views.indexOf(viewId);
   const slider=document.getElementById('navSlider');
   slider.style.left=`${idx*20}%`;
-  if(viewId==='viewWeekly') renderWeeklyView();
+  if(viewId==='viewWeekly') renderWeeklyView();renderMonthlyView();renderAchievementGrid();
   if(viewId==='viewCreatures') renderGallery();
   if(viewId==='viewRaise'){raiseSlideIdx=0;renderRaise();updateRaiseSlide();}
 }
