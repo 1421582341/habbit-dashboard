@@ -1910,6 +1910,8 @@ function bindAuthUI(){
 async function performAuthenticatedStart(){
   cloudReady=false;
   const loaded=await cloud.load(InflifeSyncCore.serializeState(state));
+  // TEMP: Demo evolution - boost warmegg to Lv.30
+  if((state.creatureLevels?.warmegg||0)<30)state.creatureLevels.warmegg=30;
   const outbox=readOutbox();
   const sourceState=outbox?.state||loaded.state;
   replaceState(sourceState);
