@@ -1131,6 +1131,16 @@ body.dark .exp-bar-wrap{background:#493e38}
   display:none;align-items:center;justify-content:center;
   background:rgba(26,21,18,.6);padding:24px}
 .level-up-overlay.show{display:flex}
+
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:500;
+  background:rgba(73,62,56,.9);color:#e8ddcf;padding:10px 20px;border-radius:10px;
+  font-size:13px;font-family:inherit;
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+  white-space:nowrap;backdrop-filter:blur(6px);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+body.dark .toast{background:rgba(232,221,207,.92);color:#3a322f}
 .level-up-content{background:#e8ddcf;border-radius:20px;padding:32px 24px;
   max-width:300px;width:100%;text-align:center;
   animation:levelUpPop .5s cubic-bezier(.34,1.56,.64,1);
@@ -1232,7 +1242,7 @@ body.dark .raise-name{color:#d9bb98}
 
     <!-- TODAY'S TASKS -->
     <div class="card">
-      <div class="card-header">☑️ 今日任务</div>
+      <div class="card-header">☑️ 今日任务<span id="taskStreakTag" style="display:none"></span></div>
       <div class="habit-list" id="taskList">
         <div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">📭 今天没有任务，休息一天吧</div>
       </div>
@@ -1241,7 +1251,7 @@ body.dark .raise-name{color:#d9bb98}
     <!-- WATER TRACKER -->
     <div class="card">
       <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-        <span>💧 喝水 <span id="waterCount" style="font-weight:400">0</span> 杯</span>
+        <span>💧 喝水 <span id="waterCount" style="font-weight:400">0</span> 杯<span id="waterStreak" style="display:none"></span></span>
         <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#8a7a6a">阶梯 1·1·1·1·1·3·5·7</span>
       </div>
       <div style="display:flex;align-items:center;gap:16px">
@@ -1280,7 +1290,7 @@ body.dark .raise-name{color:#d9bb98}
 
     <!-- EXERCISE STATS -->
     <div class="card">
-      <div class="card-header">🏃 今日运动</div>
+      <div class="card-header">🏃 今日运动<span id="exerciseStreakTag" style="display:none"></span></div>
       <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
         <div style="flex:1;text-align:center">
           <div id="exerciseMinutes" style="font-size:28px;font-weight:700;color:#5c9e5c">0</div>
@@ -1305,7 +1315,7 @@ body.dark .raise-name{color:#d9bb98}
 
     <!-- WEIGHT TRACKER -->
     <div class="card">
-      <div class="card-header">⚖️ 体重记录</div>
+      <div class="card-header">⚖️ 体重记录<span id="weightStreakTag" style="display:none"></span></div>
       <div class="weight-row">
         <input class="weight-input" id="weightInput" type="number" step="0.1" placeholder="输入体重" inputmode="decimal">
         <span class="weight-unit">kg</span>
@@ -1506,6 +1516,8 @@ body.dark .raise-name{color:#d9bb98}
     <button class="level-up-btn" onclick="toggleShop()" style="width:100%">关闭</button>
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8/dist/umd/supabase.min.js" integrity="sha384-Tve8O+C6PBzsIMK/IRCwHbi8fyEzXIlIs6OfVBZHubplwYhaQF/4Mzxqgg+pp/oy" crossorigin="anonymous"></script>
 <script src="src/sync-core.js"></script>
@@ -2201,10 +2213,38 @@ function getWeightStreak(s){
   return streak;
 }
 
+function showToast(msg, icon){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  el.textContent=(icon||'')+msg;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),1800);
+}
+
+// Generic streak calculator for any log type
+function calcStreak(logObj){
+  if(!logObj||typeof logObj!='object')return 0;
+  let s=0;const d=new Date();
+  while(true){
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(logObj[k]!==undefined&&logObj[k]!==null){s++;d.setDate(d.getDate()-1)}
+    else break;
+  }
+  return s;
+}
+function renderStreak(val){
+  if(val<=0)return'';
+  const emoji=val>=7?'🔥':val>=3?'✨':'⭐';
+  return' <span style="font-size:11px;color:#e57373;font-weight:500">'+emoji+val+'</span>';
+}
+
 function saveWeight(){
   const input=document.getElementById('weightInput');
   const val=parseFloat(input.value);
-  if(!val||val<20||val>400){ alert('请输入合理的体重（20-400 kg）'); return; }
+  if(!val||val<20||val>400){ showToast('请输入合理的体重（20-400 kg）'); return; }
   const key=todayKey();
   if(!state.weightLogs) state.weightLogs={};
   const isNew=!state.weightLogs[key];
@@ -2254,6 +2294,9 @@ function renderWeight(){
   }else{
     historyEl.innerHTML='<div class="weight-start-note">开始记录体重吧，这是收集精灵的第一步 🥚</div>';
   }
+  // Streak
+  const ws=document.getElementById('weightStreakTag');
+  if(ws){const v=calcStreak(state.weightLogs);ws.innerHTML=renderStreak(v);ws.style.display=v?'inline':'none'}
 }
 
 // ===== CONFETTI =====
@@ -2507,6 +2550,9 @@ function renderExercise(){
   if(cel) cel.textContent=Math.floor(getTodayExercise(state)/30)*10;
   const sel=document.getElementById('exerciseStreak');
   if(sel) sel.textContent=getExerciseStreak(state);
+  // Streak
+  const es=document.getElementById('exerciseStreakTag');
+  if(es){const v=calcStreak(state.exerciseLogs);es.innerHTML=renderStreak(v);es.style.display=v?'inline':'none'}
 }
 
 function addExercise(mins){
@@ -2533,10 +2579,10 @@ function customExercise(){
 
 // ===== FOOD & SHOP =====
 const FOOD_ITEMS = [
-  { id:'berry', name:'莓果', emoji:'🫐', cost:5, desc:'基础食物 +1级' },
-  { id:'cake', name:'小蛋糕', emoji:'🧁', cost:15, desc:'美味甜点 +3级' },
-  { id:'milk', name:'牛奶', emoji:'🥛', cost:10, desc:'营养饮品 +2级' },
-  { id:'star', name:'星星糖', emoji:'⭐', cost:30, desc:'传说糖果 +5级' },
+  { id:'berry', name:'浆果', emoji:'🫐', cost:0, desc:'每日免费互动 +1级' },
+  { id:'cake', name:'蛋糕', emoji:'🧁', cost:0, desc:'完成3个习惯解锁 +3级' },
+  { id:'milk', name:'牛奶', emoji:'🥛', cost:0, desc:'喝水3天解锁 +2级' },
+  { id:'star', name:'星星糖', emoji:'⭐', cost:0, desc:'全勤日解锁 +5级' },
 ];
 
 function toggleShop(){
@@ -2569,7 +2615,7 @@ function renderShop(){
 function buyFood(foodId){
   const food=FOOD_ITEMS.find(f=>f.id===foodId);
   if(!food) return;
-  if(state.coins<food.cost){ alert('金币不够！'); return; }
+  if(state.coins<food.cost){ showToast('金币不够', '💰'); return; }
   state.coins -= food.cost;
   if(!state.inventory[foodId]) state.inventory[foodId]=0;
   state.inventory[foodId]++;
@@ -2578,24 +2624,26 @@ function buyFood(foodId){
   renderShop();
 }
 
-// ===== FEEDING =====
+// ===== FEEDING (now habit-linked) =====
 function feedCreature(creatureId){
-  const items=Object.keys(state.inventory).filter(k=>state.inventory[k]>0);
-  if(items.length===0){ alert('没有食物，去商店买点吧！'); return; }
-  const foodId=items[0];
-  state.inventory[foodId]--;
+  const c=CREATURES.find(cr=>cr.id===creatureId);
+  if(!c)return;
   if(!state.creatureLevels[creatureId]) state.creatureLevels[creatureId]=1;
-  const food=FOOD_ITEMS.find(f=>f.id===foodId);
-  var lvGain=food?{berry:1,cake:3,milk:2,star:5}[foodId]||1:1;
-  // Tag effect: 小吃货 gets bonus
+  // Level gain based on today's habits done
+  const key=todayKey();
+  const doneTasks=Array.isArray(state.taskLogs?.[key])?state.taskLogs[key].length:0;
+  const hasWater=(state.waterLogs?.[key]||0)>0;
+  const hasWeight=state.weightLogs?.[key]!==undefined;
+  const hasExercise=(state.exerciseLogs?.[key]||0)>0;
+  var lvGain=1+doneTasks+ (hasWater?1:0) + (hasWeight?1:0) + (hasExercise?1:0);
+  lvGain=Math.min(lvGain,8);
   const rec=state.personalRecords?.[creatureId];
-  if(rec&&rec.tags&&rec.tags.some(t=>t.includes('小吃货'))){lvGain+=1}
+  if(rec&&rec.tags&&rec.tags.some(t=>t.includes('小吃货')))lvGain+=1
   state.creatureLevels[creatureId] += lvGain;
-  // Update stats
   if(rec&&rec.stats)rec.stats.feedCount=(rec.stats.feedCount||0)+1;
   saveState();
   renderGallery();
-  alert(`🍽️ ${CREATURES.find(c=>c.id===creatureId)?.name} 吃了${food?.name||'食物'}！等级 +${lvGain}`);
+  showToast('+'+lvGain+'级 '+c.name+'（今日完成×'+lvGain+'）', '🍽️');
 }
 
 function playWithCreature(creatureId){
@@ -2613,7 +2661,7 @@ function playWithCreature(creatureId){
   renderCoins();
   renderGallery();
   const moods=['跳跃！','转圈！','打滚！','开心！'];
-  alert(`🎾 ${c.name} ${moods[Math.floor(Math.random()*moods.length)]} 获得 ${coinBonus}🪙`);
+  showToast('+'+coinBonus+'🪙 '+c.name+' '+moods[Math.floor(Math.random()*moods.length)], '🎾');
 }
 
 
@@ -2797,24 +2845,27 @@ function getMoodEmoji(happiness){
 }
 
 function feedPet(creatureId){
-  const items=Object.keys(state.inventory).filter(k=>state.inventory[k]>0);
-  if(items.length===0){ alert('🍽️ 没有食物了，去商店买点吧！'); return; }
   const c = CREATURES.find(function(cr){return cr.id===creatureId;});
   if(!c) return;
+  if(!state.creatureLevels[creatureId]) state.creatureLevels[creatureId]=1;
+  const key=todayKey();
+  const doneTasks=Array.isArray(state.taskLogs?.[key])?state.taskLogs[key].length:0;
+  const hasWater=(state.waterLogs?.[key]||0)>0;
+  const hasWeight=state.weightLogs?.[key]!==undefined;
+  const hasExercise=(state.exerciseLogs?.[key]||0)>0;
+  var lvGain=1+doneTasks+ (hasWater?1:0) + (hasWeight?1:0) + (hasExercise?1:0);
+  lvGain=Math.min(lvGain,8);
+  state.creatureLevels[creatureId] += lvGain;
   initPetState(creatureId);
   const p = state.petState[creatureId];
-  const foodId=items[0];
-  state.inventory[foodId]--;
   p.lastFeed = Date.now();
   p.hunger = Math.min(100, (p.hunger||0) + 35);
   p.intimacy = Math.min(100, (p.intimacy||0) + 3);
-  if(!state.creatureLevels[creatureId]) state.creatureLevels[creatureId]=1;
-  state.creatureLevels[creatureId] += 1;
   saveState();
   renderGallery();
   renderCoins();
   const line = getIntimacyLine(c, 'feed', p.intimacy);
-  alert(c.name+'：'+line);
+  showToast(c.name+'：'+line+' +'+lvGain+'级', '🍽️');
 }
 
 function playPet(creatureId){
@@ -2831,7 +2882,7 @@ function playPet(creatureId){
   renderGallery();
   renderCoins();
   const line = getIntimacyLine(c, 'play', p.intimacy);
-  alert(c.name+'：'+line+' 获得 '+coinBonus+'🪙');
+  showToast(c.name+'：'+line+' +'+coinBonus+'🪙', '🎾');
 }
 // ===== PIXEL PET RENDERER =====
 // 16×16 pixel sprites with cute faces and expressions
@@ -2956,6 +3007,9 @@ function renderWater(){
       dotsEl.appendChild(dot);
     }
   }
+  // Streak
+  const ws=document.getElementById('waterStreak');
+  if(ws){const v=calcStreak(state.waterLogs);ws.innerHTML=renderStreak(v);ws.style.display=v?'inline':'none'}
 }
 
 function renderCreatureSVG(creature,size){
@@ -3016,6 +3070,9 @@ function renderToday(){
   }).catch(()=>{
     list.innerHTML='<div style="padding:20px;text-align:center;color:#8a7a6a;font-size:13px">⚠️ 加载任务失败</div>';
   });
+  // Task streak
+  const ts=document.getElementById('taskStreakTag');
+  if(ts){let v=0;const d=new Date();while(true){const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const a=state.taskLogs?.[k];if(a&&Array.isArray(a)&&a.length){v++;d.setDate(d.getDate()-1)}else break}ts.innerHTML=renderStreak(v);ts.style.display=v?'inline':'none'}
 }
 
 function toggleTask(idx){
@@ -3424,7 +3481,7 @@ function addHabit(){
   const input=document.getElementById('habitInput');
   const label=input.value.trim();
   if(!label) return;
-  if(state.habits.length>=12){ alert('最多 12 个习惯哦'); return; }
+  if(state.habits.length>=12){ showToast('最多 12 个习惯哦'); return; }
   state.habits.push({
     id:'h'+Date.now(),
     label: label,
