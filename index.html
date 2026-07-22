@@ -3411,7 +3411,7 @@ function renderGallery(){
       statusHtml='<div class="book-hint">'+hint+'</div>';
     }
 
-    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'" onclick="showProfile(\\''+c.id+'\\')" style="cursor:pointer">'+
+    return '<div class="deck-entry'+(isCollected?' collected':' locked')+'" onclick="showProfile(\''+c.id+'\')" style="cursor:pointer">'+
       '<div class="deck-left'+(isCollected?'':' gray')+'">'+
         renderPetFace(c.id,64,lvl)+
         '<div class="deck-name">'+(isCollected?c.emoji+' ':'')+c.name+'</div>'+
@@ -3458,7 +3458,7 @@ function renderRaise(){
         '<div class="raise-name">'+c.emoji+' '+c.name+'</div>'+
         '<div style="font-size:10px;color:#8a7a6a;margin-top:2px">'+mbtiTag+' · '+traitTag+'</div>'+
       '</div>'+
-      '<div style="text-align:center;padding:8px 0;min-height:100px" onclick="petTapReaction(\\''+c.id+'\\')" style="cursor:pointer">'+renderPetFace(c.id,100,lvl)+'</div>'+
+      '<div style="text-align:center;padding:8px 0;min-height:100px" onclick="petTapReaction(\''+c.id+'\')" style="cursor:pointer">'+renderPetFace(c.id,100,lvl)+'</div>'+
       '<div style="text-align:center;font-size:14px;font-weight:500;color:#8a7a6a;margin-bottom:6px">Lv.'+lvl+' '+moodEmoji+'</div>'+
       '<div style="text-align:center;font-size:10px;color:#8a7a6a;margin-bottom:6px" id="petGreeting_'+c.id+'"></div>'+
       '<div style="max-width:220px;margin:0 auto">'+
