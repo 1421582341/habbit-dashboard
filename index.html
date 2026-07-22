@@ -1196,7 +1196,7 @@ body.dark .raise-name{color:#d9bb98}
 <body class="auth-pending">
 
 <div class="auth-gate" id="authGate">
-  <form class="auth-card" id="loginForm" autocomplete="on">
+  <form class="auth-card" id="loginForm" autocomplete="on" novalidate>
     <div class="auth-title">∞ INFPLife</div>
     <div class="auth-subtitle">登录后读取你的个人数据，并在设备之间安全同步。</div>
     <label class="auth-field" for="loginEmail">邮箱</label>
@@ -1960,9 +1960,6 @@ async function startAuthenticatedApp(){
 // ===== INIT =====
 async function init(){
   loadState();
-  // TEMP: Demo evolution - set 小暖暖 to Lv.30
-  if(!state.creatureLevels) state.creatureLevels={};
-  if((state.creatureLevels.warmegg||0)<30)state.creatureLevels.warmegg=30;
   bindAuthUI();
   cloud=InflifeCloud.create({client:sbClient,onStatus:setSyncStatus,onOutboxChange:writeOutbox});
   cloud.subscribeAuth((event,session)=>{
